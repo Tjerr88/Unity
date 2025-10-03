@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Unity 2025</title>
+<style>
+  :root{color-scheme:dark}
+  body{margin:0;background:#0b1220;color:#e6eaf2;font:15px/1.55 system-ui,Arial}
+  .app{max-width:980px;margin:0 auto;padding:18px 14px 72px}
+  h1{margin:0 0 .6rem;font-size:28px}
+  h2{margin:0;font-size:18px}
+  .btn{background:#2b63ff;border:0;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700}
+  .btn.ghost{background:#1a2a4a}
+  .btn.inline{padding:6px 10px;font-weight:600;border-radius:8px}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .card{background:#101a30;border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px;margin:10px 0}
+  .session{white-space:pre-wrap;background:#0e182c;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:16px;line-height:1.6;font-family:ui-monospace,monospace}
+  .pill{display:inline-block;background:#182446;border-radius:999px;padding:4px 10px;font-size:12px;margin:2px}
+  details{border:1px solid rgba(255,255,255,.08);border-radius:12px}
+  summary{list-style:none;cursor:pointer;padding:12px 12px;font-weight:700;background:#0f1a34;border-radius:12px}
+  summary::-webkit-details-marker{display:none}
+  details[open]>summary{border-bottom:1px solid rgba(255,255,255,.08);border-bottom-left-radius:0;border-bottom-right-radius:0}
+  .panel{padding:12px}
+  label{font-size:12px;opacity:.88;display:block;margin:8px 0 4px}
+  select,input[type="text"],input[type="number"]{width:100%;background:#0d1830;border:1px solid rgba(255,255,255,.18);color:#e6eaf2;padding:8px 10px;border-radius:8px}
+  .grid{display:grid;gap:10px}
+  .cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  @media (max-width:760px){.cols-2{grid-template-columns:1fr}}
+  .muted{opacity:.75;font-size:12px}
+  .kbd{font-family:ui-monospace,monospace;background:#101a30;border:1px solid rgba(255,255,255,.2);padding:2px 6px;border-radius:6px}
+  .badge{font-weight:700;font-size:12px;padding:2px 6px;border-radius:8px;border:1px solid rgba(255,255,255,.15)}
+  .heavy{background:#4a0e14;color:#ffb3bd;border-color:#7e1821}
+  .light{background:#103f1b;color:#b8f0c2;border-color:#1b6e2f}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <h1>Unity 2025</h1>
+
+  <!-- Alleen deze twee knoppen zichtbaar op het beginscherm -->
+  <div class="row" style="margin:8px 0 12px">
+    <button id="btnNext" class="btn">Volgende sessie ▶</button>
+    <button id="btnComplete" class="btn ghost">Complete ✔</button>
+    <button id="btnNewBlock" class="btn inline" title="Nieuw blok (zet alles opnieuw)">Nieuw blok</button>
+  </div>
+
+  <!-- Sessietekst -->
+  <div class="card">
+    <h2>Huidige sessie</h2>
+    <div id="session" class="session">Nog geen blok. Klik op “Nieuw blok”.</div>
+  </div>
+
+  <!-- Instellingen accordeon -->
+  <details id="accSettings">
+    <summary>Instellingen</summary>
+    <div class="panel">
+      <div class="grid cols-2">
+        <div>
+          <label>Blokvolume</label>
+          <select id="selVol">
+            <option>180</option>
+            <option>240</option>
+            <option selected>300</option>
+            <option>400</option>
+            <option>500</option>
+          </select>
+        </div>
+        <div>
+          <label>Seed (optioneel)</label>
+          <input id="inpSeed" placeholder="bv. 12345">
+        </div>
+        <div>
+          <label>KB-bias (alleen mains; min=Heavy +1 / max=Light −1)</label>
+          <select id="selBias">
+            <option value="on" selected>Actief</option>
+            <option value="off">Uit</option>
+          </select>
+        </div>
+        <div>
+          <label>Anti-Rotation main</label>
+          <select id="selAR">
+            <option selected>Snatch</option>
+          </select>
+        </div>
+        <div>
+          <label>Plan Strong overlay (1 grind-patroon)</label>
+          <select id="selPS">
+            <option value="">— Uit —</option>
+            <option>Push</option>
+            <option>Pull</option>
+            <option>Squat</option>
+            <option>Lunge</option>
+            <!-- (Geen Anti-Rotation/Hinge/Rotation/Carry; PS is grind) -->
+          </select>
+        </div>
+        <div>
+          <label>Barbell op PS-min-sessie</label>
+          <select id="selPSBar">
+            <option value="off" selected>Uit</option>
+            <option value="on">Aan</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <div id="kpi"></div>
+        <div id="orders" class="muted" style="margin-top:6px"></div>
+        <div class="muted" style="margin-top:6px">
+          Weekpercentages: Deload 15% • Maintenance 22% • Development 28% • Stress 35%.<br>
+          Splits per partitie: 3 → [15,35,50]% • 4 → [15,22,28,35]% • 5 → [10,15,20,25,30]%.<br>
+          Afronden naar veelvoud van <span class="kbd">#rondes</span> (niet cap). 180/240/300→3, 400→4, 500→5.
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:8px">
+        <button id="btnRebuild" class="btn">Instellingen toepassen</button>
+        <button id="btnReset" class="btn ghost">Reset voortgang</button>
+      </div>
+    </div>
+  </details>
+
+</div>
+
+<script>
+(function(){
+  // ===== Canonische data =====
+  const LS_KEY='unity2025_state';
+  const WEEK_TYPES=['Deload','Maintenance','Development','Stress'];
+  const WEEK_PCT={Deload:.15,Maintenance:.22,Development:.28,Stress:.35};
+  // Splits per partitie (percent van weekvolume)
+  const SPLITS = {
+    3: [0.15,0.35,0.50],
+    4: [0.15,0.22,0.28,0.35],
+    5: [0.10,0.15,0.20,0.25,0.30]
+  };
+  const BALLISTICS = new Set(['Snatch','One-arm Swing','Two-arm Swing','High Pull','Double Clean']); // Deadstop Swing verwijderd
+
+  // Matrix (laatste keuzes)
+  const MATRIX = {
+    'Push': { main:'Military Press', acc:['Push Press','Half-kneeling Press','Floor Press'] },
+    'Pull': { main:'Double Clean', acc:['Pull-up / Chin-up','Double Bent-over Row','High Pull'] },
+    'Squat': { main:'Double Front Squat', acc:['Goblet Squat','Bulgarian Split Squat','Step-up'] },
+    'Lunge': { main:'Tactical Lunge', acc:['Double Reverse Lunge','Athletic Lunge','Side Lunge'] },
+    'Hinge': { main:'Two-arm Swing', acc:['Single-leg Glute Bridge','Double Deadlift','Double Snatch'] },
+    'Rotation': { main:'Turkish Get Up', acc:['Windmill','Side Swing','Bent Press'] },
+    'Anti-Rotation': { main:'Snatch', acc:['One-arm Swing','Single-leg Deadlift','Renegade Row'] },
+    'Loaded Carry': { main:'Suitcase Carry', acc:['Front Rack Carry','Overhead Carry','Bear Crawl'] }
+  };
+
+  // ===== Helpers =====
+  const $=s=>document.querySelector(s);
+  const rnd=(()=>{let s=Date.now()>>>0;return()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return (s>>>0)/4294967296}})();
+  function seedRandom(v){ // simple seeding
+    let h=0; for(let i=0;i<v.length;i++){ h=(h<<5)-h+v.charCodeAt(i)|0; }
+    Math.abs(h); // ignore
+  }
+  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a;}
+  const choice=a=>a[Math.floor(rnd()*a.length)];
+  const clean = s => String(s).replace(/\s+/g,' ').trim();
+
+  function roundsCap(vol){
+    switch(+vol){
+      case 180: return {rounds:3,cap:3};
+      case 240: return {rounds:3,cap:4};
+      case 300: return {rounds:3,cap:5};
+      case 400: return {rounds:4,cap:5};
+      case 500: return {rounds:5,cap:5};
+      default: return {rounds:3,cap:5};
+    }
+  }
+
+function buildWeekSplits(blockVol, weekType){
+  // 1) Bepaal #partities direct uit weekType (fail-safe default = 4)
+  const parts =
+    (weekType==='Deload') ? 3 :
+    (weekType==='Stress') ? 5 : 4;
+
+  // 2) Weekvolume
+  const {rounds} = roundsCap(blockVol);
+  const pct = WEEK_PCT[weekType] ?? 0;              // fail-safe
+  const weekTotal = Math.max(0, Math.round(blockVol * pct));
+
+  // 3) Pak de juiste split; val terug op 4-partitie als er iets geks gebeurt
+  const base = SPLITS[parts] || SPLITS[4];
+
+  // 4) Ruwe sessies en afronden naar veelvoud van #rondes (NIET cap)
+  const unit = rounds;
+  let sess = base.map(p => Math.max(unit, Math.round((weekTotal * p) / unit) * unit));
+
+  // 5) Som-correctie richting weekTotal in stapjes van 'unit'
+  let diff = weekTotal - sess.reduce((a,b)=>a+b,0);
+  let idx = sess.length-1;
+  while (Math.abs(diff) >= unit) {
+    if (diff > 0) { sess[idx] += unit; diff -= unit; }
+    else if (sess[idx] - unit >= unit) { sess[idx] -= unit; diff += unit; }
+    else { if (idx > 0) { idx--; continue; } break; }
+  }
+
+  // 6) Sessies randomiseren binnen de week
+  return shuffle(sess);
+}
+
+
+  function pickDaysForWeek(count){
+    // kies 'count' unieke dagen uit 0..4
+    const d=[0,1,2,3,4]; shuffle(d); return d.slice(0,count).sort((a,b)=>a-b);
+  }
+
+  function isUni(name){
+    const n=clean(name).toLowerCase();
+    // Einfach: double/two-arm/… = bi; veel andere = uni
+    if(n.includes('double')||n.includes('two-arm')||n.includes('front squat')||n.includes('deadlift ')||n.includes('goblet')||n.includes('carry')) return false;
+    if(n.includes('one-arm')||n.includes('single-leg')||n.includes('lunge')||n.includes('windmill')||n.includes('bent press')||n.includes('side swing')||n.includes('renegade row')||n.includes('pull-up')||n.includes('chin-up')||n.includes('military press')||n.includes('push press')||n.includes('snatch')) return true;
+    return false;
+  }
+
+  // ===== State =====
+  let state = load() || {};
+
+  function load(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||'null') }catch(e){ return null } }
+  function save(){ localStorage.setItem(LS_KEY, JSON.stringify(state)) }
+
+  // ===== Plan bouw =====
+  function buildPlan(cfg){
+    // seed
+    if(cfg.seed){ seedRandom(cfg.seed); }
+
+    // week orders per pattern (met “start ≠ vorige eind” regel)
+    const lastEnds = state.lastEnds || {};
+    const weekOrders = {};
+    for(const k of Object.keys(MATRIX)){
+      const order = [...WEEK_TYPES];
+      shuffle(order);
+      if(lastEnds[k] && order[0]===lastEnds[k]){ [order[0],order[1]]=[order[1],order[0]]; }
+      weekOrders[k]=order;
+    }
+
+    // per pattern per week → splits + dagplaatsen
+    const weeks = Array.from({length:4}, (_,w)=>({days:Array.from({length:5},()=>({entries:[]}))}));
+    for(const [pat,def] of Object.entries(MATRIX)){
+      for(let w=0; w<4; w++){
+        const wt = weekOrders[pat][w];
+        const partCount = (wt==='Deload')?3: (wt==='Stress'?5:4);
+        const vols = buildWeekSplits(cfg.volume, wt); // al gehusseld
+        const dayIdxs = pickDaysForWeek(partCount);
+        for(let i=0;i<partCount;i++){
+          const d = dayIdxs[i];
+          weeks[w].days[d].entries.push({
+            pattern: pat,
+            main: def.main,
+            acc: def.acc.slice(),
+            weekType: wt,
+            volume: vols[i] // Unity-reps voor dat patroon in deze sessie
+          });
+        }
+      }
+    }
+
+    // KB-bias labels per week voor mains (min → Heavy, max → Light)
+    if(cfg.bias==='on'){
+      for(const wk of weeks){
+        const map={};
+        for(const day of wk.days){
+          for(const e of day.entries){
+            (map[e.pattern] ||= []).push(e.volume);
+          }
+        }
+        const tagByPat={};
+        for(const [k,arr] of Object.entries(map)){
+          const min=Math.min(...arr), max=Math.max(...arr);
+          tagByPat[k]={min,max};
+        }
+        for(const day of wk.days){
+          day.kbBias={};
+          for(const e of day.entries){
+            const mm = tagByPat[e.pattern];
+            if(!mm){ day.kbBias[e.pattern]='Medium'; continue; }
+            if(mm.min===mm.max) day.kbBias[e.pattern]='Medium';
+            else if(e.volume===mm.min) day.kbBias[e.pattern]='Heavy';
+            else if(e.volume===mm.max) day.kbBias[e.pattern]='Light';
+            else day.kbBias[e.pattern]='Medium';
+          }
+        }
+      }
+    }
+
+    // Plan Strong overlay (optioneel): haal gekozen patroon uit Unity op niet-PS dagen; plan 3 PS-dagen (LMH label)
+    let ps = null;
+    if(cfg.psPattern){
+      ps = cfg.psPattern;
+      for(const wk of weeks){
+        // kies 3 dagen verspreid
+        const idxs = spread3();
+        for(let d=0; d<5; d++){
+          const day = wk.days[d];
+          // verwijder PS-patroon op non-PS dagen
+          day.entries = day.entries.filter(e=> e.pattern !== ps || idxs.includes(d));
+          if(idxs.includes(d)){
+            day.ps = day.ps || {};
+            const order=['Low','Medium','High'];
+            day.ps[ps] = order[idxs.indexOf(d)];
+            day.psBarbell = (cfg.psBar==='on' && order[idxs.indexOf(d)]==='Low');
+          }
+        }
+      }
+    }
+
+    const rc = roundsCap(cfg.volume);
+    return {weeks, rc, weekOrders};
+  }
+
+  function spread3(){
+    // kies 3 indices (0..4) redelijk verspreid
+    const c=[0,2,4]; // simpel
+    return c;
+  }
+
+  // ===== Rendering sessie =====
+  function renderSession(){
+    const out = $('#session');
+    if(!state.plan){ out.textContent='Nog geen blok. Klik op “Nieuw blok”.'; return; }
+
+    const {w,d} = state.cursor;
+    const week = state.plan.weeks[w];
+    const day = week.days[d];
+    const rc = state.plan.rc;
+
+    // 1) Opener: Get Up uit Rotation
+    let opener='';
+    const rot = day.entries.find(e=>e.pattern==='Rotation');
+    if(rot){
+      const sets = Math.min(3, Math.floor(rot.volume/5)); // 1+1 = 10 Unity → ÷5 = sets
+      if(sets>0){ opener = `${sets} × (1+1) Turkish Get Up`; }
+      rot.volume = Math.max(0, rot.volume - sets*10);
+    }
+
+    // 2) Circuitregels per entry
+    const lines=[]; const assigned=[]; // voor EMOM detection
+    const entries = shuffle(day.entries.slice().filter(e=> e.pattern!=='Loaded Carry')); // carry pas bij finisher
+
+    for(const e of entries){
+      // plan Strong: als e.pattern == PS maar dag heeft geen day.ps[pattern] (zou al gefilterd zijn)
+      const order = [e.main, ...(e.acc||[])].filter(Boolean);
+      const seen = new Set([clean(e.main)]); // main nooit nog eens
+      let remaining = e.volume;
+      let usedCount=0;
+
+      // KB-bias tag
+      const bias = (day.kbBias && day.kbBias[e.pattern]) ? day.kbBias[e.pattern] : 'Medium';
+
+      for(let i=0; i<order.length && remaining>0 && usedCount<3; i++){
+        const nm = clean(order[i]);
+        if(seen.has(nm)) continue;
+        seen.add(nm);
+
+        // hoeveel per ronde? cap hard
+        let perRound = Math.min(rc.cap, Math.ceil(remaining/rc.rounds));
+        perRound = Math.max(1, Math.floor(perRound)); // kruimelsets ok
+
+        // Push Press altijd Heavy voor badge (alleen visueel)
+        let tag = bias;
+        if(nm==='Push Press') tag='Heavy';
+
+        // weergave x2 voor ballistics
+        const isBall = BALLISTICS.has(nm);
+        const uni = isUni(nm);
+        const shown = perRound * (isBall?2:1);
+        const repText = uni ? `${shown}+${shown}` : `${shown}`;
+
+        // badge tonen alleen bij mains
+        const label = (nm===clean(e.main)) ? badge(tag) : '';
+
+        lines.push(`${repText} ${nm}${label}`);
+
+        const totalUnity = perRound * rc.rounds;
+        assigned.push({name:nm,totalUnity});
+
+        remaining -= totalUnity;
+        usedCount++;
+      }
+    }
+
+    // 3) EMOM op basis van assigned Unity-totals
+    const emom = buildEMOM(assigned, rc.rounds);
+    let circuit = lines.slice();
+    if(emom){
+      const drop = new Set(emom._names.map(clean));
+      circuit = circuit.filter(line=>{
+        const nm = clean(line.replace(/^\d+\+?\d*\s+/,'').replace(/\s+\[.*?\]$/,''));
+        return !drop.has(nm);
+      });
+    }
+
+    // 4) Finisher: Loaded Carry – volume van Loaded Carry die dag (indien aanwezig) → 5s per Unity rep
+    const carryEntry = day.entries.find(e=>e.pattern==='Loaded Carry');
+    let carryTxt='';
+    if(carryEntry){
+      const secs = carryEntry.volume * 5; // 5 seconden per Unity rep
+      const name = MATRIX['Loaded Carry'].acc[ Math.min( (carryEntry.volume/ carryEntry.volume)|0, 2) ]; // kies een accessoire ‘random-ish’
+      carryTxt = `${secs}s ${name}`;
+    }else{
+      carryTxt = `45s ${choice(MATRIX['Loaded Carry'].acc)}`; // fallback als geen LC-sessie in dag
+    }
+
+    // 5) Compose
+    let txt = `Week ${w+1}, Dag ${d+1}\n\n`;
+    if(opener) txt += opener + '\n\n';
+    txt += '---\n';
+    txt += `${rc.rounds} rounds of following circuit:\n`;
+    if(circuit.length) txt += circuit.join('\n') + '\n';
+    else txt += '(Geen patronen actief in het circuit vandaag)\n';
+    txt += '---\n\n';
+    if(emom){ txt += emom.text + '\n---\n\n'; }
+    txt += `[ ${carryTxt} ]`;
+
+    out.textContent = txt;
+  }
+
+  function badge(kind){
+    if(kind==='Heavy') return '  [Heavy +1]';
+    if(kind==='Light') return '  [Light −1]';
+    return '';
+  }
+
+  function buildEMOM(assigned, rounds){
+    const want = rounds*10; // 30 bij 3 rondes
+    const has = new Map();
+    for(const a of assigned){
+      const nm=clean(a.name);
+      if(['Snatch','One-arm Swing','Two-arm Swing'].includes(nm) && a.totalUnity===want){
+        has.set(nm,true);
+      }
+    }
+    if(has.size<2) return null;
+    const order=['Snatch','One-arm Swing','Two-arm Swing'];
+    const parts=[]; const used=[];
+    for(const nm of order){
+      if(!has.has(nm)) continue;
+      used.push(nm);
+      if(nm==='Two-arm Swing'){
+        parts.push('EMOM:\n3 minutes of 10 Two-arm Swings');
+      }else{
+        const label = (nm==='Snatch')?'Snatches':'One-arm Swings';
+        parts.push('EMOM:\n6 minutes of 10 '+label+' (alternate side each minute)\n\nThen');
+      }
+    }
+    let text = parts.join('\n\n').replace(/\n\nThen$/,'');
+    return {text, _names:used};
+  }
+
+  // ===== UI & state =====
+  function renderInfo(){
+    if(!state.plan) { $('#kpi').innerHTML=''; $('#orders').innerHTML=''; return; }
+    const rc = state.plan.rc;
+    const kpi = [
+      `<span class="pill">Volume: ${state.cfg.volume}</span>`,
+      `<span class="pill">Rounds: ${rc.rounds}</span>`,
+      `<span class="pill">Cap/round: ${rc.cap}</span>`,
+      `<span class="pill">Blok #${state.blockIdx}</span>`,
+      `<span class="pill">KB-bias: ${state.cfg.bias==='on'?'Aan':'Uit'}</span>`,
+      state.cfg.psPattern? `<span class="pill">Plan Strong: ${state.cfg.psPattern}${state.cfg.psBar==='on'?' (barbell min)':''}</span>`:''
+    ].filter(Boolean).join(' ');
+    $('#kpi').innerHTML = kpi;
+
+    const rows = Object.entries(state.plan.weekOrders).map(([k,v])=>`${k}: <b>${v.join(' → ')}</b>`).join('<br>');
+    $('#orders').innerHTML = rows;
+  }
+
+  function newBlock(){
+    const cfg = readCfg();
+    const rc = roundsCap(cfg.volume);
+    const plan = buildPlan(cfg);
+
+    const blockIdx = (state.blockIdx||0)+1;
+    state = {
+      blockIdx,
+      cfg,
+      plan,
+      cursor:{w:0,d:0},
+      lastEnds: state.lastEnds || {}
+    };
+    save();
+    renderInfo();
+    renderSession();
+  }
+
+  function readCfg(){
+    return {
+      volume: +$('#selVol').value,
+      seed: ($('#inpSeed').value||'').trim(),
+      bias: $('#selBias').value,
+      arMain: $('#selAR').value, // (nu altijd Snatch)
+      psPattern: ($('#selPS').value||'') || null,
+      psBar: $('#selPSBar').value
+    };
+  }
+
+  function next(){
+    if(!state.plan){ return; }
+    let {w,d} = state.cursor;
+    d++; if(d>=5){ d=0; w++; }
+    if(w>=4){
+      // blok afgerond → zet lastEnds
+      const ends={};
+      for(const k of Object.keys(MATRIX)){
+        ends[k] = state.plan.weekOrders[k][3]; // eindtype in week 4
+      }
+      state.lastEnds=ends;
+      save();
+      alert('Blok afgerond. Ga naar Instellingen → “Nieuw blok” voor de volgende cyclus (start ≠ eind).');
+      return;
+    }
+    state.cursor={w,d}; save(); renderSession();
+  }
+
+  function complete(){ // zelfde als next voor nu
+    next();
+  }
+
+  function resetProgress(){
+    localStorage.removeItem(LS_KEY);
+    state={};
+    $('#session').textContent='Voortgang gewist. Klik “Nieuw blok”.';
+    $('#kpi').innerHTML=''; $('#orders').innerHTML='';
+  }
+
+  // ===== Events =====
+  $('#btnNewBlock').onclick=newBlock;
+  $('#btnRebuild').onclick=newBlock;
+  $('#btnReset').onclick=resetProgress;
+  $('#btnNext').onclick=()=>{ // toon volgende sessie (preview)
+    if(!state.plan){ return; }
+    next();
+  };
+  $('#btnComplete').onclick=complete;
+
+  // init
+  if(state && state.plan){ renderInfo(); renderSession(); }
+})();
+</script>
+</body>
+</html>
