@@ -7,7 +7,7 @@
 <style>
   :root{color-scheme:dark}
   body{margin:0;background:#0b1220;color:#e6eaf2;font:15px/1.55 system-ui,Arial}
-  .app{max-width:980px;margin:0 auto;padding:18px 14px 72px}
+  .app{max-width:980px;margin:0 auto;padding:18px 14px 84px}
   h1{margin:0 0 .6rem;font-size:28px}
   h2{margin:0;font-size:18px}
   .btn{background:#2b63ff;border:0;color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700}
@@ -23,15 +23,22 @@
   details[open]>summary{border-bottom:1px solid rgba(255,255,255,.08);border-bottom-left-radius:0;border-bottom-right-radius:0}
   .panel{padding:12px}
   label{font-size:12px;opacity:.88;display:block;margin:8px 0 4px}
-  select,input[type="text"],input[type="number"]{width:100%;background:#0d1830;border:1px solid rgba(255,255,255,.18);color:#e6eaf2;padding:8px 10px;border-radius:8px}
+  select,input[type="text"]{width:100%;background:#0d1830;border:1px solid rgba(255,255,255,.18);color:#e6eaf2;padding:8px 10px;border-radius:8px}
   .grid{display:grid;gap:10px}
   .cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
   @media (max-width:760px){.cols-2{grid-template-columns:1fr}}
   .muted{opacity:.75;font-size:12px}
   .kbd{font-family:ui-monospace,monospace;background:#101a30;border:1px solid rgba(255,255,255,.2);padding:2px 6px;border-radius:6px}
-  .badge{font-weight:700;font-size:12px;padding:2px 6px;border-radius:8px;border:1px solid rgba(255,255,255,.15)}
-  .heavy{background:#4a0e14;color:#ffb3bd;border-color:#7e1821}
-  .light{background:#103f1b;color:#b8f0c2;border-color:#1b6e2f}
+  .toast{position:fixed;inset:auto 16px 16px auto;background:#0f1a34;border:1px solid rgba(255,255,255,.15);padding:10px 12px;border-radius:10px;font-size:13px}
+  .diag{position:fixed;left:16px;bottom:16px;background:#0f1a34;border:1px solid rgba(255,255,255,.2);padding:8px 10px;border-radius:10px;font:12px/1.4 ui-monospace,monospace;max-width:44ch;max-height:30vh;overflow:auto;display:none}
+  .diag b{color:#b8f0c2}
+  .badge{display:inline-block;font-weight:700;font-size:12px;padding:2px 6px;border-radius:8px;border:1px solid rgba(255,255,255,.25);margin-left:6px;background:#0f1a34;color:#e6eaf2}
+  .ex-acc{border:1px solid rgba(255,255,255,.14);border-radius:10px;margin:8px 0;background:#0c1730}
+  .ex-acc summary{background:#0c1730;padding:10px 12px;border-radius:10px;cursor:pointer}
+  .ex-acc .ex-body{padding:10px 12px}
+  .ex-note{width:100%;background:#0b162c;color:#e6eaf2;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:8px 10px;font-family:inherit}
+  .ex-actions{margin-top:8px;display:flex;gap:8px;align-items:center}
+  .tiny{font-size:12px;opacity:.8}
 </style>
 </head>
 <body>
@@ -39,69 +46,110 @@
 
   <h1>Unity 2025</h1>
 
-  <!-- Alleen deze twee knoppen zichtbaar op het beginscherm -->
   <div class="row" style="margin:8px 0 12px">
     <button id="btnNext" class="btn">Volgende sessie ▶</button>
     <button id="btnComplete" class="btn ghost">Complete ✔</button>
     <button id="btnNewBlock" class="btn inline" title="Nieuw blok (zet alles opnieuw)">Nieuw blok</button>
   </div>
 
-  <!-- Sessietekst -->
   <div class="card">
     <h2>Huidige sessie</h2>
     <div id="session" class="session">Nog geen blok. Klik op “Nieuw blok”.</div>
   </div>
 
-  <!-- Instellingen accordeon -->
   <details id="accSettings">
     <summary>Instellingen</summary>
     <div class="panel">
       <div class="grid cols-2">
         <div>
-          <label>Blokvolume</label>
+          <label>Blokvolume (Unity)</label>
           <select id="selVol">
-            <option>180</option>
-            <option>240</option>
-            <option selected>300</option>
-            <option>400</option>
-            <option>500</option>
+            <option>180</option><option>240</option><option selected>300</option><option>400</option><option>500</option>
           </select>
         </div>
         <div>
           <label>Seed (optioneel)</label>
           <input id="inpSeed" placeholder="bv. 12345">
         </div>
+
         <div>
-          <label>KB-bias (alleen mains; min=Heavy +1 / max=Light −1)</label>
+          <label>Oefeningsset</label>
+          <select id="selSet">
+            <option value="advanced" selected>Advanced</option>
+            <option value="basic">Basis (geen double bells / snatch / bent press / jerk)</option>
+          </select>
+        </div>
+        <div>
+          <label>KB-bias (alleen mains; op basis van week-split)</label>
           <select id="selBias">
-            <option value="on" selected>Actief</option>
+            <option value="on" selected>Aan (▲/▼)</option>
             <option value="off">Uit</option>
           </select>
         </div>
-        <div>
-          <label>Anti-Rotation main</label>
-          <select id="selAR">
-            <option selected>Snatch</option>
-          </select>
-        </div>
+
         <div>
           <label>Plan Strong overlay (1 grind-patroon)</label>
           <select id="selPS">
             <option value="">— Uit —</option>
-            <option>Push</option>
-            <option>Pull</option>
-            <option>Squat</option>
-            <option>Lunge</option>
-            <!-- (Geen Anti-Rotation/Hinge/Rotation/Carry; PS is grind) -->
+            <option>Push</option><option>Pull</option><option>Squat</option><option>Lunge</option>
           </select>
         </div>
         <div>
-          <label>Barbell op PS-min-sessie</label>
-          <select id="selPSBar">
+          <label>PS Volume (indien PS aan)</label>
+          <select id="selPSVol" disabled>
+            <option>180</option><option selected>240</option><option>300</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Chaos mode (notities/accordeon per oefening)</label>
+          <select id="selChaos">
             <option value="off" selected>Uit</option>
             <option value="on">Aan</option>
           </select>
         </div>
+        <div></div>
+
+        <!-- Barbell sectie -->
+        <div style="grid-column:1/-1;margin-top:4px">
+          <div class="card">
+            <b>Barbell per patroon (vervangt main op laagste-% sessie; max 3 tegelijk)</b>
+            <div class="grid cols-2" style="margin-top:8px">
+              <div>
+                <label>Push → Barbell lift</label>
+                <select id="selBarPush">
+                  <option value="">— Uit —</option>
+                  <option value="Barbell Shoulder Press">Barbell Shoulder Press</option>
+                  <option value="Barbell Incline Bench Press">Barbell Incline Bench Press</option>
+                  <option value="Barbell Bench Press">Barbell Bench Press</option>
+                </select>
+              </div>
+              <div>
+                <label>Squat → Barbell lift</label>
+                <select id="selBarSquat">
+                  <option value="">— Uit —</option>
+                  <option value="Barbell Back Squat">Barbell Back Squat</option>
+                  <option value="Barbell Front Squat">Barbell Front Squat</option>
+                  <option value="Barbell Zercher Squat">Barbell Zercher Squat</option>
+                </select>
+              </div>
+              <div>
+                <label>Hinge → Barbell lift</label>
+                <select id="selBarHinge">
+                  <option value="">— Uit —</option>
+                  <option value="Barbell Deadlift (Conventional)">Barbell Deadlift (Conventional)</option>
+                  <option value="Barbell Deadlift (Sumo)">Barbell Deadlift (Sumo)</option>
+                  <option value="Barbell Good Morning">Barbell Good Morning</option>
+                </select>
+              </div>
+              <div class="muted">
+                Barbell vervangt alleen de <b>main</b> van het gekozen patroon, en <b>alleen</b> op de sessie met het <b>laagste %</b> die week.
+                Als KB-bias aanstaat en die sessie Heavy zou krijgen, wordt dat door barbell overschreven (geen ▲/▼ op barbell).
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <div class="card" style="margin-top:12px">
@@ -110,7 +158,9 @@
         <div class="muted" style="margin-top:6px">
           Weekpercentages: Deload 15% • Maintenance 22% • Development 28% • Stress 35%.<br>
           Splits per partitie: 3 → [15,35,50]% • 4 → [15,22,28,35]% • 5 → [10,15,20,25,30]%.<br>
-          Afronden naar veelvoud van <span class="kbd">#rondes</span> (niet cap). 180/240/300→3, 400→4, 500→5.
+          Bias (alleen mains): Deload 15%=Heavy ▲, 50%=Light ▼ • Maint/Dev 15%=Heavy ▲, 35%=Light ▼ • Stress 10%=Heavy ▲, 30%=Light ▼.<br>
+          Afronden naar veelvoud van <span class="kbd">#rondes</span> (niet cap). 180/240/300→3, 400→4, 500→5.<br>
+          Plan Strong op vaste dagen 1/3/5. Barbell → alleen laagste-% sessie per week.
         </div>
       </div>
 
@@ -123,22 +173,29 @@
 
 </div>
 
+<div id="toast" class="toast" style="display:none"></div>
+<div id="diag" class="diag"></div>
+
 <script>
 (function(){
-  // ===== Canonische data =====
+  // ===== Diagnostics =====
+  const diagEl = document.getElementById('diag');
+  function diag(msg){
+    diagEl.style.display='block';
+    diagEl.innerHTML = '<b>Diagnostics</b><br>'+String(msg).replace(/</g,'&lt;');
+  }
+  window.addEventListener('error', e=>diag(e.message+'\n'+(e.filename||'')+':'+(e.lineno||'')));
+
+  // ===== Canon =====
   const LS_KEY='unity2025_state';
+  const NOTES_KEY='unity2025_notes';
   const WEEK_TYPES=['Deload','Maintenance','Development','Stress'];
   const WEEK_PCT={Deload:.15,Maintenance:.22,Development:.28,Stress:.35};
-  // Splits per partitie (percent van weekvolume)
-  const SPLITS = {
-    3: [0.15,0.35,0.50],
-    4: [0.15,0.22,0.28,0.35],
-    5: [0.10,0.15,0.20,0.25,0.30]
-  };
-  const BALLISTICS = new Set(['Snatch','One-arm Swing','Two-arm Swing','High Pull','Double Clean']); // Deadstop Swing verwijderd
+  const SPLITS = { 3:[0.15,0.35,0.50], 4:[0.15,0.22,0.28,0.35], 5:[0.10,0.15,0.20,0.25,0.30] };
+  const BALLISTICS = new Set(['Snatch','One-arm Swing','Two-arm Swing','High Pull','Double Clean']); // x2 weergave
 
-  // Matrix (laatste keuzes)
-  const MATRIX = {
+  // ===== Matrices =====
+  const MATRIX_ADV = {
     'Push': { main:'Military Press', acc:['Push Press','Half-kneeling Press','Floor Press'] },
     'Pull': { main:'Double Clean', acc:['Pull-up / Chin-up','Double Bent-over Row','High Pull'] },
     'Squat': { main:'Double Front Squat', acc:['Goblet Squat','Bulgarian Split Squat','Step-up'] },
@@ -149,17 +206,33 @@
     'Loaded Carry': { main:'Suitcase Carry', acc:['Front Rack Carry','Overhead Carry','Bear Crawl'] }
   };
 
+  // Basis: geen double bells/snatch/bent press/jerk; simpelere varianten
+  const MATRIX_BASIC = {
+    'Push': { main:'Military Press', acc:['Half-kneeling Press','Floor Press','Push Press'] },
+    'Pull': { main:'One-arm Row', acc:['Gorilla Row','One-arm Clean','High Pull'] },
+    'Squat': { main:'Goblet Squat', acc:['Step-up','Split Squat','Bodyweight Squat'] },
+    'Lunge': { main:'Reverse Lunge', acc:['Tactical Lunge','Forward Lunge','Side Lunge'] },
+    'Hinge': { main:'Two-arm Swing', acc:['KB Deadlift','Single-leg Glute Bridge','Hip Hinge (BW)'] },
+    'Rotation': { main:'Turkish Get Up', acc:['Half-kneeling Windmill','Windmill','Tall-kneeling Windmill'] },
+    'Anti-Rotation': { main:'One-arm Swing', acc:['Single-leg Deadlift','Renegade Row','Pallof Press (band)'] },
+    'Loaded Carry': { main:'Suitcase Carry', acc:['Front Rack Carry','Farmer Carry','Bear Crawl'] }
+  };
+
   // ===== Helpers =====
   const $=s=>document.querySelector(s);
-  const rnd=(()=>{let s=Date.now()>>>0;return()=>{s^=s<<13;s^=s>>>17;s^=s<<5;return (s>>>0)/4294967296}})();
-  function seedRandom(v){ // simple seeding
-    let h=0; for(let i=0;i<v.length;i++){ h=(h<<5)-h+v.charCodeAt(i)|0; }
-    Math.abs(h); // ignore
-  }
-  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a;}
-  const choice=a=>a[Math.floor(rnd()*a.length)];
-  const clean = s => String(s).replace(/\s+/g,' ').trim();
+  const toast=(msg)=>{ const t=$('#toast'); t.textContent=msg; t.style.display='block'; setTimeout(()=>t.style.display='none',1600); };
+  function esc(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
+  function makeRNG(seedStr){
+    let h=2166136261>>>0;
+    if(seedStr){ for(let i=0;i<seedStr.length;i++){ h^=seedStr.charCodeAt(i); h=Math.imul(h,16777619); } }
+    else { h=(Date.now()>>>0); }
+    return function(){ h+=0x6D2B79F5; let t=h; t=Math.imul(t^t>>>15, t|1); t^=t+Math.imul(t^t>>>7, t|61); return ((t^t>>>14)>>>0)/4294967296; }
+  }
+  let rnd = makeRNG('');
+  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a; }
+  const clean = s => String(s).replace(/\s+/g,' ').trim();
+  const choice=a=>a[Math.floor(rnd()*a.length)];
   function roundsCap(vol){
     switch(+vol){
       case 180: return {rounds:3,cap:3};
@@ -171,372 +244,426 @@
     }
   }
 
-function buildWeekSplits(blockVol, weekType){
-  // 1) Bepaal #partities direct uit weekType (fail-safe default = 4)
-  const parts =
-    (weekType==='Deload') ? 3 :
-    (weekType==='Stress') ? 5 : 4;
-
-  // 2) Weekvolume
-  const {rounds} = roundsCap(blockVol);
-  const pct = WEEK_PCT[weekType] ?? 0;              // fail-safe
-  const weekTotal = Math.max(0, Math.round(blockVol * pct));
-
-  // 3) Pak de juiste split; val terug op 4-partitie als er iets geks gebeurt
-  const base = SPLITS[parts] || SPLITS[4];
-
-  // 4) Ruwe sessies en afronden naar veelvoud van #rondes (NIET cap)
-  const unit = rounds;
-  let sess = base.map(p => Math.max(unit, Math.round((weekTotal * p) / unit) * unit));
-
-  // 5) Som-correctie richting weekTotal in stapjes van 'unit'
-  let diff = weekTotal - sess.reduce((a,b)=>a+b,0);
-  let idx = sess.length-1;
-  while (Math.abs(diff) >= unit) {
-    if (diff > 0) { sess[idx] += unit; diff -= unit; }
-    else if (sess[idx] - unit >= unit) { sess[idx] -= unit; diff += unit; }
-    else { if (idx > 0) { idx--; continue; } break; }
-  }
-
-  // 6) Sessies randomiseren binnen de week
-  return shuffle(sess);
-}
-
-
-  function pickDaysForWeek(count){
-    // kies 'count' unieke dagen uit 0..4
-    const d=[0,1,2,3,4]; shuffle(d); return d.slice(0,count).sort((a,b)=>a-b);
-  }
-
   function isUni(name){
     const n=clean(name).toLowerCase();
-    // Einfach: double/two-arm/… = bi; veel andere = uni
     if(n.includes('double')||n.includes('two-arm')||n.includes('front squat')||n.includes('deadlift ')||n.includes('goblet')||n.includes('carry')) return false;
     if(n.includes('one-arm')||n.includes('single-leg')||n.includes('lunge')||n.includes('windmill')||n.includes('bent press')||n.includes('side swing')||n.includes('renegade row')||n.includes('pull-up')||n.includes('chin-up')||n.includes('military press')||n.includes('push press')||n.includes('snatch')) return true;
     return false;
   }
+  function badge(kind){
+    if(kind==='Heavy') return ' <span class="badge" title="Heavy (+1 bell)" aria-label="Heavy (+1 bell)">▲ +1</span>';
+    if(kind==='Light') return ' <span class="badge" title="Light (−1 bell)" aria-label="Light (−1 bell)">▼ −1</span>';
+    return '';
+  }
+
+  // === Splits met pct (voor bias, barbell-plaatsing)
+  function buildWeekSplitsWithPcts(blockVol, weekType){
+    const parts = (weekType==='Deload') ? 3 : (weekType==='Stress' ? 5 : 4);
+    const basePcts = SPLITS[parts].slice();
+    const {rounds} = roundsCap(blockVol);
+    const weekTotal = Math.round(blockVol * (WEEK_PCT[weekType] || 0));
+    let sess = basePcts.map(p => Math.max(rounds, Math.round((weekTotal * p) / rounds) * rounds));
+    let diff = weekTotal - sess.reduce((a,b)=>a+b,0);
+    let idx = sess.length - 1;
+    while (Math.abs(diff) >= rounds) {
+      if (diff > 0) { sess[idx] += rounds; diff -= rounds; }
+      else if (sess[idx] - rounds >= rounds) { sess[idx] -= rounds; diff += rounds; }
+      else { if (idx > 0) { idx--; continue; } break; }
+    }
+    const orderIdx = sess.map((_,i)=>i); shuffle(orderIdx);
+    return orderIdx.map(i => ({ vol: sess[i], pct: basePcts[i] }));
+  }
+  function biasFromPct(weekType, pct){
+    const parts = (weekType==='Deload') ? 3 : (weekType==='Stress' ? 5 : 4);
+    const base = SPLITS[parts];
+    const minPct = Math.min(...base);
+    const maxPct = Math.max(...base);
+    const eq = (a,b)=> Math.abs(a-b) < 1e-9;
+    if (eq(pct, minPct)) return 'Heavy';
+    if (eq(pct, maxPct)) return 'Light';
+    return 'Medium';
+  }
+  function pickDays(count){ const d=[0,1,2,3,4]; shuffle(d); return d.slice(0,count).sort((a,b)=>a-b); }
+
+  // ===== Notes (chaos)
+  function loadNotes(){ try{ return JSON.parse(localStorage.getItem(NOTES_KEY)||'{}') }catch(e){ return {} } }
+  function saveNotes(obj){ try{ localStorage.setItem(NOTES_KEY, JSON.stringify(obj)) }catch(e){} }
+  let notes = loadNotes();
+  function getNote(exName){ return notes[exName]||'' }
+  function setNote(exName, val){ notes[exName]=val; saveNotes(notes); }
 
   // ===== State =====
-  let state = load() || {};
+  let state = safeLoad() || {};
+  function safeLoad(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||'null') }catch(e){ diag('load error: '+e.message); return null } }
+  function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)) }catch(e){ diag('save error: '+e.message) } }
 
-  function load(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||'null') }catch(e){ return null } }
-  function save(){ localStorage.setItem(LS_KEY, JSON.stringify(state)) }
-
-  // ===== Plan bouw =====
+  // ===== Planbouw =====
   function buildPlan(cfg){
-    // seed
-    if(cfg.seed){ seedRandom(cfg.seed); }
+    rnd = makeRNG(cfg.seed||'');
+    const matrix = (cfg.set==='basic') ? MATRIX_BASIC : MATRIX_ADV;
 
-    // week orders per pattern (met “start ≠ vorige eind” regel)
+    // Weekorders per patroon (start != vorige eind)
     const lastEnds = state.lastEnds || {};
     const weekOrders = {};
-    for(const k of Object.keys(MATRIX)){
-      const order = [...WEEK_TYPES];
-      shuffle(order);
-      if(lastEnds[k] && order[0]===lastEnds[k]){ [order[0],order[1]]=[order[1],order[0]]; }
-      weekOrders[k]=order;
+    for(const pat of Object.keys(matrix)){
+      const order=[...WEEK_TYPES]; shuffle(order);
+      if(lastEnds[pat] && order[0]===lastEnds[pat]){ [order[0],order[1]]=[order[1],order[0]]; }
+      weekOrders[pat]=order;
     }
 
-    // per pattern per week → splits + dagplaatsen
-    const weeks = Array.from({length:4}, (_,w)=>({days:Array.from({length:5},()=>({entries:[]}))}));
-    for(const [pat,def] of Object.entries(MATRIX)){
+    const weeks = Array.from({length:4}, ()=>({days:Array.from({length:5},()=>({entries:[],ps:null}))}));
+
+    // UNITY entries vullen (pct+bias)
+    for(const [pat,def] of Object.entries(matrix)){
       for(let w=0; w<4; w++){
         const wt = weekOrders[pat][w];
-        const partCount = (wt==='Deload')?3: (wt==='Stress'?5:4);
-        const vols = buildWeekSplits(cfg.volume, wt); // al gehusseld
-        const dayIdxs = pickDaysForWeek(partCount);
-        for(let i=0;i<partCount;i++){
+        const items = buildWeekSplitsWithPcts(cfg.volume, wt);
+        const dayIdxs = pickDays(items.length);
+        for(let i=0;i<items.length;i++){
           const d = dayIdxs[i];
+          const {vol, pct} = items[i];
           weeks[w].days[d].entries.push({
             pattern: pat,
             main: def.main,
             acc: def.acc.slice(),
             weekType: wt,
-            volume: vols[i] // Unity-reps voor dat patroon in deze sessie
+            volume: vol,
+            pct: pct,
+            bias: biasFromPct(wt, pct) // init voor KB-badge
           });
         }
       }
     }
 
-    // KB-bias labels per week voor mains (min → Heavy, max → Light)
-    if(cfg.bias==='on'){
-      for(const wk of weeks){
-        const map={};
-        for(const day of wk.days){
-          for(const e of day.entries){
-            (map[e.pattern] ||= []).push(e.volume);
-          }
-        }
-        const tagByPat={};
-        for(const [k,arr] of Object.entries(map)){
-          const min=Math.min(...arr), max=Math.max(...arr);
-          tagByPat[k]={min,max};
-        }
-        for(const day of wk.days){
-          day.kbBias={};
-          for(const e of day.entries){
-            const mm = tagByPat[e.pattern];
-            if(!mm){ day.kbBias[e.pattern]='Medium'; continue; }
-            if(mm.min===mm.max) day.kbBias[e.pattern]='Medium';
-            else if(e.volume===mm.min) day.kbBias[e.pattern]='Heavy';
-            else if(e.volume===mm.max) day.kbBias[e.pattern]='Light';
-            else day.kbBias[e.pattern]='Medium';
-          }
-        }
-      }
-    }
-
-    // Plan Strong overlay (optioneel): haal gekozen patroon uit Unity op niet-PS dagen; plan 3 PS-dagen (LMH label)
-    let ps = null;
-    if(cfg.psPattern){
-      ps = cfg.psPattern;
-      for(const wk of weeks){
-        // kies 3 dagen verspreid
-        const idxs = spread3();
+    // === Barbell per week: op laagste-% sessie van die week per gekozen patroon
+    const barCfg = {
+      'Push': (cfg.barPush||'').trim(),
+      'Squat': (cfg.barSquat||'').trim(),
+      'Hinge': (cfg.barHinge||'').trim()
+    };
+    for(let w=0; w<4; w++){
+      for(const [pat,barLift] of Object.entries(barCfg)){
+        if(!barLift) continue;
+        const pool=[];
         for(let d=0; d<5; d++){
-          const day = wk.days[d];
-          // verwijder PS-patroon op non-PS dagen
-          day.entries = day.entries.filter(e=> e.pattern !== ps || idxs.includes(d));
-          if(idxs.includes(d)){
-            day.ps = day.ps || {};
-            const order=['Low','Medium','High'];
-            day.ps[ps] = order[idxs.indexOf(d)];
-            day.psBarbell = (cfg.psBar==='on' && order[idxs.indexOf(d)]==='Low');
+          for(const e of weeks[w].days[d].entries){
+            if(e.pattern===pat){ pool.push({e,dayIdx:d}); }
           }
+        }
+        if(!pool.length) continue;
+        pool.sort((a,b)=>a.e.pct-b.e.pct); // laagste pct eerst
+        const target = pool[0].e;
+        target._barbellMain = barLift; // override render; onderdrukt KB-badge
+      }
+    }
+
+    // === Plan Strong overlay (vaste dagen 0/2/4)
+    if(cfg.psPattern){
+      const psPattern = cfg.psPattern;
+      const psBlock = +cfg.psVolume;
+      for(let w=0; w<4; w++){
+        const wt = weekOrders[psPattern][w];
+        const weekVol = Math.round(psBlock * (WEEK_PCT[wt]||0));
+        const basePS = [0.15,0.35,0.50];
+        let psSess = basePS.map(p=> Math.max(1, Math.round(weekVol*p)));
+        let diff = weekVol - psSess.reduce((a,b)=>a+b,0);
+        let j=psSess.length-1;
+        while(Math.abs(diff)>=1){
+          if(diff>0){ psSess[j]+=1; diff-=1; }
+          else { if(psSess[j]-1>=1){ psSess[j]-=1; diff+=1; } else { if(j>0){j--;continue;} break; } }
+        }
+        const dayIdxs = [0,2,4];
+        const LMH = ['Low','Medium','High'];
+        for(let i=0;i<3;i++){
+          const d = dayIdxs[i];
+          const day = weeks[w].days[d];
+          for(let dd=0; dd<5; dd++){
+            if(dd!==d){ weeks[w].days[dd].entries = weeks[w].days[dd].entries.filter(en => en.pattern !== psPattern); }
+          }
+          day.ps = day.ps || {};
+          day.ps[psPattern] = { level: LMH[i], weekType: wt, reps: psSess[i] };
+          day.entries = day.entries.filter(en => en.pattern !== psPattern);
         }
       }
     }
 
-    const rc = roundsCap(cfg.volume);
-    return {weeks, rc, weekOrders};
+    return {weeks, rc:roundsCap(cfg.volume), weekOrders, set: cfg.set};
   }
 
-  function spread3(){
-    // kies 3 indices (0..4) redelijk verspreid
-    const c=[0,2,4]; // simpel
-    return c;
-  }
-
-  // ===== Rendering sessie =====
-  function renderSession(){
-    const out = $('#session');
-    if(!state.plan){ out.textContent='Nog geen blok. Klik op “Nieuw blok”.'; return; }
-
-    const {w,d} = state.cursor;
-    const week = state.plan.weeks[w];
-    const day = week.days[d];
-    const rc = state.plan.rc;
-
-    // 1) Opener: Get Up uit Rotation
-    let opener='';
-    const rot = day.entries.find(e=>e.pattern==='Rotation');
-    if(rot){
-      const sets = Math.min(3, Math.floor(rot.volume/5)); // 1+1 = 10 Unity → ÷5 = sets
-      if(sets>0){ opener = `${sets} × (1+1) Turkish Get Up`; }
-      rot.volume = Math.max(0, rot.volume - sets*10);
-    }
-
-    // 2) Circuitregels per entry
-    const lines=[]; const assigned=[]; // voor EMOM detection
-    const entries = shuffle(day.entries.slice().filter(e=> e.pattern!=='Loaded Carry')); // carry pas bij finisher
-
-    for(const e of entries){
-      // plan Strong: als e.pattern == PS maar dag heeft geen day.ps[pattern] (zou al gefilterd zijn)
-      const order = [e.main, ...(e.acc||[])].filter(Boolean);
-      const seen = new Set([clean(e.main)]); // main nooit nog eens
-      let remaining = e.volume;
-      let usedCount=0;
-
-      // KB-bias tag
-      const bias = (day.kbBias && day.kbBias[e.pattern]) ? day.kbBias[e.pattern] : 'Medium';
-
-      for(let i=0; i<order.length && remaining>0 && usedCount<3; i++){
-        const nm = clean(order[i]);
-        if(seen.has(nm)) continue;
-        seen.add(nm);
-
-        // hoeveel per ronde? cap hard
-        let perRound = Math.min(rc.cap, Math.ceil(remaining/rc.rounds));
-        perRound = Math.max(1, Math.floor(perRound)); // kruimelsets ok
-
-        // Push Press altijd Heavy voor badge (alleen visueel)
-        let tag = bias;
-        if(nm==='Push Press') tag='Heavy';
-
-        // weergave x2 voor ballistics
-        const isBall = BALLISTICS.has(nm);
-        const uni = isUni(nm);
-        const shown = perRound * (isBall?2:1);
-        const repText = uni ? `${shown}+${shown}` : `${shown}`;
-
-        // badge tonen alleen bij mains
-        const label = (nm===clean(e.main)) ? badge(tag) : '';
-
-        lines.push(`${repText} ${nm}${label}`);
-
-        const totalUnity = perRound * rc.rounds;
-        assigned.push({name:nm,totalUnity});
-
-        remaining -= totalUnity;
-        usedCount++;
-      }
-    }
-
-    // 3) EMOM op basis van assigned Unity-totals
-    const emom = buildEMOM(assigned, rc.rounds);
-    let circuit = lines.slice();
-    if(emom){
-      const drop = new Set(emom._names.map(clean));
-      circuit = circuit.filter(line=>{
-        const nm = clean(line.replace(/^\d+\+?\d*\s+/,'').replace(/\s+\[.*?\]$/,''));
-        return !drop.has(nm);
-      });
-    }
-
-    // 4) Finisher: Loaded Carry – volume van Loaded Carry die dag (indien aanwezig) → 5s per Unity rep
-    const carryEntry = day.entries.find(e=>e.pattern==='Loaded Carry');
-    let carryTxt='';
-    if(carryEntry){
-      const secs = carryEntry.volume * 5; // 5 seconden per Unity rep
-      const name = MATRIX['Loaded Carry'].acc[ Math.min( (carryEntry.volume/ carryEntry.volume)|0, 2) ]; // kies een accessoire ‘random-ish’
-      carryTxt = `${secs}s ${name}`;
-    }else{
-      carryTxt = `45s ${choice(MATRIX['Loaded Carry'].acc)}`; // fallback als geen LC-sessie in dag
-    }
-
-    // 5) Compose
-    let txt = `Week ${w+1}, Dag ${d+1}\n\n`;
-    if(opener) txt += opener + '\n\n';
-    txt += '---\n';
-    txt += `${rc.rounds} rounds of following circuit:\n`;
-    if(circuit.length) txt += circuit.join('\n') + '\n';
-    else txt += '(Geen patronen actief in het circuit vandaag)\n';
-    txt += '---\n\n';
-    if(emom){ txt += emom.text + '\n---\n\n'; }
-    txt += `[ ${carryTxt} ]`;
-
-    out.textContent = txt;
-  }
-
-  function badge(kind){
-    if(kind==='Heavy') return '  [Heavy +1]';
-    if(kind==='Light') return '  [Light −1]';
-    return '';
-  }
-
+  // ===== EMOM (getoonde reps per ronde == 10)
   function buildEMOM(assigned, rounds){
-    const want = rounds*10; // 30 bij 3 rondes
+    const wantShown = 10;
     const has = new Map();
     for(const a of assigned){
       const nm=clean(a.name);
-      if(['Snatch','One-arm Swing','Two-arm Swing'].includes(nm) && a.totalUnity===want){
+      if(['Snatch','One-arm Swing','Two-arm Swing'].includes(nm) && a.shownPerRound === wantShown){
         has.set(nm,true);
       }
     }
-    if(has.size<2) return null;
+    if(has.size < 2) return null;
+    const totalMins = rounds; // 10 per min
     const order=['Snatch','One-arm Swing','Two-arm Swing'];
     const parts=[]; const used=[];
     for(const nm of order){
       if(!has.has(nm)) continue;
       used.push(nm);
       if(nm==='Two-arm Swing'){
-        parts.push('EMOM:\n3 minutes of 10 Two-arm Swings');
+        parts.push(`EMOM:\n${totalMins} minutes of 10 Two-arm Swings`);
       }else{
-        const label = (nm==='Snatch')?'Snatches':'One-arm Swings';
-        parts.push('EMOM:\n6 minutes of 10 '+label+' (alternate side each minute)\n\nThen');
+        const label = nm==='Snatch'?'Snatches':'One-arm Swings';
+        parts.push(`EMOM:\n${totalMins*2} minutes of 10 ${label} (alternate side each minute)\n\nThen`);
       }
     }
     let text = parts.join('\n\n').replace(/\n\nThen$/,'');
-    return {text, _names:used};
+    return { text, _names: used };
   }
 
-  // ===== UI & state =====
+  // ===== Rendering sessie =====
+  function renderSession(){
+    try{
+      const out = $('#session');
+      if(!state.plan){ out.textContent='Nog geen blok. Klik op “Nieuw blok”.'; return; }
+
+      const {w,d} = state.cursor;
+      const week = state.plan.weeks[w];
+      const day = week.days[d];
+      const rc = state.plan.rc;
+      const chaos = state.cfg.chaos==='on';
+      const matrix = (state.plan.set==='basic') ? MATRIX_BASIC : MATRIX_ADV;
+
+      // 1) Opener: Get Up uit Rotation
+      let opener='';
+      const rot = day.entries.find(e=>e.pattern==='Rotation');
+      if(rot){
+        const sets = Math.min(3, Math.floor(rot.volume/5)); // 1+1 = 10 Unity → ÷5 = sets
+        if(sets>0){ opener = `${sets} × (1+1) Turkish Get Up`; }
+        rot.volume = Math.max(0, rot.volume - sets*10);
+      }
+
+      // 2) Circuit
+      const assigned=[];
+      const entries = shuffle(day.entries.slice().filter(e=> e.pattern!=='Loaded Carry'));
+      const lineObjs=[];
+
+      for(const e of entries){
+        let mainName = e._barbellMain ? e._barbellMain : e.main; // barbell override indien gezet
+        const order = [mainName, ...(e.acc||[])].filter(Boolean);
+        const seen = new Set(); // main moet kunnen plaatsen
+        let remaining = e.volume;
+        let usedCount=0;
+
+        for(let i=0; i<order.length && remaining>0 && usedCount<3; i++){
+          const nm = clean(order[i]);
+          if(seen.has(nm)) continue;
+          seen.add(nm);
+
+          let perRound = Math.min(rc.cap, Math.ceil(remaining/rc.rounds));
+          perRound = Math.max(1, Math.floor(perRound)); // kruimelsets ok
+
+          const isBall = BALLISTICS.has(nm);
+          const uni = isUni(nm);
+          const shown = perRound * (isBall?2:1);
+          const repText = uni ? `${shown}+${shown}` : `${shown}`;
+
+          let labelHTML = '';
+          const isMainLine = (nm===clean(mainName));
+          const barbellActive = !!e._barbellMain;
+          if(isMainLine && state.cfg.bias==='on' && !barbellActive){
+            labelHTML = (e.bias==='Heavy') ? badge('Heavy') : (e.bias==='Light') ? badge('Light') : '';
+          }
+
+          lineObjs.push({name:nm, repText, htmlLabel:labelHTML, isMain:isMainLine});
+
+          const totalUnity = perRound * rc.rounds;
+          const shownPerRound = shown; // voor EMOM
+          assigned.push({name:nm,totalUnity,shownPerRound});
+          remaining -= totalUnity;
+          usedCount++;
+        }
+      }
+
+      // 3) Plan Strong blok (tekstuele guidance)
+      let psBlockText = '';
+      if(day.ps){
+        for(const [pat,info] of Object.entries(day.ps)){
+          psBlockText += `Plan Strong — ${pat}: ${info.level}\n`;
+          const target = info.reps;
+          const perRound = Math.min(rc.cap, Math.ceil(target/rc.rounds));
+          const roundsTotal = perRound*rc.rounds;
+          const spare = Math.max(0, target - roundsTotal);
+          psBlockText += `${rc.rounds} rounds: ~${perRound} per round — totaal ca. ${roundsTotal}${spare?` (+${spare})`:''}\n\n`;
+        }
+      }
+
+      // 4) EMOM
+      const emom = buildEMOM(assigned, rc.rounds);
+      let circuitObjs = lineObjs.slice();
+      if(emom){
+        const drop = new Set(emom._names.map(clean));
+        circuitObjs = circuitObjs.filter(o => !drop.has(clean(o.name)));
+      }
+
+      // 5) Loaded Carry
+      const carryEntry = day.entries.find(e=>e.pattern==='Loaded Carry');
+      let carryTxt='';
+      if(carryEntry){
+        const secs = Math.max(30, carryEntry.volume * 5); // 5s per Unity rep
+        const name = choice(matrix['Loaded Carry'].acc);
+        carryTxt = `${secs}s ${name}`;
+      }else{
+        const name = choice(matrix['Loaded Carry'].acc);
+        carryTxt = `45s ${name}`;
+      }
+
+      // 6) Compose
+      const parts = [];
+      parts.push(esc(`Week ${w+1}, Dag ${d+1}`), '<br><br>');
+      if(psBlockText){ parts.push(esc(psBlockText).replace(/\n/g,'<br>'), '<br>'); }
+      if(opener){ parts.push(esc(opener), '<br><br>'); }
+      parts.push('<hr>');
+      parts.push(esc(`${rc.rounds} rounds of following circuit:`), '<br>');
+
+      if(circuitObjs.length){
+        if(chaos){
+          parts.push('<div>');
+          for(const o of circuitObjs){
+            const key = clean(o.name);
+            const previous = esc(getNote(key));
+            const head = `${esc(o.repText)} ${esc(o.name)}${o.htmlLabel}`;
+            parts.push(
+              `<details class="ex-acc"><summary>${head}</summary>`+
+              `<div class="ex-body">`+
+              `<div class="tiny">Vorige notitie: ${previous || '—'}</div>`+
+              `<textarea class="ex-note" data-ex="${esc(key)}" rows="2" placeholder="Bijv. 24 kg / 2×24 kg / RPE 8"></textarea>`+
+              `<div class="ex-actions"><button class="btn inline" data-save="${esc(key)}">Opslaan</button><span class="tiny">Notitie wordt lokaal bewaard.</span></div>`+
+              `</div></details>`
+            );
+          }
+          parts.push('</div>');
+        }else{
+          parts.push(circuitObjs.map(o => `${esc(o.repText)} ${esc(o.name)}${o.htmlLabel}`).join('<br>'), '<br>');
+        }
+      }else{
+        parts.push(esc('(Geen patronen actief in het circuit vandaag)'), '<br>');
+      }
+
+      parts.push('<hr><br>');
+      if(emom){ parts.push(esc(emom.text).replace(/\n/g,'<br>'), '<br><hr><br>'); }
+      parts.push(esc(`[ ${carryTxt} ]`));
+
+      $('#session').innerHTML = parts.join('');
+
+      // Bind chaos notes
+      if(chaos){
+        document.querySelectorAll('button[data-save]').forEach(btn=>{
+          btn.onclick = ()=>{
+            const ex = btn.getAttribute('data-save');
+            const ta = document.querySelector(`textarea[data-ex="${CSS.escape(ex)}"]`);
+            if(ta){ setNote(ex, ta.value.trim()); toast('Notitie opgeslagen'); renderSession(); }
+          };
+        });
+      }
+
+    }catch(e){ diag('renderSession error: '+e.message); }
+  }
+
+  // ===== Info render =====
   function renderInfo(){
-    if(!state.plan) { $('#kpi').innerHTML=''; $('#orders').innerHTML=''; return; }
-    const rc = state.plan.rc;
-    const kpi = [
-      `<span class="pill">Volume: ${state.cfg.volume}</span>`,
-      `<span class="pill">Rounds: ${rc.rounds}</span>`,
-      `<span class="pill">Cap/round: ${rc.cap}</span>`,
-      `<span class="pill">Blok #${state.blockIdx}</span>`,
-      `<span class="pill">KB-bias: ${state.cfg.bias==='on'?'Aan':'Uit'}</span>`,
-      state.cfg.psPattern? `<span class="pill">Plan Strong: ${state.cfg.psPattern}${state.cfg.psBar==='on'?' (barbell min)':''}</span>`:''
-    ].filter(Boolean).join(' ');
-    $('#kpi').innerHTML = kpi;
+    try{
+      if(!state.plan){ $('#kpi').innerHTML=''; $('#orders').innerHTML=''; return; }
+      const rc = state.plan.rc;
+      const barBits = [];
+      if(state.cfg.barPush)  barBits.push(`Push: ${state.cfg.barPush}`);
+      if(state.cfg.barSquat) barBits.push(`Squat: ${state.cfg.barSquat}`);
+      if(state.cfg.barHinge) barBits.push(`Hinge: ${state.cfg.barHinge}`);
 
-    const rows = Object.entries(state.plan.weekOrders).map(([k,v])=>`${k}: <b>${v.join(' → ')}</b>`).join('<br>');
-    $('#orders').innerHTML = rows;
+      const kpi = [
+        `<span class="pill">Set: ${state.cfg.set==='basic'?'Basis':'Advanced'}</span>`,
+        `<span class="pill">Volume: ${state.cfg.volume}</span>`,
+        `<span class="pill">Rounds: ${rc.rounds}</span>`,
+        `<span class="pill">Cap/round: ${rc.cap}</span>`,
+        `<span class="pill">Blok #${state.blockIdx}</span>`,
+        `<span class="pill">KB-bias: ${state.cfg.bias==='on'?'Aan (▲/▼)':'Uit'}</span>`,
+        barBits.length? `<span class="pill">Barbell: ${barBits.join(' • ')}</span>` : '',
+        state.cfg.psPattern? `<span class="pill">Plan Strong: ${state.cfg.psPattern} • Vol: ${state.cfg.psVolume} • Dagen 1/3/5</span>`:''
+      ].filter(Boolean).join(' ');
+      $('#kpi').innerHTML = kpi;
+
+      const rows = Object.entries(state.plan.weekOrders).map(([k,v])=>`${k}: <b>${v.join(' → ')}</b>`).join('<br>');
+      $('#orders').innerHTML = rows;
+    }catch(e){ diag('renderInfo error: '+e.message); }
   }
 
+  // ===== Blok besturing =====
+  function firstNonEmpty(plan){
+    for(let w=0; w<plan.weeks.length; w++){
+      for(let d=0; d<plan.weeks[w].days.length; d++){
+        if(plan.weeks[w].days[d].entries.length>0 || plan.weeks[w].days[d].ps){ return {w,d}; }
+      }
+    }
+    return {w:0,d:0};
+  }
   function newBlock(){
-    const cfg = readCfg();
-    const rc = roundsCap(cfg.volume);
-    const plan = buildPlan(cfg);
-
-    const blockIdx = (state.blockIdx||0)+1;
-    state = {
-      blockIdx,
-      cfg,
-      plan,
-      cursor:{w:0,d:0},
-      lastEnds: state.lastEnds || {}
-    };
-    save();
-    renderInfo();
-    renderSession();
+    try{
+      const cfg = readCfg();
+      const plan = buildPlan(cfg);
+      const blockIdx = (state.blockIdx||0)+1;
+      state = { blockIdx, cfg, plan, cursor: firstNonEmpty(plan), lastEnds: state.lastEnds || {} };
+      save(); renderInfo(); renderSession(); toast('Blok aangemaakt');
+    }catch(e){ diag('newBlock error: '+e.message); }
   }
-
-  function readCfg(){
-    return {
-      volume: +$('#selVol').value,
-      seed: ($('#inpSeed').value||'').trim(),
-      bias: $('#selBias').value,
-      arMain: $('#selAR').value, // (nu altijd Snatch)
-      psPattern: ($('#selPS').value||'') || null,
-      psBar: $('#selPSBar').value
-    };
-  }
-
   function next(){
-    if(!state.plan){ return; }
+    if(!state.plan){ newBlock(); return; }
     let {w,d} = state.cursor;
     d++; if(d>=5){ d=0; w++; }
     if(w>=4){
-      // blok afgerond → zet lastEnds
+      const matrix = (state.cfg.set==='basic')? MATRIX_BASIC : MATRIX_ADV;
       const ends={};
-      for(const k of Object.keys(MATRIX)){
-        ends[k] = state.plan.weekOrders[k][3]; // eindtype in week 4
-      }
-      state.lastEnds=ends;
-      save();
-      alert('Blok afgerond. Ga naar Instellingen → “Nieuw blok” voor de volgende cyclus (start ≠ eind).');
-      return;
+      for(const pat of Object.keys(matrix)){ ends[pat] = state.plan.weekOrders[pat][3]; }
+      state.lastEnds=ends; save(); toast('Blok afgerond'); return;
     }
     state.cursor={w,d}; save(); renderSession();
   }
-
-  function complete(){ // zelfde als next voor nu
-    next();
-  }
-
+  function complete(){ next(); }
   function resetProgress(){
-    localStorage.removeItem(LS_KEY);
-    state={};
-    $('#session').textContent='Voortgang gewist. Klik “Nieuw blok”.';
-    $('#kpi').innerHTML=''; $('#orders').innerHTML='';
+    try{
+      localStorage.removeItem(LS_KEY);
+      state={};
+      $('#session').textContent='Voortgang gewist. Klik “Nieuw blok”.';
+      $('#kpi').innerHTML=''; $('#orders').innerHTML='';
+      toast('Voortgang gereset');
+    }catch(e){ diag('reset error: '+e.message); }
   }
 
-  // ===== Events =====
+  function readCfg(){
+    const psPat = ($('#selPS').value||'') || null;
+    const psVol = $('#selPSVol').value;
+    return {
+      set: $('#selSet').value,
+      volume: +$('#selVol').value,
+      seed: ($('#inpSeed').value||'').trim(),
+      bias: $('#selBias').value,
+      psPattern: psPat,
+      psVolume: psPat ? psVol : null,
+      chaos: $('#selChaos').value,
+      barPush:  $('#selBarPush').value || '',
+      barSquat: $('#selBarSquat').value || '',
+      barHinge: $('#selBarHinge').value || ''
+    };
+  }
+
+  // ===== UI bindings =====
   $('#btnNewBlock').onclick=newBlock;
   $('#btnRebuild').onclick=newBlock;
   $('#btnReset').onclick=resetProgress;
-  $('#btnNext').onclick=()=>{ // toon volgende sessie (preview)
-    if(!state.plan){ return; }
-    next();
-  };
+  $('#btnNext').onclick=()=>{ next(); };
   $('#btnComplete').onclick=complete;
+  $('#selPS').addEventListener('change', (e)=>{
+    const on = !!(e.target.value);
+    $('#selPSVol').disabled = !on;
+  });
 
-  // init
+  // restore
   if(state && state.plan){ renderInfo(); renderSession(); }
 })();
 </script>
