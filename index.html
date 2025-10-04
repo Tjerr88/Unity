@@ -457,27 +457,28 @@
           if(seen.has(nm)) continue;
           seen.add(nm);
 
-// cap verhogen naar 10 als Light main (−bell), tenzij barbell actief
-let capNow = rc.cap;
-if (isMainLine && state.cfg.bias === 'on' && e.bias === 'Light' && !barbellActive) {
-  capNow = 10; // Light main → hogere cap
-}
-
-let perRound = Math.min(capNow, Math.ceil(remaining / rc.rounds));
-perRound = Math.max(1, Math.floor(perRound)); // kruimelsets ok
-
-
+          // ---- PATCH: cap 10 op Light-bias main (−bell), tenzij barbell actief ----
           const isBall = BALLISTICS.has(nm);
           const uni = isUni(nm);
+          const isMainLine = (nm===clean(mainName));
+          const barbellActive = !!e._barbellMain;
+
+          let capNow = rc.cap;
+          if (isMainLine && state.cfg.bias === 'on' && e.bias === 'Light' && !barbellActive) {
+            capNow = 10;
+          }
+
+          let perRound = Math.min(capNow, Math.ceil(remaining / rc.rounds));
+          perRound = Math.max(1, Math.floor(perRound)); // kruimelsets ok
+
           const shown = perRound * (isBall?2:1);
           const repText = uni ? `${shown}+${shown}` : `${shown}`;
 
           let labelHTML = '';
-          const isMainLine = (nm===clean(mainName));
-          const barbellActive = !!e._barbellMain;
           if(isMainLine && state.cfg.bias==='on' && !barbellActive){
             labelHTML = (e.bias==='Heavy') ? badge('Heavy') : (e.bias==='Light') ? badge('Light') : '';
           }
+          // ---- EINDE PATCH ----
 
           lineObjs.push({name:nm, repText, htmlLabel:labelHTML, isMain:isMainLine});
 
