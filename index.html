@@ -457,8 +457,19 @@
           if(seen.has(nm)) continue;
           seen.add(nm);
 
-          let perRound = Math.min(rc.cap, Math.ceil(remaining/rc.rounds));
-          perRound = Math.max(1, Math.floor(perRound)); // kruimelsets ok
+         // cap verhogen naar 10 als: (1) dit de main-regel is, (2) KB-bias aan staat,
+// (3) bias == 'Light' (−bell), en (4) GEEN barbell override actief is
+const isMainLine = (nm === clean(mainName));
+const barbellActive = !!e._barbellMain;
+let capNow = rc.cap;
+
+if (isMainLine && state.cfg.bias === 'on' && e.bias === 'Light' && !barbellActive) {
+  capNow = 10; // Light main → hogere cap
+}
+
+let perRound = Math.min(capNow, Math.ceil(remaining/rc.rounds));
+perRound = Math.max(1, Math.floor(perRound)); // kruimelsets ok
+
 
           const isBall = BALLISTICS.has(nm);
           const uni = isUni(nm);
