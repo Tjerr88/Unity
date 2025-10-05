@@ -88,10 +88,10 @@
         </div>
 
         <div>
-          <label>Plan Strong overlay (1 grind-patroon)</label>
+          <label>Plan Strong overlay (alleen Push/Pull/Squat/Hinge)</label>
           <select id="selPS">
             <option value="">— Uit —</option>
-            <option>Push</option><option>Pull</option><option>Squat</option><option>Lunge</option>
+            <option>Push</option><option>Pull</option><option>Squat</option><option>Hinge</option>
           </select>
         </div>
         <div>
@@ -145,6 +145,7 @@
               <div class="muted">
                 Barbell vervangt alleen de <b>main</b> van het gekozen patroon, en <b>alleen</b> op de sessie met het <b>laagste %</b> die week.
                 Als KB-bias aanstaat en die sessie Heavy zou krijgen, wordt dat door barbell overschreven (geen ▲/▼ op barbell).
+                <br>Let op: <b>Plan Strong overrulet barbell/bias op PS-dagen</b>.
               </div>
             </div>
           </div>
@@ -156,11 +157,11 @@
         <div id="kpi"></div>
         <div id="orders" class="muted" style="margin-top:6px"></div>
         <div class="muted" style="margin-top:6px">
-          Weekpercentages: Deload 15% • Maintenance 22% • Development 28% • Stress 35%.<br>
+          Weekpercentages: Deload 15% • Development 28% • Maintenance 22% • Stress 35%.<br>
           Splits per partitie: 3 → [15,35,50]% • 4 → [15,22,28,35]% • 5 → [10,15,20,25,30]%.<br>
           Bias (alleen mains): Deload 15%=Heavy ▲, 50%=Light ▼ • Maint/Dev 15%=Heavy ▲, 35%=Light ▼ • Stress 10%=Heavy ▲, 30%=Light ▼.<br>
           Afronden naar veelvoud van <span class="kbd">#rondes</span> (niet cap). 180/240/300→3, 400→4, 500→5.<br>
-          Plan Strong op vaste dagen 1/3/5. Barbell → alleen laagste-% sessie per week.
+          Plan Strong (Push/Pull/Squat/Hinge) met vaste volgorde: Deload → Development → Maintenance → Stress.
         </div>
       </div>
 
@@ -189,10 +190,21 @@
   // ===== Canon =====
   const LS_KEY='unity2025_state';
   const NOTES_KEY='unity2025_notes';
-  const WEEK_TYPES=['Deload','Maintenance','Development','Stress'];
+  const WEEK_TYPES=['Deload','Maintenance','Development','Stress']; // voor niet-PS patronen
   const WEEK_PCT={Deload:.15,Maintenance:.22,Development:.28,Stress:.35};
+  // PS gebruikt vaste volgorde: Deload -> Development -> Maintenance -> Stress
+  const PS_FIXED_ORDER=['Deload','Development','Maintenance','Stress'];
   const SPLITS = { 3:[0.15,0.35,0.50], 4:[0.15,0.22,0.28,0.35], 5:[0.10,0.15,0.20,0.25,0.30] };
   const BALLISTICS = new Set(['Snatch','One-arm Swing','Two-arm Swing','High Pull','Double Clean']); // x2 weergave
+
+  // PS sessie-splits per weektype (absolute sessiepercentages binnen die week)
+  const PS_SESS_PCTS = {
+    Deload:      [0.15, 0.35, 0.50],               // 3 sessies
+    Development: [0.15, 0.22, 0.28, 0.35],         // 4 sessies
+    Maintenance: [0.15, 0.22, 0.28, 0.35],         // 4 sessies
+    Stress:      [0.10, 0.15, 0.20, 0.25, 0.30]    // 5 sessies
+  };
+  const PS_ALLOWED = new Set(['Push','Pull','Squat','Hinge']);
 
   // ===== Matrices =====
   const MATRIX_ADV = {
@@ -302,7 +314,7 @@
     rnd = makeRNG(cfg.seed||'');
     const matrix = (cfg.set==='basic') ? MATRIX_BASIC : MATRIX_ADV;
 
-    // Weekorders per patroon (start != vorige eind)
+    // Weekorders per patroon (start != vorige eind) — NIET voor PS-patroon (die is vast)
     const lastEnds = state.lastEnds || {};
     const weekOrders = {};
     for(const pat of Object.keys(matrix)){
@@ -311,9 +323,14 @@
       weekOrders[pat]=order;
     }
 
+    // PS: forceer vaste weekvolgorde
+    if(cfg.psPattern && PS_ALLOWED.has(cfg.psPattern)){
+      weekOrders[cfg.psPattern] = PS_FIXED_ORDER.slice();
+    }
+
     const weeks = Array.from({length:4}, ()=>({days:Array.from({length:5},()=>({entries:[],ps:null}))}));
 
-    // UNITY entries vullen (pct+bias)
+    // UNITY entries vullen (pct+bias) — PS-patroon wordt later overschreven op PS-dagen
     for(const [pat,def] of Object.entries(matrix)){
       for(let w=0; w<4; w++){
         const wt = weekOrders[pat][w];
@@ -335,7 +352,7 @@
       }
     }
 
-    // === Barbell per week: op laagste-% sessie van die week per gekozen patroon
+    // === Barbell per week: op laagste-% sessie (skip PS-patroon)
     const barCfg = {
       'Push': (cfg.barPush||'').trim(),
       'Squat': (cfg.barSquat||'').trim(),
@@ -344,6 +361,7 @@
     for(let w=0; w<4; w++){
       for(const [pat,barLift] of Object.entries(barCfg)){
         if(!barLift) continue;
+        if(cfg.psPattern && pat===cfg.psPattern) continue; // PS overrulet
         const pool=[];
         for(let d=0; d<5; d++){
           for(const e of weeks[w].days[d].entries){
@@ -357,32 +375,38 @@
       }
     }
 
-    // === Plan Strong overlay (vaste dagen 0/2/4)
-    if(cfg.psPattern){
-      const psPattern = cfg.psPattern;
+    // === Plan Strong overlay (vaste dagen 0/2/4; sessievolumes per weektype volgens PS_SESS_PCTS)
+    if(cfg.psPattern && PS_ALLOWED.has(cfg.psPattern)){
+      const psPat = cfg.psPattern;
       const psBlock = +cfg.psVolume;
+
       for(let w=0; w<4; w++){
-        const wt = weekOrders[psPattern][w];
-        const weekVol = Math.round(psBlock * (WEEK_PCT[wt]||0));
-        const basePS = [0.15,0.35,0.50];
-        let psSess = basePS.map(p=> Math.max(1, Math.round(weekVol*p)));
-        let diff = weekVol - psSess.reduce((a,b)=>a+b,0);
-        let j=psSess.length-1;
-        while(Math.abs(diff)>=1){
-          if(diff>0){ psSess[j]+=1; diff-=1; }
-          else { if(psSess[j]-1>=1){ psSess[j]-=1; diff+=1; } else { if(j>0){j--;continue;} break; } }
+        const wt = weekOrders[psPat][w]; // vaste volgorde
+        const weekVol = Math.round(psBlock * (WEEK_PCT[wt]||0)); // PS-weekvolume
+        const sessPcts = PS_SESS_PCTS[wt].slice();
+        const dayIdxs = (wt==='Deload') ? [0,2,4] : (wt==='Stress' ? [0,1,2,3,4] : [0,1,2,3]);
+
+        // Session volumes op basis van sessPcts
+        let sessVols = sessPcts.map(p => Math.max(0, Math.round(weekVol * p)));
+        // corrigeer som naar weekVol
+        let diff = weekVol - sessVols.reduce((a,b)=>a+b,0);
+        let ix = sessVols.length-1;
+        while(diff!==0){
+          if(diff>0){ sessVols[ix] += 1; diff -= 1; }
+          else { if(sessVols[ix]>0){ sessVols[ix] -= 1; diff += 1; } }
+          ix = (ix-1+sessVols.length)%sessVols.length;
         }
-        const dayIdxs = [0,2,4];
-        const LMH = ['Low','Medium','High'];
-        for(let i=0;i<3;i++){
+
+        // wis PS-patroon uit alle dagen die week
+        for(let d=0; d<5; d++){
+          weeks[w].days[d].entries = weeks[w].days[d].entries.filter(en => en.pattern !== psPat);
+        }
+
+        // plaats PS-sessies op dagindices; rest-dagen hebben geen PS
+        for(let i=0;i<dayIdxs.length;i++){
           const d = dayIdxs[i];
-          const day = weeks[w].days[d];
-          for(let dd=0; dd<5; dd++){
-            if(dd!==d){ weeks[w].days[dd].entries = weeks[w].days[dd].entries.filter(en => en.pattern !== psPattern); }
-          }
-          day.ps = day.ps || {};
-          day.ps[psPattern] = { level: LMH[i], weekType: wt, reps: psSess[i] };
-          day.entries = day.entries.filter(en => en.pattern !== psPattern);
+          weeks[w].days[d].ps = weeks[w].days[d].ps || {};
+          weeks[w].days[d].ps[psPat] = { weekType: wt, reps: sessVols[i] };
         }
       }
     }
@@ -457,7 +481,7 @@
           if(seen.has(nm)) continue;
           seen.add(nm);
 
-          // ---- PATCH: cap 10 op Light-bias main (−bell), tenzij barbell actief ----
+          // ---- KB-bias cap 10 op Light-bias main (−bell), tenzij barbell actief ----
           const isBall = BALLISTICS.has(nm);
           const uni = isUni(nm);
           const isMainLine = (nm===clean(mainName));
@@ -478,7 +502,7 @@
           if(isMainLine && state.cfg.bias==='on' && !barbellActive){
             labelHTML = (e.bias==='Heavy') ? badge('Heavy') : (e.bias==='Light') ? badge('Light') : '';
           }
-          // ---- EINDE PATCH ----
+          // ---- EINDE bias patch ----
 
           lineObjs.push({name:nm, repText, htmlLabel:labelHTML, isMain:isMainLine});
 
@@ -490,17 +514,52 @@
         }
       }
 
-      // 3) Plan Strong blok (tekstuele guidance)
-      let psBlockText = '';
-      if(day.ps){
-        for(const [pat,info] of Object.entries(day.ps)){
-          psBlockText += `Plan Strong — ${pat}: ${info.level}\n`;
-          const target = info.reps;
-          const perRound = Math.min(rc.cap, Math.ceil(target/rc.rounds));
-          const roundsTotal = perRound*rc.rounds;
-          const spare = Math.max(0, target - roundsTotal);
-          psBlockText += `${rc.rounds} rounds: ~${perRound} per round — totaal ca. ${roundsTotal}${spare?` (+${spare})`:''}\n\n`;
+      // === Plan Strong in het circuit (dynamisch per sessie; 50/35/15; rondeverdeling)
+      if (day.ps){
+        const matrixCur = (state.plan.set==='basic' ? MATRIX_BASIC : MATRIX_ADV);
+
+        function splitOverRounds(T, n){
+          const base = Math.floor(T/n);
+          let rem = T - base*n;
+          const arr = Array.from({length:n}, ()=>base);
+          for(let i=0;i<n && rem>0;i++){ arr[i]+=1; rem--; }
+          return arr;
         }
+
+        const injected=[];
+        for(const [pat,info] of Object.entries(day.ps)){
+          if(!PS_ALLOWED.has(pat)) continue; // alleen Push/Pull/Squat/Hinge
+          const mainPS = matrixCur[pat].main;
+          const T = Math.max(0, info.reps|0); // sessietotaal PS
+
+          // L/M/H 50/35/15 op sessievolume
+          let L = Math.round(T*0.50);
+          let M = Math.round(T*0.35);
+          let H = T - L - M;
+          if (H < 0) { let b=Math.min(M,-H); M-=b; H+=b; if(H<0){ b=Math.min(L,-H); L-=b; H+=b; } }
+
+          const Lr = splitOverRounds(L, rc.rounds);
+          const Mr = splitOverRounds(M, rc.rounds);
+          const Hr = splitOverRounds(H, rc.rounds);
+
+          const roundLabels=[];
+          for(let r=0;r<rc.rounds;r++){
+            const parts=[];
+            if(Lr[r]>0) parts.push(`L${Lr[r]}`);
+            if(Mr[r]>0) parts.push(`M${Mr[r]}`);
+            if(Hr[r]>0) parts.push(`H${Hr[r]}`);
+            roundLabels.push(parts.length? parts.join('/') : '—');
+          }
+          const detail = roundLabels.map((s,i)=>`R${i+1}:${s}`).join(' • ');
+
+          injected.push({
+            name:`PS — ${mainPS}`,
+            repText:`${rc.rounds} rounds`,
+            htmlLabel:` — ${detail}`,
+            isMain:true
+          });
+        }
+        if(injected.length){ lineObjs.unshift(...injected); }
       }
 
       // 4) EMOM
@@ -526,11 +585,11 @@
       // 6) Compose
       const parts = [];
       parts.push(esc(`Week ${w+1}, Dag ${d+1}`), '<br><br>');
-      if(psBlockText){ parts.push(esc(psBlockText).replace(/\n/g,'<br>'), '<br>'); }
       if(opener){ parts.push(esc(opener), '<br><br>'); }
       parts.push('<hr>');
       parts.push(esc(`${rc.rounds} rounds of following circuit:`), '<br>');
 
+      const chaos = state.cfg.chaos==='on';
       if(circuitObjs.length){
         if(chaos){
           parts.push('<div>');
@@ -644,7 +703,10 @@
   }
 
   function readCfg(){
-    const psPat = ($('#selPS').value||'') || null;
+    let psPat = ($('#selPS').value||'') || null;
+    const PS_ALLOWED = new Set(['Push','Pull','Squat','Hinge']);
+    if(psPat && !PS_ALLOWED.has(psPat)) psPat = null;
+
     const psVol = $('#selPSVol').value;
     return {
       set: $('#selSet').value,
