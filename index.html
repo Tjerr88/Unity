@@ -1,457 +1,705 @@
 <!DOCTYPE html>
 <html lang="nl" class="dark">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Unity 2025</title>
-<style>
-  :root{color-scheme:dark light}
-  *{box-sizing:border-box}
-  html,body{height:100%}
-  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;background:#0b1220;color:#e6eaf2;-webkit-font-smoothing:antialiased}
-  a{color:inherit}
-  .app{max-width:980px;margin:0 auto;padding:14px 12px 80px}
-  .muted{opacity:.72}
-  .tiny{font-size:12px;opacity:.78}
-  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
-  h1{margin:.2rem 0 0;font-size:clamp(22px,4.6vw,36px);line-height:1.1}
-  .row{display:flex;gap:10px;flex-wrap:wrap}
-  .card{background:linear-gradient(180deg,#101a30,#0c1527);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:14px}
-  .card h3{margin:0 0 10px;font-size:15px;letter-spacing:.2px}
-  .btn{background:#1a2a4a;border:1px solid rgba(255,255,255,.12);padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:600}
-  .btn:active{transform:translateY(1px)}
-  .btn.primary{background:#2b63ff;border-color:#2b63ff;color:#fff}
-  .btn.danger{background:#842029;border-color:#842029}
-  .btn.ghost{background:transparent;border-color:rgba(255,255,255,.18)}
-  .pill{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.12);padding:6px 10px;border-radius:999px;font-size:12px}
-  .badge{display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:999px;font-weight:700;font-size:12px;letter-spacing:.2px}
-  .badge.red{background:#4a0e14;color:#ffb3bd;border:1px solid #7e1821}
-  .badge.green{background:#103f1b;color:#b8f0c2;border:1px solid #1b6e2f}
-  .head{display:flex;align-items:center;gap:10px}
-  .spacer{flex:1}
-  .session{white-space:pre-wrap;background:#0e182c;border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:16px;line-height:1.6}
-  .list{display:grid;gap:8px}
-  .hr{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);margin:12px 0}
-  .kpi{display:flex;gap:10px;flex-wrap:wrap}
-  .grid{display:grid;gap:10px}
-  .grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
-  @media (max-width:760px){.grid.cols-2{grid-template-columns:1fr}}
-  .field{display:grid;gap:6px}
-  .field label{font-size:12px;opacity:.8}
-  select,input[type="text"]{background:#0d1830;border:1px solid rgba(255,255,255,.14);color:#e6eaf2;padding:10px 12px;border-radius:10px;outline:none;min-height:40px}
-  .footer{position:fixed;inset:auto 0 0 0;background:linear-gradient(180deg,rgba(11,18,32,.0),rgba(11,18,32,.95)),#0b1220;border-top:1px solid rgba(255,255,255,.08);padding:10px 12px;display:flex;gap:10px;align-items:center;justify-content:center}
-  .fab{position:fixed;right:12px;bottom:82px}
-  .toggle{display:flex;align-items:center;gap:8px}
-  .toggle input{accent-color:#2b63ff;transform:scale(1.1)}
-  /* collapsible */
-  #settings{transition:max-height .25s ease,opacity .25s ease;overflow:hidden}
-  #settings[data-open="0"]{max-height:0;opacity:0}
-  #settings[data-open="1"]{max-height:900px;opacity:1}
-  /* touch targets */
-  .btn,select,input{touch-action:manipulation}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Unity 2025</title>
+
+  <!--
+    Unity 2025 — Single-file HTML App
+    Layout: Sessie (boven) • Info (midden) • Instellingen (onder, inklapbaar - standaard dicht)
+    Alle logica inline; geen externe deps; geschikt voor GitHub Pages; offline werkend.
+  -->
+
+  <style>
+    /* ====== Base / Theme ====== */
+    :root { color-scheme: dark light; }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+      background: #0b1220; color: #e6eaf2;
+      -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+    }
+    a { color: inherit; }
+    .app { max-width: 1000px; margin: 0 auto; padding: 16px 12px 90px; }
+
+    .muted { opacity: .72; }
+    .tiny { font-size: 12px; opacity: .78; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+
+    h1 { margin: 2px 0 0; font-size: clamp(22px, 4.6vw, 36px); line-height: 1.1; letter-spacing: .2px; }
+    h2 { margin: 18px 0 6px; font-size: clamp(18px, 3vw, 22px); }
+    h3 { margin: 0 0 10px; font-size: 15px; letter-spacing: .2px; }
+
+    .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .spacer { flex: 1; }
+
+    .card {
+      background: linear-gradient(180deg, #101a30, #0c1527);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .btn {
+      background: #1a2a4a;
+      border: 1px solid rgba(255,255,255,.12);
+      padding: 10px 14px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      user-select: none;
+      min-height: 40px;
+      touch-action: manipulation;
+    }
+    .btn:hover { filter: brightness(1.06); }
+    .btn:active { transform: translateY(1px); }
+    .btn.primary { background: #2b63ff; border-color: #2b63ff; color: #fff; }
+    .btn.danger  { background: #842029; border-color: #842029; color: #fff; }
+    .btn.ghost   { background: transparent; border-color: rgba(255,255,255,.18); }
+
+    .pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      border: 1px solid rgba(255,255,255,.12); padding: 6px 10px;
+      border-radius: 999px; font-size: 12px;
+    }
+
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 999px; font-weight: 700; font-size: 12px; }
+    .badge.red   { background: #4a0e14; color: #ffb3bd; border: 1px solid #7e1821; }
+    .badge.green { background: #103f1b; color: #b8f0c2; border: 1px solid #1b6e2f; }
+
+    .session {
+      white-space: pre-wrap;
+      background: #0e182c;
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 16px;
+      padding: 16px;
+      line-height: 1.6;
+    }
+
+    .list { display: grid; gap: 8px; }
+    .hr { height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent); margin: 12px 0; }
+
+    .grid { display: grid; gap: 10px; }
+    .grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    @media (max-width: 760px) { .grid.cols-2 { grid-template-columns: 1fr; } }
+
+    .field { display: grid; gap: 6px; }
+    .field label { font-size: 12px; opacity: .8; }
+    select, input[type="text"] {
+      background: #0d1830; border: 1px solid rgba(255,255,255,.14); color: #e6eaf2;
+      padding: 10px 12px; border-radius: 10px; outline: none; min-height: 40px;
+    }
+    .toggle { display: flex; align-items: center; gap: 8px; }
+    .toggle input { accent-color: #2b63ff; transform: scale(1.1); }
+
+    /* Footer actions (mobiel) */
+    .footer {
+      position: fixed; inset: auto 0 0 0;
+      background: linear-gradient(180deg, rgba(11,18,32,.0), rgba(11,18,32,.95)), #0b1220;
+      border-top: 1px solid rgba(255,255,255,.08);
+      padding: 10px 12px; display: flex; gap: 10px; align-items: center; justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+
+    /* Inklapbaar instellingenpaneel onderaan (default dicht) */
+    #settings { transition: max-height .25s ease, opacity .25s ease; overflow: hidden; }
+    #settings[data-open="0"] { max-height: 0; opacity: 0; }
+    #settings[data-open="1"] { max-height: 1200px; opacity: 1; }
+
+    /* Touch focus visueel vriendelijk */
+    .btn, select, input { -webkit-tap-highlight-color: transparent; }
+  </style>
 </head>
 <body>
-<div class="app">
-  <div class="head" style="margin-bottom:6px">
-    <div>
-      <h1>Unity 2025</h1>
-      <div class="muted tiny">Periodiek circuitprogramma • 8 patronen • 100% client-side</div>
+  <div class="app">
+    <!-- Header -->
+    <div class="row" style="margin-bottom:6px">
+      <div>
+        <h1>Unity 2025</h1>
+        <div class="muted tiny">Periodiek circuitprogramma • 8 patronen • 100% client-side</div>
+      </div>
+      <div class="spacer"></div>
+      <button id="btnGenTop" class="btn primary">Nieuw blok genereren</button>
     </div>
-    <div class="spacer"></div>
-    <button id="btnGen" class="btn primary">Nieuw blok genereren</button>
-  </div>
 
-  <!-- Sessie bovenaan -->
-  <div id="sessionCard" class="card">
-    <div class="head" style="margin-bottom:8px">
-      <h3>Huidige sessie</h3>
-      <div class="row">
+    <!-- Sessie (bovenaan) -->
+    <div id="sessionCard" class="card">
+      <div class="row" style="margin-bottom:8px">
+        <h3>Huidige sessie</h3>
+        <div class="spacer"></div>
         <button id="btnPrev" class="btn ghost">◀ Vorige</button>
         <button id="btnComplete" class="btn primary">Complete ▶</button>
       </div>
+      <div id="sessionText" class="session mono">Nog geen blok. Open “Instellingen” onderaan en genereer een blok.</div>
     </div>
-    <div id="sessionText" class="session mono">Nog geen blok. Open “Instellingen” onderaan en genereer een blok.</div>
-  </div>
 
-  <!-- Info in het midden -->
-  <div id="info" class="card" style="margin-top:12px">
-    <h3>Blokinfo</h3>
-    <div id="kpi" class="kpi"></div>
-    <div class="hr"></div>
-    <div id="weekOrders" class="list tiny"></div>
-    <div class="hr"></div>
-    <div class="tiny muted">Weekpercentages: Deload 15% • Maintenance 22% • Development 28% • Stress 35%. Sessie-splits (bij 300): Deload 6/15/24 • Maintenance 9/15/18/24 • Development 12/18/24/30 • Stress 9/15/21/27/33.</div>
-  </div>
-
-  <!-- Instellingen ONDERAAN, inklapbaar -->
-  <div class="fab">
-    <button id="btnToggleSettings" class="btn">⚙️ Instellingen</button>
-  </div>
-  <div id="settings" class="card" data-open="0" style="margin-top:12px">
-    <div class="head" style="margin-bottom:8px">
-      <h3>Instellingen</h3>
-      <div class="spacer"></div>
-      <button id="btnCloseSettings" class="btn ghost">Sluit</button>
+    <!-- Info (midden) -->
+    <div id="info" class="card" style="margin-top:12px">
+      <h3>Blokinfo</h3>
+      <div id="kpi" class="row" style="flex-wrap:wrap; gap:10px"></div>
+      <div class="hr"></div>
+      <div id="weekOrders" class="list tiny"></div>
+      <div class="hr"></div>
+      <div class="tiny muted">
+        Weekpercentages: Deload 15% • Maintenance 22% • Development 28% • Stress 35%.<br/>
+        Sessiesplits (bij 300): Deload 6/15/24 • Maintenance 9/15/18/24 • Development 12/18/24/30 • Stress 9/15/21/27/33.
+      </div>
     </div>
-    <div class="grid cols-2">
-      <div class="field">
-        <label>Blokvolume</label>
-        <select id="selVolume">
-          <option value="180">180</option>
-          <option value="240">240</option>
-          <option value="300" selected>300</option>
-          <option value="400">400</option>
-          <option value="500">500</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Seed (optioneel)</label>
-        <input id="inpSeed" placeholder="bv. 12345" />
+
+    <!-- Instellingen (onderaan, inklapbaar) -->
+    <div class="row" style="margin-top:12px; justify-content:center">
+      <button id="btnToggleSettings" class="btn">⚙️ Instellingen</button>
+    </div>
+
+    <div id="settings" class="card" data-open="0" style="margin-top:10px">
+      <div class="row" style="margin-bottom:8px">
+        <h3>Instellingen</h3>
+        <div class="spacer"></div>
+        <button id="btnCloseSettings" class="btn ghost">Sluit</button>
       </div>
 
-      <div class="field">
-        <label>Plan Strong overlay</label>
-        <div class="toggle"><input type="checkbox" id="togPS"/><span>Plan Strong aan</span></div>
-        <div class="toggle"><input type="checkbox" id="togPSBarbell"/><span>Barbell op Low-dag</span></div>
-      </div>
-      <div class="field">
-        <label>PS-patroon (grind)</label>
-        <select id="selPSPattern">
-          <option value="">–</option>
-          <option>Push</option>
-          <option>Squat</option>
-          <option>Lunge</option>
-          <option>Rotation</option>
-        </select>
-      </div>
+      <div class="grid cols-2">
+        <div class="field">
+          <label>Blokvolume</label>
+          <select id="selVolume">
+            <option value="180">180</option>
+            <option value="240">240</option>
+            <option value="300" selected>300</option>
+            <option value="400">400</option>
+            <option value="500">500</option>
+          </select>
+        </div>
 
-      <div class="field">
-        <label>Bodyweight toggle (vervangt Acc3)</label>
-        <div class="toggle"><input type="checkbox" id="togBW"/><span>Bodyweight aan</span></div>
-      </div>
-      <div class="field">
-        <label>Advanced exercises toggle (hook)</label>
-        <div class="toggle"><input type="checkbox" id="togADV"/><span>Advanced hook aan</span></div>
-      </div>
-      <div class="field">
-        <label>KB variatie (Min=Heavy +1, Max=Light −1)</label>
-        <div class="toggle"><input type="checkbox" id="togBias" checked/><span>Variatie aan</span></div>
-      </div>
+        <div class="field">
+          <label>Seed (optioneel, reproduceerbare volgorde)</label>
+          <input id="inpSeed" placeholder="bv. 12345" />
+        </div>
 
-      <div class="field">
-        <label>Voortgang</label>
-        <div class="row">
-          <button id="btnReset" class="btn danger">Reset voortgang</button>
-          <span class="tiny muted">Opslag: <span class="mono">localStorage.unity2025</span></span>
+        <div class="field">
+          <label>Plan Strong overlay</label>
+          <div class="toggle"><input type="checkbox" id="togPS" /> <span>Plan Strong aan</span></div>
+          <div class="toggle"><input type="checkbox" id="togPSBarbell" /> <span>Barbell op Low-dag</span></div>
+        </div>
+
+        <div class="field">
+          <label>PS-patroon (grind)</label>
+          <select id="selPSPattern">
+            <option value="">–</option>
+            <option>Push</option>
+            <option>Squat</option>
+            <option>Lunge</option>
+            <option>Rotation</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Bodyweight toggle (vervangt Acc3)</label>
+          <div class="toggle"><input type="checkbox" id="togBW" /> <span>Bodyweight aan</span></div>
+        </div>
+
+        <div class="field">
+          <label>Advanced exercises toggle (hook)</label>
+          <div class="toggle"><input type="checkbox" id="togADV" /> <span>Advanced hook aan</span></div>
+        </div>
+
+        <div class="field">
+          <label>KB variatie (Min=Heavy +1, Max=Light −1)</label>
+          <div class="toggle"><input type="checkbox" id="togBias" checked /> <span>Variatie aan</span></div>
+        </div>
+
+        <div class="field">
+          <label>Voortgang</label>
+          <div class="row">
+            <button id="btnReset" class="btn danger">Reset voortgang</button>
+            <span class="tiny muted">Opslag: <span class="mono">localStorage.unity2025</span></span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Actie</label>
+          <button id="btnGenBottom" class="btn primary">Nieuw blok genereren</button>
         </div>
       </div>
-      <div class="field">
-        <label>Actie</label>
-        <button id="btnGen2" class="btn primary">Nieuw blok genereren</button>
-      </div>
     </div>
   </div>
-</div>
 
-<div class="footer">
-  <button id="btnSettingsBottom" class="btn">⚙️ Instellingen</button>
-  <button id="btnGenBottom" class="btn primary">Genereer</button>
-</div>
+  <!-- Vaste footer (mobiel acties snel bereikbaar) -->
+  <div class="footer">
+    <button id="btnSettingsFooter" class="btn">⚙️ Instellingen</button>
+    <button id="btnGenFooter" class="btn primary">Genereer</button>
+  </div>
 
-<script>
-(function(){
-  const LS_KEY='unity2025'; const VERSION='2025.10.06.u1';
-  const WEEK_TYPES=['Deload','Maintenance','Development','Stress'];
-  const WEEK_PCT={Deload:.15,Maintenance:.22,Development:.28,Stress:.35};
-  const BASE_SPLITS={ Deload:[6,15,24], Maintenance:[9,15,18,24], Development:[12,18,24,30], Stress:[9,15,21,27,33] };
+  <script>
+    (function(){
+      /* ==========================
+         Unity 2025 — App Logic
+         ========================== */
 
-  const PATTERNS=[
-    {key:'Push', main:'Military Press', acc:['Floor Press','Half-kneeling Press','Push Press','Top-down Press','Push Jerk'], body:['Push-up','Pike Push-up','Handstand Hold']},
-    {key:'Pull', main:'Double Clean', acc:['Bent-over Row (Double)','Renegade Row','Dead Clean → Row','One-arm High Pull'], body:['Inverted Row','Table Row']},
-    {key:'Squat', main:'Double Front Squat', acc:['Goblet Squat','Side Lunge / Cossack','Bulgarian Split Squat','Step-up/Pistol','Jump Squat'], body:['Air Squat','Split Squat','Step-up (BW)']},
-    {key:'Lunge', main:'Tactical Lunge', acc:['Athletic Lunge (Rev Lunge + Clean/Snatch)','Reverse Lunge','Forward Lunge','Step-back Lunge'], body:['Reverse Lunge (BW)','Split Squat (BW)']},
-    {key:'Hinge', main:'Two-arm Swing', acc:['Deadlift','B-stance Deadlift','One-arm Swing','Hand-to-hand Swing','Glute Bridge'], body:['Hip Hinge (BW)','Single-leg RDL (BW)']},
-    {key:'Rotation', main:'Turkish Get Up', acc:['Windmill','Bent Press','Half-kneeling Windmill'], body:['Russian Twist (BW)','Supine Get-up Sit-up']},
-    {key:'Anti-Rotation', main:'Snatch / Deadstop Swing', acc:['Snatch','Deadstop Swing','Front Rack Hold'], body:['Pallof Press (band)','Front Rack Hold (BW alt)']},
-    {key:'Loaded Carry', main:'Suitcase Carry', acc:['Rack Carry','Farmer Carry','Cross-body Carry'], body:['Suitcase Carry (light)']}
-  ];
-  const BALLISTICS=new Set(['Snatch','One-arm Swing','Two-arm Swing','Hand-to-hand Swing','Clean','Double Clean','High Pull','Push Jerk','Push Press','Deadstop Swing']);
-
-  const $=s=>document.querySelector(s);
-  const el={
-    sessionText:$('#sessionText'), kpi:$('#kpi'), weekOrders:$('#weekOrders'),
-    selVolume:$('#selVolume'), inpSeed:$('#inpSeed'),
-    togPS:$('#togPS'), selPSPattern:$('#selPSPattern'), togPSBarbell:$('#togPSBarbell'),
-    togBW:$('#togBW'), togADV:$('#togADV'), togBias:$('#togBias'),
-    btnGen:$('#btnGen'), btnGen2:$('#btnGen2'), btnGenBottom:$('#btnGenBottom'),
-    btnReset:$('#btnReset'), btnPrev:$('#btnPrev'), btnComplete:$('#btnComplete'),
-    settings:$('#settings'), btnToggleSettings:$('#btnToggleSettings'),
-    btnCloseSettings:$('#btnCloseSettings'), btnSettingsBottom:$('#btnSettingsBottom')
-  };
-
-  let state = loadState() || {};
-
-  // RNG
-  const rnd=makeRNG(); function makeRNG(){ let s=xmur3(String(Date.now()))(); function r(){s^=s<<13; s^=s>>>17; s^=s<<5; return (s>>>0)/4294967296} r.seed=t=>{s=xmur3(String(t))()}; return r }
-  function xmur3(str){ for(var i=0,h=1779033703^str.length;i<str.length;i++){h=Math.imul(h^str.charCodeAt(i),3432918353);h=h<<13|h>>>19} return function(){h=Math.imul(h^h>>>16,2246822507);h=Math.imul(h^h>>>13,3266489909);return (h^h>>>16)>>>0} }
-  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a }
-  function choice(a){ return a[Math.floor(rnd()*a.length)] }
-
-  // Storage
-  function saveState(){ localStorage.setItem(LS_KEY, JSON.stringify(state)) }
-  function loadState(){ try{ return JSON.parse(localStorage.getItem(LS_KEY)||'null') }catch(_){return null} }
-  function reset(){ localStorage.removeItem(LS_KEY); state={}; renderInfo(); renderSession(); }
-
-  // UI helpers
-  function openSettings(open){ el.settings.dataset.open=open?'1':'0' }
-
-  // Rounds & cap
-  function roundsAndCap(volume){
-    switch(+volume){
-      case 180: return {rounds:3, cap:3};
-      case 240: return {rounds:3, cap:4};
-      case 300: return {rounds:3, cap:5};
-      case 400: return {rounds:4, cap:5};
-      case 500: return {rounds:5, cap:5};
-      default:  return {rounds:3, cap:5};
-    }
-  }
-
-  // Scale to volume, round to multiples of cap; enforce Delta ≥20%
-  function scaleSplits(volume, weekType){
-    const {cap}=roundsAndCap(volume);
-    const mul=volume/300, base=BASE_SPLITS[weekType].map(v=>v*mul);
-    const unit=cap;
-    let splits=base.map(v=>Math.max(unit, Math.round(v/unit)*unit));
-    for(let i=1;i<splits.length;i++){
-      const prev=splits[i-1], cur=splits[i];
-      const minDelta=Math.round(prev*0.2/unit)*unit;
-      if(Math.abs(cur-prev) < Math.max(unit,minDelta)){
-        splits[i]=prev + (i%2?1:-1) * Math.max(unit,minDelta||unit);
-        if(splits[i]<unit) splits[i]=unit;
-      }
-    }
-    return splits;
-  }
-
-  function lastWeekTypes(){ return state.lastWeekTypes||{} }
-  function chooseWeekOrder(avoid){ const a=[...WEEK_TYPES]; shuffle(a); if(avoid&&a[0]===avoid){[a[0],a[1]]=[a[1],a[0]]} return a }
-
-  // Build plan
-  function buildBlock(cfg){
-    if(cfg.seed) rnd.seed(cfg.seed);
-    const rc=roundsAndCap(cfg.volume);
-    const patterns=PATTERNS.map(p=>({key:p.key, main:p.main, acc:[...p.acc], body:[...p.body]}));
-    // Anti-Rotation alternatie
-    const arI=patterns.findIndex(p=>p.key==='Anti-Rotation');
-    const useSnatch=(state.blockIdx||0)%2===0; patterns[arI].main=useSnatch?'Snatch':'Deadstop Swing';
-
-    const plan={weeks:[], meta:{}, rc};
-    plan.meta.weekOrders={};
-    for(const p of patterns){ plan.meta.weekOrders[p.key]=chooseWeekOrder(lastWeekTypes()[p.key]); }
-
-    const splitsByPatWeek={};
-    for(const p of patterns){ splitsByPatWeek[p.key]={}; for(const wt of WEEK_TYPES){ splitsByPatWeek[p.key][wt]=scaleSplits(cfg.volume, wt); } }
-
-    const weekLen=Math.max(...Object.values(BASE_SPLITS).map(a=>a.length));
-    for(let w=0;w<4;w++){
-      const week={index:w+1, days:[]};
-      for(let d=0;d<weekLen;d++){
-        const day={index:d+1, entries:[], carry:pickCarry(), weekTypes:{}, kbBiasTags:{}, ps:null};
-        for(const p of patterns){
-          const wt=plan.meta.weekOrders[p.key][w];
-          day.weekTypes[p.key]=wt;
-          const val=(splitsByPatWeek[p.key][wt][d]||0);
-          if(val>0) day.entries.push({pattern:p.key, volume:val, main:p.main, acc:[...p.acc], body:[...p.body]});
-        }
-        shuffle(day.entries);
-        week.days.push(day);
-      }
-      plan.weeks.push(week);
-    }
-
-    // KB bias
-    if(cfg.kbBias){
-      for(const week of plan.weeks){
-        const map={};
-        for(const day of week.days){ for(const e of day.entries){ (map[e.pattern]=map[e.pattern]||[]).push(e.volume); } }
-        const mm={}; for(const [k,arr] of Object.entries(map)){ mm[k]={min:Math.min(...arr), max:Math.max(...arr)} }
-        for(const day of week.days){
-          day.kbBiasTags={};
-          for(const e of day.entries){
-            const m=mm[e.pattern]; if(!m){day.kbBiasTags[e.pattern]='Medium'; continue;}
-            if(m.min===m.max) day.kbBiasTags[e.pattern]='Medium';
-            else if(e.volume===m.min) day.kbBiasTags[e.pattern]='Heavy';
-            else if(e.volume===m.max) day.kbBiasTags[e.pattern]='Light';
-            else day.kbBiasTags[e.pattern]='Medium';
-          }
-        }
-      }
-    }
-
-    // Plan Strong overlay
-    if(cfg.psOn && cfg.psPattern){
-      for(const week of plan.weeks){
-        const order=['Low','Medium','High'];
-        const idxs=spread3(week.days.length);
-        for(let i=0;i<week.days.length;i++){
-          const day=week.days[i];
-          day.entries=day.entries.filter(e=>e.pattern!==cfg.psPattern);
-          if(idxs.includes(i)){
-            day.ps={pattern:cfg.psPattern, level:order[idxs.indexOf(i)], barbell:(cfg.psBarbell && order[idxs.indexOf(i)]==='Low')};
-          }
-        }
-      }
-    }
-
-    plan.meta.endsWith={}; for(const p of patterns){ plan.meta.endsWith[p.key]=plan.meta.weekOrders[p.key][3]; }
-    return plan;
-  }
-
-  function spread3(n){ const a=Math.floor(n*.1), b=Math.floor(n*.5), c=Math.floor(n*.85); const s=new Set([Math.min(a,n-1),Math.min(b,n-1),Math.min(c,n-1)]); while(s.size<3){s.add(Math.floor(rnd()*n))} return [...s].sort((x,y)=>x-y) }
-  function pickCarry(){ const o=[{name:'Suitcase Carry',fmt:()=>rnd()<.5?`${30+Math.floor(rnd()*60)}s`:`${20+Math.floor(rnd()*40)}m`},{name:'Rack Carry',fmt:()=>`${30+Math.floor(rnd()*60)}s`},{name:'Farmer Carry',fmt:()=>`${30+Math.floor(rnd()*60)}s`}]; const c=choice(o); return `${c.fmt()} ${c.name}` }
-
-  function cleanName(n){return String(n).replace(/\s+/g,' ').trim()}
-  function isUnilateral(name){ const n=cleanName(name).toLowerCase(); if(n.includes('two-arm')||n.includes('double')||n.includes('front squat')||n.includes('deadlift')||n.includes('jump squat')) return false; if(n.includes('swing')&&n.includes('two-arm')) return false; if(n.includes('snatch')) return true; if(n.includes('press')&&n.includes('double')) return false; if(n.includes('row (double)')) return false; return true }
-  function badge(k){ if(k==='Heavy')return'[Heavy +1]'; if(k==='Light')return'[Light −1]'; return '' }
-  function decorate(name,bias){ const n=cleanName(name); if(n==='Push Press'||n==='Push Jerk'||n==='Double Push Press'||n==='Double Push Jerk'){bias='Heavy'}; if(bias==='Heavy')return `${n}  ${badge('Heavy')}`; if(bias==='Light')return `${n}  ${badge('Light')}`; return n }
-  function line(rep,name){ return `${rep} ${name}` }
-
-  function buildEMOM(cands){
-    const map=new Map(); for(const c of cands){ if(['Snatch','One-arm Swing','Two-arm Swing'].includes(c.name)) map.set(c.name,c); }
-    if(map.size<2) return '';
-    const order=['Snatch','One-arm Swing','Two-arm Swing']; const parts=[]; let first=true;
-    for(const n of order){
-      if(!map.has(n)) continue;
-      if(!first) parts.push('Then');
-      if(n==='Two-arm Swing') parts.push('EMOM:\n3 minutes of 10 Two-arm Swings (30 totaal = 3 min)');
-      else parts.push(`EMOM:\n6 minutes of 10 ${n==='Snatch'?'Snatches':'One-arm Swings'} (alternate side each minute)`);
-      first=false;
-    }
-    return parts.join('\n\n');
-  }
-
-  function renderDayText(plan, wIdx, dIdx, cfg){
-    const day=plan.weeks[wIdx].days[dIdx]; const {rounds,cap}=plan.rc;
-    // Get-Up opener — hybride regel
-    let openerText=''; let rot=day.entries.find(e=>e.pattern==='Rotation'); if(rot){
-      const vol=+state.config.volume; const small=(vol<=300);
-      const sets=small?3:rounds; if(sets>0){ openerText=`${sets} × (1+1) Get Up`; const openerUnity=sets*cap; rot.volume=Math.max(0, rot.volume - openerUnity); }
-    }
-
-    const lines=[]; const emom=[];
-    for(const entry of day.entries){
-      if(entry.pattern==='Loaded Carry') continue;
-      if(entry.pattern==='Rotation' && entry.volume<=0) continue;
-
-      const acc=[...entry.acc]; let acc3=acc[2]||null;
-      if(cfg.bodyweight){ acc3=(entry.body && entry.body[0])||acc3 }
-      else if(cfg.advanced){ acc3=(acc[2]||acc3) }
-      const ordered=[entry.main, acc[0]||null, acc[1]||null, acc3||null].filter(Boolean);
-
-      let remaining=entry.volume, used=0, ptr=1; const MAX_EX=3;
-      const add=(name,filler=false)=>{
-        let perRound=Math.min(cap, Math.ceil(remaining/rounds));
-        if(BALLISTICS.has(cleanName(name)) && cap>=10){ perRound=Math.min(cap,10) }
-        if(filler) perRound=Math.max(1, Math.min(perRound, cap));
-        const uni=isUnilateral(name); const rep=uni?`${perRound}+${perRound}`:`${perRound}`;
-        const label=filler?`${name} (filler)`:name;
-        lines.push(line(rep, decorate(label, day.kbBiasTags[entry.pattern])));
-        if(BALLISTICS.has(cleanName(name)) && perRound===10){ emom.push({name:cleanName(name), type:(cleanName(name)==='Two-arm Swing')?'bi':'uni'}) }
-        remaining-=perRound*rounds;
+      const LS_KEY   = 'unity2025';
+      const VERSION  = '2025.10.06.YESTERDAY-LAYOUT';
+      const WEEK_TYPES = ['Deload','Maintenance','Development','Stress'];
+      const WEEK_PCT   = { Deload:.15, Maintenance:.22, Development:.28, Stress:.35 };
+      const BASE_SPLITS = {
+        Deload: [6,15,24],
+        Maintenance: [9,15,18,24],
+        Development: [12,18,24,30],
+        Stress: [9,15,21,27,33]
       };
-      // main
-      add(ordered[0]); used++;
-      // acc
-      while(remaining>0 && used<MAX_EX){ add(ordered[ptr % ordered.length] || ordered[0]); used++; ptr++; }
-      // filler
-      const fillerName=ordered[Math.min(2, ordered.length-1)]||ordered[0];
-      let safety=24; while(remaining>0 && safety--){ add(fillerName,true) }
-    }
 
-    const circuit=shuffle(lines.slice());
-    const emomText=buildEMOM(emom);
-    const carryText=`[ ${day.carry} ]`;
+      const PATTERNS = [
+        {key:'Push', main:'Military Press', acc:['Floor Press','Half-kneeling Press','Push Press','Top-down Press','Push Jerk'], body:['Push-up','Pike Push-up','Handstand Hold']},
+        {key:'Pull', main:'Double Clean', acc:['Bent-over Row (Double)','Renegade Row','Dead Clean → Row','One-arm High Pull'], body:['Inverted Row','Table Row']},
+        {key:'Squat', main:'Double Front Squat', acc:['Goblet Squat','Side Lunge / Cossack','Bulgarian Split Squat','Step-up/Pistol','Jump Squat'], body:['Air Squat','Split Squat','Step-up (BW)']},
+        {key:'Lunge', main:'Tactical Lunge', acc:['Athletic Lunge (Rev Lunge + Clean/Snatch)','Reverse Lunge','Forward Lunge','Step-back Lunge'], body:['Reverse Lunge (BW)','Split Squat (BW)']},
+        {key:'Hinge', main:'Two-arm Swing', acc:['Deadlift','B-stance Deadlift','One-arm Swing','Hand-to-hand Swing','Glute Bridge'], body:['Hip Hinge (BW)','Single-leg RDL (BW)']},
+        {key:'Rotation', main:'Turkish Get Up', acc:['Windmill','Bent Press','Half-kneeling Windmill'], body:['Russian Twist (BW)','Supine Get-up Sit-up']},
+        {key:'Anti-Rotation', main:'Snatch / Deadstop Swing', acc:['Snatch','Deadstop Swing','Front Rack Hold'], body:['Pallof Press (band)','Front Rack Hold (BW alt)']},
+        {key:'Loaded Carry', main:'Suitcase Carry', acc:['Rack Carry','Farmer Carry','Cross-body Carry'], body:['Suitcase Carry (light)']}
+      ];
 
-    let out=''; if(openerText) out+=openerText+"\n\n";
-    out+='---\n';
-    out+=`${plan.rc.rounds} rounds of following circuit:\n`;
-    out+=circuit.join('\n')+'\n';
-    out+='---\n\n';
-    if(emomText){ out+=emomText+'\n---\n\n'; }
-    out+=carryText;
-    if(day.ps){ out+=`\n\nPS: ${day.ps.pattern} — ${day.ps.level}${day.ps.barbell?' (Barbell)':''}` }
-    return out.trim();
-  }
+      const BALLISTICS = new Set(['Snatch','One-arm Swing','Two-arm Swing','Hand-to-hand Swing','Clean','Double Clean','High Pull','Push Jerk','Push Press','Deadstop Swing']);
 
-  // Render
-  function renderInfo(){
-    const k=[]; if(state.plan){
-      k.push(`<span class="pill">Volume: <b>${state.config.volume}</b> • Rounds: <b>${state.plan.rc.rounds}</b> • Cap/round: <b>${state.plan.rc.cap}</b></span>`);
-      if(state.config.psOn && state.config.psPattern) k.push(`<span class="pill">PS: <b>${state.config.psPattern}</b>${state.config.psBarbell?' (Barbell Low)':''}</span>`);
-      if(state.config.bodyweight) k.push(`<span class="pill">Bodyweight Acc3</span>`);
-      if(state.config.advanced) k.push(`<span class="pill">Advanced hook</span>`);
-      if(state.config.kbBias) k.push(`<span class="pill">KB variatie actief</span>`);
-      k.push(`<span class="pill">Blok #${(state.blockIdx||1)}</span>`);
-    }
-    el.kpi.innerHTML=k.join('');
-    const wo=[]; if(state.plan){ for(const [pat,order] of Object.entries(state.plan.meta.weekOrders)){ wo.push(`<div>${pat}: <b>${order.join(' → ')}</b></div>`)} }
-    $('#weekOrders').innerHTML=wo.join('');
-  }
-  function renderSession(){
-    if(!state.plan){ el.sessionText.textContent='Nog geen blok. Open “Instellingen” onderaan en genereer een blok.'; return }
-    const idx=state.cursor||{w:0,d:0};
-    const text=renderDayText(state.plan, idx.w, idx.d, state.config);
-    el.sessionText.textContent=`Week ${idx.w+1}, Dag ${idx.d+1}\n\n${text}`;
-  }
+      // ---------- DOM ----------
+      const $ = (s) => document.querySelector(s);
+      const el = {
+        // session
+        sessionText: $('#sessionText'),
+        btnPrev: $('#btnPrev'),
+        btnComplete: $('#btnComplete'),
+        // info
+        kpi: $('#kpi'),
+        weekOrders: $('#weekOrders'),
+        // settings
+        settings: $('#settings'),
+        btnToggleSettings: $('#btnToggleSettings'),
+        btnCloseSettings: $('#btnCloseSettings'),
+        selVolume: $('#selVolume'), inpSeed: $('#inpSeed'),
+        togPS: $('#togPS'), selPSPattern: $('#selPSPattern'), togPSBarbell: $('#togPSBarbell'),
+        togBW: $('#togBW'), togADV: $('#togADV'), togBias: $('#togBias'),
+        btnReset: $('#btnReset'),
+        btnGenTop: $('#btnGenTop'), btnGenBottom: $('#btnGenBottom'), btnGenFooter: $('#btnGenFooter'),
+        btnSettingsFooter: $('#btnSettingsFooter')
+      };
 
-  // Nav
-  function advance(){
-    if(!state.plan) return;
-    const weeks=state.plan.weeks; let {w,d}=state.cursor||{w:0,d:0};
-    d++; if(d>=weeks[w].days.length){ w++; d=0 }
-    if(w>=weeks.length){
-      state.lastWeekTypes=state.plan.meta.endsWith; state.blockIdx=(state.blockIdx||1)+1; saveState();
-      alert('Blok afgerond. Genereer een nieuw blok met jouw voorkeuren. (Nieuw blok start per patroon niet met het vorige eind-weektype.)'); return;
-    }
-    state.cursor={w,d}; saveState(); renderSession();
-  }
-  function back(){
-    if(!state.plan) return;
-    let {w,d}=state.cursor||{w:0,d:0}; d--; if(d<0){ w--; if(w<0){w=0; d=0}else{d=state.plan.weeks[w].days.length-1} }
-    state.cursor={w,d}; saveState(); renderSession();
-  }
+      // ---------- State ----------
+      let state = loadState() || {};
 
-  // Config
-  function readCfg(){
-    return {
-      volume:+el.selVolume.value,
-      seed:(el.inpSeed.value||'').trim(),
-      psOn:el.togPS.checked,
-      psPattern:(el.selPSPattern.value||''),
-      psBarbell:el.togPSBarbell.checked,
-      bodyweight:el.togBW.checked,
-      advanced:el.togADV.checked,
-      kbBias:el.togBias.checked
-    }
-  }
-  function newBlock(){
-    const cfg=readCfg(); const plan=buildBlock(cfg);
-    state={version:VERSION, config:cfg, plan, cursor:{w:0,d:0}, lastWeekTypes:state.lastWeekTypes||{}, blockIdx:(state.blockIdx||1)};
-    saveState(); renderInfo(); renderSession();
-  }
+      // ---------- RNG ----------
+      const rnd = makeRNG();
+      function makeRNG(){ let s=xmur3(String(Date.now()))(); function r(){ s^=s<<13; s^=s>>>17; s^=s<<5; return (s>>>0)/4294967296 } r.seed = (t)=>{ s=xmur3(String(t))() }; return r; }
+      function xmur3(str){ for(var i=0,h=1779033703^str.length;i<str.length;i++){h=Math.imul(h^str.charCodeAt(i),3432918353);h=h<<13|h>>>19} return function(){h=Math.imul(h^h>>>16,2246822507);h=Math.imul(h^h>>>13,3266489909);return (h^h>>>16)>>>0} }
 
-  // Events
-  el.btnGen.onclick=newBlock; el.btnGen2.onclick=newBlock; el.btnGenBottom.onclick=newBlock;
-  el.btnPrev.onclick=back; el.btnComplete.onclick=advance; el.btnReset.onclick=()=>{ if(confirm('Weet je zeker dat je alle voortgang wilt wissen?')) reset() };
-  el.btnToggleSettings.onclick=()=>openSettings(true);
-  el.btnSettingsBottom.onclick=()=>openSettings(true);
-  el.btnCloseSettings.onclick=()=>openSettings(false);
+      // ---------- Storage ----------
+      function saveState(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+      function loadState(){ try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch(_) { return null; } }
+      function resetProgress(){ localStorage.removeItem(LS_KEY); state={}; renderInfo(); renderSession(); }
 
-  // Init
-  (function init(){ if(state&&state.plan){ renderInfo(); renderSession(); } })();
-})();
-</script>
+      // ---------- UI helpers ----------
+      function openSettings(open){ el.settings.dataset.open = open ? '1' : '0'; }
+      function pill(txt){ const span=document.createElement('span'); span.className='pill'; span.innerHTML=txt; return span; }
+
+      // ---------- Parameters ----------
+      function roundsAndCap(volume){
+        switch(+volume){
+          case 180: return {rounds:3, cap:3};
+          case 240: return {rounds:3, cap:4};
+          case 300: return {rounds:3, cap:5};
+          case 400: return {rounds:4, cap:5};
+          case 500: return {rounds:5, cap:5};
+          default:  return {rounds:3, cap:5};
+        }
+      }
+
+      // Scale base splits to target volume, round to multiples of cap, and keep Δ≥20% between successive sessions
+      function scaleSplits(volume, weekType){
+        const {cap} = roundsAndCap(volume);
+        const mul  = volume/300;
+        const base = BASE_SPLITS[weekType].map(v => v*mul);
+        const unit = cap;
+        let splits = base.map(v => Math.max(unit, Math.round(v/unit)*unit));
+        for(let i=1;i<splits.length;i++){
+          const prev = splits[i-1], cur = splits[i];
+          const minDelta = Math.round(prev*0.2/unit)*unit;
+          if(Math.abs(cur-prev) < Math.max(unit, minDelta)){
+            splits[i] = prev + (i%2 ? 1 : -1) * Math.max(unit, minDelta||unit);
+            if(splits[i] < unit) splits[i] = unit;
+          }
+        }
+        return splits;
+      }
+
+      function choice(arr){ return arr[Math.floor(rnd()*arr.length)] }
+      function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a }
+
+      function lastWeekTypes(){ return state.lastWeekTypes || {}; }
+      function chooseWeekOrder(avoid){
+        const a = [...WEEK_TYPES]; shuffle(a);
+        if(avoid && a[0]===avoid){ [a[0],a[1]] = [a[1],a[0]]; }
+        return a;
+      }
+
+      // ---------- Plan generation ----------
+      function buildBlock(cfg){
+        if(cfg.seed) rnd.seed(cfg.seed);
+        const rc = roundsAndCap(cfg.volume);
+
+        const patterns = PATTERNS.map(p => ({key:p.key, main:p.main, acc:[...p.acc], body:[...p.body]}));
+        // Anti-Rotation alterneert per blok (Snatch / Deadstop Swing)
+        const arIndex = patterns.findIndex(p=>p.key==='Anti-Rotation');
+        const useSnatch = (state.blockIdx||0)%2===0;
+        patterns[arIndex].main = useSnatch ? 'Snatch' : 'Deadstop Swing';
+
+        const plan = { weeks:[], meta:{}, rc };
+        plan.meta.weekOrders = {};
+
+        // Weekvolgorde per patroon (met "nieuw blok ≠ eind-weektype vorige blok")
+        for(const p of patterns){
+          plan.meta.weekOrders[p.key] = chooseWeekOrder(lastWeekTypes()[p.key]);
+        }
+
+        // Vooraf sessiesplits per weektype
+        const splitsByPatWeek = {};
+        for(const p of patterns){
+          splitsByPatWeek[p.key] = {};
+          for(const wt of WEEK_TYPES){
+            splitsByPatWeek[p.key][wt] = scaleSplits(cfg.volume, wt);
+          }
+        }
+
+        const weekLen = Math.max(...Object.values(BASE_SPLITS).map(a=>a.length)); // 5
+
+        // Bouw 4 weken × weekLen dagen
+        for(let w=0; w<4; w++){
+          const week = { index:w+1, days:[] };
+          for(let d=0; d<weekLen; d++){
+            const day = { index:d+1, entries:[], carry:pickCarry(), weekTypes:{}, kbBiasTags:{}, ps:null };
+            for(const p of patterns){
+              const wt = plan.meta.weekOrders[p.key][w];
+              day.weekTypes[p.key] = wt;
+              const val = (splitsByPatWeek[p.key][wt][d]||0);
+              if(val>0){
+                day.entries.push({pattern:p.key, volume:val, main:p.main, acc:[...p.acc], body:[...p.body]});
+              }
+            }
+            shuffle(day.entries);
+            week.days.push(day);
+          }
+          plan.weeks.push(week);
+        }
+
+        // KB-bias (min=Heavy +1, max=Light −1; gelijk=Medium)
+        if(cfg.kbBias){
+          for(const week of plan.weeks){
+            const map = {};
+            for(const day of week.days){
+              for(const e of day.entries){
+                (map[e.pattern] = map[e.pattern] || []).push(e.volume);
+              }
+            }
+            const mm = {}; for(const [k,arr] of Object.entries(map)){ mm[k] = {min:Math.min(...arr), max:Math.max(...arr)}; }
+            for(const day of week.days){
+              day.kbBiasTags = {};
+              for(const e of day.entries){
+                const m = mm[e.pattern];
+                if(!m){ day.kbBiasTags[e.pattern]='Medium'; continue; }
+                if(m.min===m.max)               day.kbBiasTags[e.pattern]='Medium';
+                else if(e.volume===m.min)       day.kbBiasTags[e.pattern]='Heavy';
+                else if(e.volume===m.max)       day.kbBiasTags[e.pattern]='Light';
+                else                             day.kbBiasTags[e.pattern]='Medium';
+              }
+            }
+          }
+        }
+
+        // Plan Strong overlay: 3×/week L→M→H; Low = barbell indien toggle aan; PS-lift valt uit Unity op niet-PS-dagen
+        if(cfg.psOn && cfg.psPattern){
+          for(const week of plan.weeks){
+            const order = ['Low','Medium','High'];
+            const idxs  = spread3(week.days.length);
+            for(let i=0;i<week.days.length;i++){
+              const day = week.days[i];
+              // PS-lift verdwijnt uit Unity op alle dagen
+              day.entries = day.entries.filter(e => e.pattern !== cfg.psPattern);
+              // Zet PS-sessie op 3 gekozen dagen
+              if(idxs.includes(i)){
+                day.ps = { pattern: cfg.psPattern, level: order[idxs.indexOf(i)], barbell: (cfg.psBarbell && order[idxs.indexOf(i)]==='Low') };
+              }
+            }
+          }
+        }
+
+        // Sla eind-weektypes op voor “nieuw blok ≠ eind-weektype vorige blok”
+        plan.meta.endsWith = {};
+        for(const p of patterns){ plan.meta.endsWith[p.key] = plan.meta.weekOrders[p.key][3]; }
+
+        return plan;
+      }
+
+      function spread3(n){
+        const a=Math.floor(n*.1), b=Math.floor(n*.5), c=Math.floor(n*.85);
+        const s=new Set([Math.min(a,n-1), Math.min(b,n-1), Math.min(c,n-1)]);
+        while(s.size<3){ s.add(Math.floor(rnd()*n)) }
+        return [...s].sort((x,y)=>x-y);
+      }
+
+      function pickCarry(){
+        const opts = [
+          {name:'Suitcase Carry', fmt:()=>rnd()<.5? `${30+Math.floor(rnd()*60)}s` : `${20+Math.floor(rnd()*40)}m`},
+          {name:'Rack Carry',     fmt:()=>`${30+Math.floor(rnd()*60)}s`},
+          {name:'Farmer Carry',   fmt:()=>`${30+Math.floor(rnd()*60)}s`}
+        ];
+        const c = choice(opts);
+        return `${c.fmt()} ${c.name}`;
+      }
+
+      // ---------- Rendering one day ----------
+      function renderDayText(plan, wIdx, dIdx, cfg){
+        const day = plan.weeks[wIdx].days[dIdx];
+        const {rounds, cap} = plan.rc;
+
+        // 1) Opener: Get Up — Hybride regel
+        // ≤300: 3 × (1+1) (opener = 3×cap Unity) • 400: 4× • 500: 5×; rest van Rotation naar accessories
+        let openerText = '';
+        let rotEntry = day.entries.find(e => e.pattern==='Rotation');
+        if(rotEntry){
+          const vol = +state.config.volume;
+          const sets = (vol <= 300) ? 3 : rounds; // 3 bij 180/240/300; 4/5 bij 400/500
+          if(sets > 0){
+            openerText = `${sets} × (1+1) Get Up`;
+            const openerUnity = sets * cap; // cap per set
+            rotEntry.volume = Math.max(0, rotEntry.volume - openerUnity);
+          }
+        }
+
+        // 2) Circuit: consume alle pattern-volumes
+        const lines = [];
+        const emomCandidates = [];
+
+        for(const entry of day.entries){
+          if(entry.pattern==='Loaded Carry') continue;
+          if(entry.pattern==='Rotation' && entry.volume<=0) continue;
+
+          // Acc3-keuze: BW > Advanced hook
+          const acc = [...entry.acc];
+          let acc3 = acc[2] || null;
+          if(cfg.bodyweight){ acc3 = (entry.body && entry.body[0]) || acc3; }
+          else if(cfg.advanced){ acc3 = (acc[2] || acc3); }
+
+          const ordered = [entry.main, acc[0]||null, acc[1]||null, acc3||null].filter(Boolean);
+
+          // volledige consumptie: main → acc1 → acc2/3 (rotatie) → filler
+          let remaining = entry.volume;
+          let used = 0, ptr = 1;
+          const MAX_EX = 3;
+
+          const addExercise = (name, isFiller=false) => {
+            let perRound = Math.min(cap, Math.ceil(remaining/rounds));
+            if(BALLISTICS.has(cleanName(name)) && cap>=10) perRound = Math.min(cap, 10);
+            if(isFiller) perRound = Math.max(1, Math.min(perRound, cap));
+            const uni = isUnilateral(name);
+            const repText = uni ? `${perRound}+${perRound}` : `${perRound}`;
+            const label = isFiller ? `${name} (filler)` : name;
+            lines.push(`${repText} ${decorateName(label, day.kbBiasTags[entry.pattern])}`);
+            if(BALLISTICS.has(cleanName(name)) && perRound===10){
+              const t = (cleanName(name)==='Two-arm Swing') ? 'bi':'uni';
+              emomCandidates.push({name: cleanName(name), type: t});
+            }
+            remaining -= perRound * rounds;
+          };
+
+          // main
+          addExercise(ordered[0]); used++;
+
+          // accessoires
+          while(remaining > 0 && used < MAX_EX){
+            const nextName = ordered[ptr % ordered.length] || ordered[0];
+            ptr++; used++;
+            addExercise(nextName);
+          }
+
+          // filler tot remaining op is
+          const fillerName = ordered[Math.min(2, ordered.length-1)] || ordered[0];
+          let safety = 24;
+          while(remaining > 0 && safety--){
+            addExercise(fillerName, true);
+          }
+        }
+
+        // randomize circuit volgorde
+        const circuitLines = shuffle(lines.slice());
+
+        // 3) EMOM-blok (alleen als ≥2 van Snatch/One-arm Swing/Two-arm Swing op 10/ronde)
+        const emomBlock = buildEMOM(emomCandidates);
+
+        // 4) Carry finisher
+        const carryText = `[ ${day.carry} ]`;
+
+        // Compose sessie
+        let out = '';
+        if(openerText){ out += openerText + "\n\n"; }
+        out += '---\n';
+        out += `${plan.rc.rounds} rounds of following circuit:\n`;
+        out += circuitLines.join('\n') + '\n';
+        out += '---\n\n';
+        if(emomBlock){ out += emomBlock + '\n---\n\n'; }
+        out += carryText;
+
+        // PS label tonen
+        if(day.ps){ out += `\n\nPS: ${day.ps.pattern} — ${day.ps.level}${day.ps.barbell?' (Barbell)':''}`; }
+
+        return out.trim();
+      }
+
+      function cleanName(n){ return String(n).replace(/\s+/g,' ').trim(); }
+      function isUnilateral(name){
+        const n = cleanName(name).toLowerCase();
+        if(n.includes('two-arm')||n.includes('double')||n.includes('front squat')||n.includes('deadlift')||n.includes('jump squat')) return false;
+        if(n.includes('swing') && n.includes('two-arm')) return false;
+        if(n.includes('snatch')) return true;
+        if(n.includes('press') && n.includes('double')) return false;
+        if(n.includes('row (double)')) return false;
+        return true;
+      }
+      function badge(kind){ if(kind==='Heavy') return '[Heavy +1]'; if(kind==='Light') return '[Light −1]'; return ''; }
+      function decorateName(name, bias){
+        const n = cleanName(name);
+        // Double Push Press / Jerk altijd overload
+        if(n==='Push Press'||n==='Push Jerk'||n==='Double Push Press'||n==='Double Push Jerk'){ bias='Heavy'; }
+        if(bias==='Heavy') return `${n}  ${badge('Heavy')}`;
+        if(bias==='Light') return `${n}  ${badge('Light')}`;
+        return n;
+      }
+
+      function buildEMOM(cands){
+        const map = new Map();
+        for(const c of cands){ if(['Snatch','One-arm Swing','Two-arm Swing'].includes(c.name)) map.set(c.name,c); }
+        if(map.size < 2) return '';
+        const order = ['Snatch','One-arm Swing','Two-arm Swing'];
+        const parts = [];
+        let first = true;
+        for(const name of order){
+          if(!map.has(name)) continue;
+          if(!first) parts.push('Then');
+          if(name==='Two-arm Swing'){
+            parts.push('EMOM:\n3 minutes of 10 Two-arm Swings (30 totaal = 3 min)');
+          } else {
+            const ex = name==='Snatch' ? 'Snatches' : 'One-arm Swings';
+            parts.push(`EMOM:\n6 minutes of 10 ${ex} (alternate side each minute)`);
+          }
+          first = false;
+        }
+        return parts.join('\n\n');
+      }
+
+      // ---------- Rendering wrappers ----------
+      function renderInfo(){
+        const s = state;
+        const chips = [];
+        if(s.plan){
+          chips.push(pill(`Volume: <b>${s.config.volume}</b> • Rounds: <b>${s.plan.rc.rounds}</b> • Cap/round: <b>${s.plan.rc.cap}</b>`).outerHTML);
+          if(s.config.psOn && s.config.psPattern) chips.push(pill(`PS: <b>${s.config.psPattern}</b>${s.config.psBarbell?' (Barbell Low)':''}`).outerHTML);
+          if(s.config.bodyweight) chips.push(pill('Bodyweight Acc3').outerHTML);
+          if(s.config.advanced)   chips.push(pill('Advanced hook').outerHTML);
+          if(s.config.kbBias)     chips.push(pill('KB variatie actief').outerHTML);
+          chips.push(pill(`Blok #${(s.blockIdx||1)}`).outerHTML);
+        }
+        el.kpi.innerHTML = chips.join('');
+
+        const wo = [];
+        if(s.plan){
+          for(const [pat,order] of Object.entries(s.plan.meta.weekOrders)){
+            wo.push(`<div>${pat}: <b>${order.join(' → ')}</b></div>`);
+          }
+        }
+        el.weekOrders.innerHTML = wo.join('');
+      }
+
+      function renderSession(){
+        if(!state.plan){
+          el.sessionText.textContent = 'Nog geen blok. Open “Instellingen” onderaan en genereer een blok.';
+          return;
+        }
+        const idx = state.cursor || {w:0,d:0};
+        const text = renderDayText(state.plan, idx.w, idx.d, state.config);
+        el.sessionText.textContent = `Week ${idx.w+1}, Dag ${idx.d+1}\n\n${text}`;
+      }
+
+      // ---------- Navigation ----------
+      function advance(){
+        if(!state.plan) return;
+        const weeks = state.plan.weeks;
+        let {w,d} = state.cursor || {w:0,d:0};
+        d++;
+        if(d >= weeks[w].days.length){ w++; d = 0; }
+        if(w >= weeks.length){
+          state.lastWeekTypes = state.plan.meta.endsWith;
+          state.blockIdx = (state.blockIdx||1) + 1;
+          saveState();
+          alert('Blok afgerond. Genereer een nieuw blok met jouw voorkeuren. (Nieuw blok start per patroon niet met het vorige eind-weektype.)');
+          return;
+        }
+        state.cursor = {w,d};
+        saveState(); renderSession();
+      }
+      function back(){
+        if(!state.plan) return;
+        let {w,d} = state.cursor || {w:0,d:0};
+        d--;
+        if(d<0){ w--; if(w<0){ w=0; d=0; } else { d = state.plan.weeks[w].days.length-1; } }
+        state.cursor = {w,d}; saveState(); renderSession();
+      }
+
+      // ---------- Build / Config ----------
+      function readConfig(){
+        return {
+          volume: +el.selVolume.value,
+          seed: (el.inpSeed.value||'').trim(),
+          psOn: el.togPS.checked,
+          psPattern: (el.selPSPattern.value||''),
+          psBarbell: el.togPSBarbell.checked,
+          bodyweight: el.togBW.checked,
+          advanced: el.togADV.checked,
+          kbBias: el.togBias.checked
+        };
+      }
+      function newBlock(){
+        const cfg = readConfig();
+        const plan = buildBlock(cfg);
+        state = {
+          version: VERSION,
+          config: cfg,
+          plan,
+          cursor: {w:0,d:0},
+          lastWeekTypes: state.lastWeekTypes || {},
+          blockIdx: (state.blockIdx || 1)
+        };
+        saveState();
+        renderInfo();
+        renderSession();
+      }
+
+      // ---------- Events ----------
+      $('#btnGenTop').onclick = newBlock;
+      $('#btnGenBottom').onclick = newBlock;
+      $('#btnGenFooter').onclick = newBlock;
+
+      el.btnPrev.onclick = back;
+      el.btnComplete.onclick = advance;
+
+      el.btnReset.onclick = ()=>{ if(confirm('Weet je zeker dat je alle voortgang wilt wissen?')) resetProgress(); };
+
+      el.btnToggleSettings.onclick = ()=> openSettings(true);
+      el.btnCloseSettings .onclick = ()=> openSettings(false);
+      el.btnSettingsFooter.onclick = ()=> openSettings(true);
+
+      // ---------- Init ----------
+      (function init(){
+        if(state && state.plan){ renderInfo(); renderSession(); }
+      })();
+    })();
+  </script>
 </body>
 </html>
