@@ -3,13 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Unity 2025</title>
-<!-- Unity 2025 — FULL BUILD (no-custom) f4h_fix3.1 — 2025-10-29
-     - Verwijderd: 'Eigen oefeningen' (custom overrides + UI)
-     - Behouden: KB-bias (▲/▼ + cap-boost naar 10 bij Light), opener (2+2 bij Light-bias),
-                 EMOM-injectie (Swings/Snatch), Plan Strong overlay (M→H→L / H+SH),
-                 counters per dag, localStorage, 'on/off'-sanitizers
--->
+<title>Unity 2025 — Go-time Edition</title>
 <style>
   :root{color-scheme:dark}
   *{box-sizing:border-box}
@@ -17,10 +11,9 @@
   .app{max-width:980px;margin:0 auto;padding:16px 12px 84px}
   h1{margin:0 0 .6rem;font-size:28px}
   h2{margin:0;font-size:18px}
-  .btn{background:#2b63ff;border:0;color:#fff;padding:12px 14px;border-radius:12px;cursor:pointer;font-weight:800;transition:transform .06s ease,filter .15s ease;-webkit-tap-highlight-color:transparent}
+  .btn{background:#2b63ff;border:0;color:#fff;padding:12px 14px;border-radius:12px;cursor:pointer;font-weight:800;transition:transform .06s ease}
   .btn.ghost{background:#1a2a4a}
-  .btn.inline{padding:10px 12px;border-radius:10px}
-  .btn:active{transform:translateY(1px)}
+  .btn.inline{padding:8px 10px;border-radius:10px}
   .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .row.stack>*.btn{flex:1}
   .card{background:#101a30;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px;margin:10px 0}
@@ -35,26 +28,42 @@
   select,input[type="text"]{width:100%;background:#0d1830;border:1px solid rgba(255,255,255,.18);color:#e6eaf2;padding:10px;border-radius:10px}
   .grid{display:grid;gap:10px}
   .cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
-  @media (max-width:760px){.cols-2{grid-template-columns:1fr}.row.stack{display:grid;gap:8px}.btn{padding:14px 16px;border-radius:14px}}
+  @media (max-width:760px){
+    .cols-2{grid-template-columns:1fr}
+    .row.stack{display:grid;grid-template-columns:1fr;gap:8px}
+    .btn{padding:14px 16px;border-radius:14px}
+  }
   .muted{opacity:.75;font-size:12px}
-  .toast{position:fixed;inset:auto 12px 12px auto;background:#0f1a34;border:1px solid rgba(255,255,255,.15);padding:10px 12px;border-radius:12px;font-size:13px}
-  .diag{position:fixed;left:12px;bottom:12px;background:#0f1a34;border:1px solid rgba(255,255,255,.2);padding:8px 10px;border-radius:10px;font:12px/1.4 ui-monospace,monospace;max-width:44ch;max-height:30vh;overflow:auto;display:none}
-  .diag b{color:#b8f0c2}
-  .badge{display:inline-block;font-weight:800;font-size:12px;padding:3px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.25);margin-left:6px;background:#0f1a34;color:#e6eaf2}
+  .toast{position:fixed;right:12px;bottom:12px;background:#0f1a34;border:1px solid rgba(255,255,255,.15);padding:10px 12px;border-radius:12px;font-size:13px;display:none}
+  .badge{display:inline-block;font-weight:800;font-size:12px;padding:3px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.25);margin-left:6px;background:#0f1a34}
+  /* Tabs */
+  .tabs{display:flex;gap:8px;margin:10px 0 6px}
+  .tab-btn{background:#0f1a34;border:1px solid rgba(255,255,255,.15);color:#e6eaf2;padding:10px 12px;border-radius:12px;font-weight:800;cursor:pointer}
+  .tab-btn.active{background:#2b63ff;border-color:#2b63ff}
+  .tab-pane{display:none}
+  .tab-pane.active{display:block}
+  /* Counters & lines */
   .counter{display:inline-flex;align-items:center;gap:8px;margin-left:12px;flex:0 0 auto}
   .counter .cbtn{background:#0f1a34;border:1px solid rgba(255,255,255,.2);color:#e6eaf2;border-radius:10px;padding:4px 10px;font-weight:800;cursor:pointer}
   .counter .cval{min-width:64px;text-align:center;font-weight:900}
   .session .line{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap}
   .session .line .txt{flex:1;min-width:0;white-space:normal}
+  .row-inline{display:flex;gap:8px;align-items:center}
+  .row-inline input[type="text"]{flex:1}
+  .chk{display:inline-flex;gap:6px;align-items:center;font-size:12px;opacity:.9}
 </style>
 </head>
 <body>
 <div class="app">
-
   <h1>Unity 2025</h1>
 
-  <div id="tab-plan" class="tab-pane active">
+  <div class="tabs" role="tablist" aria-label="Navigatie">
+    <button class="tab-btn active" data-tab="plan" aria-selected="true">Planner</button>
+    <button class="tab-btn" data-tab="custom" aria-selected="false">Eigen oefeningen</button>
+  </div>
 
+  <!-- Planner -->
+  <div id="tab-plan" class="tab-pane active">
     <div class="row stack" style="margin:8px 0 12px">
       <button id="btnPrevTop" class="btn ghost" aria-label="Vorige sessie">◀ Vorige</button>
       <button id="btnNextTop" class="btn" aria-label="Volgende sessie">Volgende ▶</button>
@@ -81,15 +90,6 @@
             <label>Seed (optioneel)</label>
             <input id="inpSeed" placeholder="bv. 12345">
           </div>
-
-          <div>
-            <label>Oefeningsset</label>
-            <select id="selSet">
-              <option value="advanced" selected>Advanced</option>
-              <option value="basic">Basis (geen double bells / snatch / bent press / jerk)</option>
-            </select>
-          </div>
-
           <div>
             <label>KB-bias (alleen mains; op basis van week-split)</label>
             <select id="selBias">
@@ -97,7 +97,6 @@
               <option value="off">Uit</option>
             </select>
           </div>
-
           <div>
             <label>Plan Strong overlay (1 grind-patroon)</label>
             <select id="selPS">
@@ -118,14 +117,6 @@
               <span>Advanced: High + Super Heavy</span>
             </label>
           </div>
-
-          <div>
-            <label>Chaos mode (notities/accordeon per oefening)</label>
-            <select id="selChaos">
-              <option value="off" selected>Uit</option>
-              <option value="on">Aan</option>
-            </select>
-          </div>
         </div>
 
         <div class="card" style="margin-top:12px">
@@ -134,10 +125,8 @@
           <div class="muted" style="margin-top:6px">
             Weekpercentages: Deload 15% • Maintenance 22% • Development 28% • Stress 35%.<br>
             Splits per partitie: 3 → [15,35,50]% • 4 → [15,22,28,35]% • 5 → [10,15,20,25,30]%.<br>
-            Bias (alleen mains): Deload min%=Heavy ▲, max%=Light ▼ • Maint/Dev min%=Heavy ▲, max%=Light ▼ • Stress min%=Heavy ▲, max%=Light ▼.<br>
-            Light-bias main: cap-boost tot 10 per ronde (geen PS).<br>
-            Plan Strong: 3×/week <b>M→H→L</b> (Advanced = <b>H+SH</b>); volgorde weken vast: Deload → Development → Maintenance → Stress.<br>
-            Anti-Rotation main: default Snatch.
+            Bias (alleen mains): min%=Heavy ▲, max%=Light ▼. Light-bias main: cap-boost tot 10 per ronde (geen PS).<br>
+            Anti-Rotation main: Snatch (default), maar override via eigen oefeningen is toegestaan.
           </div>
         </div>
 
@@ -148,497 +137,452 @@
         </div>
       </div>
     </details>
+  </div>
 
-  </div> <!-- einde tab-plan -->
-
+  <!-- Custom -->
+  <div id="tab-custom" class="tab-pane">
+    <div class="card">
+      <h2>Eigen oefeningen</h2>
+      <p class="muted">Per patroon: vul <b>1 (Main)</b> en 2–4 (accessoires) in. Zet <b>Ballistic (x2)</b> voor swings/snatches e.d. en <b>Unilateral (+/+)</b> voor uni-oefeningen (weergave x+x). Leeg = Unity-standaard.</p>
+      <div id="customForm" class="grid cols-2" style="margin-top:8px"></div>
+      <div class="row stack" style="margin-top:8px">
+        <button id="btnSaveCustom" class="btn">Opslaan</button>
+        <button id="btnClearCustom" class="btn ghost">Leegmaken</button>
+        <span class="muted">Na opslaan: de Planner wordt direct herbouwd.</span>
+      </div>
+    </div>
+  </div>
 </div>
 
-<div id="toast" class="toast" style="display:none" aria-live="polite"></div>
-<div id="diag" class="diag"></div>
+<div id="toast" class="toast" aria-live="polite"></div>
 
 <script>
 (function(){
-"use strict";
+  const LS_KEY='unity2025_state';
+  const COUNTERS_KEY='unity2025_counters';
+  const CUSTOM_KEY='unity2025_custom_matrix_v5';
+  const PATTERNS=['Push','Pull','Squat','Lunge','Hinge','Rotation','Anti-Rotation','Loaded Carry'];
+  const WEEK_TYPES=['Deload','Maintenance','Development','Stress'];
+  const WEEK_PCT={Deload:.15,Maintenance:.22,Development:.28,Stress:.35};
+  const SPLITS={3:[0.15,0.35,0.50],4:[0.15,0.22,0.28,0.35],5:[0.10,0.15,0.20,0.25,0.30]};
+  const DEFAULT_BALLISTICS=new Set(['Snatch','One-arm Swing','Two-arm Swing','High Pull','Double Clean']);
 
-/* ===== Diagnostics ===== */
-const diagEl=document.getElementById('diag');
-function diag(msg){diagEl.style.display='block';diagEl.innerHTML='<b>Diagnostics</b><br>'+String(msg).replace(/</g,'&lt;');}
-window.addEventListener('error',e=>diag((e.message||'error')+'\n'+(e.filename||'')+':'+(e.lineno||'')));
+  // Default Unity-matrix (Advanced leidend)
+  const MATRIX_ADV={
+    'Push':{main:'Military Press',acc:['Push Press','Half-kneeling Press','Floor Press']},
+    'Pull':{main:'Double Clean',acc:['Pull-up / Chin-up','Double Bent-over Row','High Pull']},
+    'Squat':{main:'Double Front Squat',acc:['Goblet Squat','Bulgarian Split Squat','Step-up']},
+    'Lunge':{main:'Tactical Lunge',acc:['Double Reverse Lunge','Athletic Lunge','Side Lunge']},
+    'Hinge':{main:'Two-arm Swing',acc:['Single-leg Glute Bridge','Double Deadlift','Double Snatch']},
+    'Rotation':{main:'Turkish Get Up',acc:['Windmill','Half-kneeling Windmill','Bent Press']},
+    'Anti-Rotation':{main:'Snatch',acc:['One-arm Swing','Single-leg Deadlift','Renegade Row']},
+    'Loaded Carry':{main:'Suitcase Carry',acc:['Front Rack Carry','Overhead Carry','Bear Crawl']}
+  };
 
-/* ===== Keys & consts ===== */
-const LS_KEY='unity2025_state';
-const COUNTERS_KEY='unity2025_counters';
+  // ===== Helpers =====
+  const $=s=>document.querySelector(s);
+  const toast=(m)=>{const t=$('#toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',1500);};
+  const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const clean=s=>String(s).replace(/\s+/g,' ').trim();
+  function sanitizeName(s){const x=String(s||'').trim(); if(!x) return ''; if(x==='on'||x==='off') return ''; return x;}
+  function makeRNG(seed){let h=2166136261>>>0;if(seed){for(let i=0;i<seed.length;i++){h^=seed.charCodeAt(i);h=Math.imul(h,16777619);}}else{h=(Date.now()>>>0);}return function(){h+=0x6D2B79F5;let t=h;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return ((t^t>>>14)>>>0)/4294967296;}}
+  let rnd=makeRNG('');
+  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a;}
+  function roundsCap(v){switch(+v){case 180:return{rounds:3,cap:3};case 240:return{rounds:3,cap:4};case 300:return{rounds:3,cap:5};case 400:return{rounds:4,cap:5};case 500:return{rounds:5,cap:5};default:return{rounds:3,cap:5};}}
+  function apportion2(total,weights){const w=weights.slice();const W=w.reduce((a,b)=>a+b,0);if(W<=0)return Array(w.length).fill(0);const raw=w.map(v=>(v*total)/W);const base=raw.map(x=>Math.floor(x));let rem=total-base.reduce((a,b)=>a+b,0);const order=raw.map((x,i)=>({i,frac:x-Math.floor(x)})).sort((a,b)=>b.frac-a.frac);for(let k=0;k<order.length&&rem>0;k++){base[order[k].i]+=1;rem--;}return base;}
+  function biasFromPct(weekType,pct){const parts=(weekType==='Deload')?3:((weekType==='Stress')?5:4);const base=SPLITS[parts];const mn=Math.min(...base),mx=Math.max(...base);const eq=(a,b)=>Math.abs(a-b)<1e-9; if(eq(pct,mn))return'Heavy'; if(eq(pct,mx))return'Light'; return'Medium';}
+  function pickDays(count){const d=[0,1,2,3,4];shuffle(d);return d.slice(0,count).sort((a,b)=>a-b);}
 
-const PATTERNS=['Push','Pull','Squat','Lunge','Hinge','Rotation','Anti-Rotation','Loaded Carry'];
-const WEEK_TYPES=['Deload','Maintenance','Development','Stress'];
-const WEEK_PCT={Deload:.15,Maintenance:.22,Development:.28,Stress:.35};
-const SPLITS={3:[0.15,0.35,0.50],4:[0.15,0.22,0.28,0.35],5:[0.10,0.15,0.20,0.25,0.30]};
-const DEFAULT_BALLISTICS=new Set(['Snatch','One-arm Swing','Two-arm Swing','High Pull','Double Clean']);
+  // LocalStorage JSON helpers
+  function loadJSON(k,def){try{const v=localStorage.getItem(k);return v?JSON.parse(v):def}catch(e){return def}}
+  function saveJSON(k,o){try{localStorage.setItem(k,JSON.stringify(o))}catch(e){}}
 
-/* ===== Matrices (geen custom) ===== */
-const MATRIX_ADV={
-  'Push': { main:'Military Press', acc:['Push Press','Half-kneeling Press','Floor Press'] },
-  'Pull': { main:'Double Clean', acc:['Pull-up / Chin-up','Double Bent-over Row','High Pull'] },
-  'Squat': { main:'Double Front Squat', acc:['Goblet Squat','Bulgarian Split Squat','Step-up'] },
-  'Lunge': { main:'Tactical Lunge', acc:['Double Reverse Lunge','Athletic Lunge','Side Lunge'] },
-  'Hinge': { main:'Two-arm Swing', acc:['Single-leg Glute Bridge','Double Deadlift','Double Snatch'] },
-  'Rotation': { main:'Turkish Get Up', acc:['Windmill','Half-kneeling Windmill','Bent Press'] },
-  'Anti-Rotation': { main:'Snatch', acc:['One-arm Swing','Single-leg Deadlift','Renegade Row'] },
-  'Loaded Carry': { main:'Suitcase Carry', acc:['Front Rack Carry','Overhead Carry','Bear Crawl'] }
-};
-const MATRIX_BASIC={
-  'Push': { main:'Military Press', acc:['Half-kneeling Press','Floor Press','Push Press'] },
-  'Pull': { main:'One-arm Row', acc:['Gorilla Row','One-arm Clean','High Pull'] },
-  'Squat': { main:'Goblet Squat', acc:['Step-up','Split Squat','Bodyweight Squat'] },
-  'Lunge': { main:'Reverse Lunge', acc:['Tactical Lunge','Forward Lunge','Side Lunge'] },
-  'Hinge': { main:'Two-arm Swing', acc:['KB Deadlift','Single-leg Glute Bridge','Hip Hinge (BW)'] },
-  'Rotation': { main:'Turkish Get Up', acc:['Half-kneeling Windmill','Windmill','Tall-kneeling Windmill'] },
-  'Anti-Rotation': { main:'Snatch', acc:['One-arm Swing','Single-leg Deadlift','Pallof Press (band)'] },
-  'Loaded Carry': { main:'Suitcase Carry', acc:['Front Rack Carry','Farmer Carry','Bear Crawl'] }
-};
+  // Counters
+  let counters=loadJSON(COUNTERS_KEY,{}); function countersSave(){saveJSON(COUNTERS_KEY,counters);}
+  function dayKey(){if(!state.plan||!state.cursor)return'nokey';const{w,d}=state.cursor;return`${state.blockIdx||0}_${w}_${d}`;}
+  function getCount(exKey){const k=dayKey();return(counters[k]&&counters[k][exKey])|0;}
+  function setCount(exKey,val,max){const k=dayKey();counters[k]=counters[k]||{};counters[k][exKey]=Math.max(0,Math.min(max,val|0));countersSave();}
+  function resetDayCounters(){const k=dayKey();if(counters[k]){delete counters[k];countersSave();}}
+  function mkCounterHTML(exKey,max){const cur=getCount(exKey);const safe=exKey.replace(/&/g,'&amp;').replace(/</g,'&lt;');return`<span class="counter" data-ex="${safe}" data-max="${max}"><button class="cbtn" data-dec>−</button><span class="cval">${cur}/${max}</span><button class="cbtn" data-inc>+</button></span>`}
 
-/* ===== Helpers ===== */
-const $=s=>document.querySelector(s);
-const toast=m=>{const t=$('#toast');t.textContent=m;t.style.display='block';clearTimeout(toast._t);toast._t=setTimeout(()=>t.style.display='none',1600);};
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-const clean=s=>String(s||'').replace(/\s+/g,' ').trim();
-function sanitizeName(n){n=clean(n);if(!n)return'';return (n==='on'||n==='off')?'':n;}
-function makeRNG(seed){let h=2166136261>>>0;if(seed){for(let i=0;i<seed.length;i++){h^=seed.charCodeAt(i);h=Math.imul(h,16777619)}}else h=Date.now()>>>0;return()=>{h+=0x6D2B79F5;let t=h;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
-let rnd=makeRNG('');
-function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
-const choice=a=>a[Math.floor(rnd()*a.length)];
-function roundsCap(vol){switch(+vol){case 180:return{rounds:3,cap:3};case 240:return{rounds:3,cap:4};case 300:return{rounds:3,cap:5};case 400:return{rounds:4,cap:5};case 500:return{rounds:5,cap:5};default:return{rounds:3,cap:5};}}
-function isUni(name){const n=clean(name).toLowerCase();return /(one-arm|single-leg|lunge|windmill|bent press|renegade row|pull-up|chin-up)/.test(n)}
-function isBallistic(name){return DEFAULT_BALLISTICS.has(clean(name))}
-function badge(kind){if(kind==='Heavy')return' <span class="badge" title="Heavy (+1 bell)">▲ +1</span>';if(kind==='Light')return' <span class="badge" title="Light (−1 bell)">▼ −1</span>';return''}
-function apportion2(total,weights){const W=weights.reduce((a,b)=>a+b,0);if(W<=0)return weights.map(()=>0);const raw=weights.map(v=>v*total/W);const base=raw.map(x=>Math.floor(x));let rem=total-base.reduce((a,b)=>a+b,0);const ord=raw.map((x,i)=>({i,f:x-Math.floor(x)})).sort((a,b)=>b.f-a.f);for(let k=0;k<ord.length&&rem>0;k++){base[ord[k].i]++;rem--;}return base}
-
-/* ===== Counters ===== */
-function countersLoad(){try{return JSON.parse(localStorage.getItem(COUNTERS_KEY)||'{}')}catch{return{}}}
-function countersSave(o){try{localStorage.setItem(COUNTERS_KEY,JSON.stringify(o))}catch{}}
-let counters=countersLoad();
-function dayKey(){if(!state.plan||!state.cursor)return'nokey';const{w,d}=state.cursor;return`${state.blockIdx||0}_${w}_${d}`}
-function getCount(k){const dk=dayKey();return (counters[dk]&&counters[dk][k])|0}
-function setCount(k,val,max){const dk=dayKey();counters[dk]=counters[dk]||{};counters[dk][k]=Math.max(0,Math.min(max,val|0));countersSave(counters)}
-function resetDayCounters(){const dk=dayKey();if(counters[dk]){delete counters[dk];countersSave(counters)}}
-
-/* ===== Effective matrix (zonder custom) ===== */
-function effectiveMatrix(cfg){
-  return (cfg.set==='basic') ? MATRIX_BASIC : MATRIX_ADV;
-}
-
-/* ===== State ===== */
-let state=safeLoad()||{};
-function safeLoad(){try{return JSON.parse(localStorage.getItem(LS_KEY)||'null')}catch(e){diag('load error: '+e.message);return null}}
-function save(){try{localStorage.setItem(LS_KEY,JSON.stringify(state))}catch(e){diag('save error: '+e.message)}}
-
-/* ===== Splits & Bias helpers ===== */
-function buildWeekSplitsWithPcts(blockVol,weekType){
-  const parts=(weekType==='Deload')?3:(weekType==='Stress'?5:4);
-  const basePcts=SPLITS[parts].slice();
-  const {rounds}=roundsCap(blockVol);
-  const weekTotal=Math.round(blockVol*(WEEK_PCT[weekType]||0));
-  let sess=basePcts.map(p=>Math.max(rounds,Math.round((weekTotal*p)/rounds)*rounds));
-  let diff=weekTotal-sess.reduce((a,b)=>a+b,0);
-  let idx=sess.length-1;
-  while(Math.abs(diff)>=rounds){
-    if(diff>0){sess[idx]+=rounds;diff-=rounds;}
-    else if(sess[idx]-rounds>=rounds){sess[idx]-=rounds;diff+=rounds;}
-    else {if(idx>0){idx--;continue;}break;}
-  }
-  const orderIdx=sess.map((_,i)=>i);shuffle(orderIdx);
-  return orderIdx.map(i=>({vol:sess[i],pct:basePcts[i]}));
-}
-function biasFromPct(weekType,pct){
-  const parts=(weekType==='Deload')?3:(weekType==='Stress'?5:4);
-  const base=SPLITS[parts];const minPct=Math.min(...base);const maxPct=Math.max(...base);
-  const eq=(a,b)=>Math.abs(a-b)<1e-9;
-  if(eq(pct,minPct))return'Heavy';
-  if(eq(pct,maxPct))return'Light';
-  return'Medium';
-}
-function pickDays(count){const d=[0,1,2,3,4];shuffle(d);return d.slice(0,count).sort((a,b)=>a-b);}
-
-/* ===== Planbouw incl. Plan Strong overlay ===== */
-function buildPlan(cfg){
-  rnd=makeRNG(cfg.seed||'');
-  const matrix=effectiveMatrix(cfg);
-
-  const weekOrders={};
-  for(const pat of Object.keys(matrix)){
-    const order=['Deload','Maintenance','Development','Stress'];shuffle(order);
-    weekOrders[pat]=order;
-  }
-
-  const weeks=Array.from({length:4},()=>({days:Array.from({length:5},()=>({entries:[],ps:null}))}));
-
-  for(const [pat,def] of Object.entries(matrix)){
-    for(let w=0;w<4;w++){
-      const wt=weekOrders[pat][w];
-      const items=buildWeekSplitsWithPcts(cfg.volume,wt);
-      const dayIdxs=pickDays(items.length);
-      for(let i=0;i<items.length;i++){
-        const d=dayIdxs[i];const {vol,pct}=items[i];
-        weeks[w].days[d].entries.push({
-          pattern:pat,main:def.main,acc:def.acc.slice(),
-          weekType:wt,volume:vol,pct:pct,bias:biasFromPct(wt,pct)
-        });
+  // Custom matrix (met ballistic/unilateral)
+  let customMatrix=loadJSON(CUSTOM_KEY,{})||{};
+  function inferBallistic(name){const nm=clean(name);return DEFAULT_BALLISTICS.has(nm)||/(swing|snatch|high pull|double clean)/i.test(nm)}
+  function inferUnilateral(name){const n=clean(name).toLowerCase();return /(one-arm|single-leg|pull-up|chin-up|lunge|windmill|bent press|renegade row|military press|push press|snatch)/i.test(n)}
+  function seedFromUnity(){const out={};for(const p of PATTERNS){const m=MATRIX_ADV[p];const items=[];items[0]={name:m.main,ballistic:inferBallistic(m.main),unilateral:inferUnilateral(m.main)};for(let i=0;i<3;i++){const nm=m.acc[i]||'';items[i+1]={name:nm,ballistic:inferBallistic(nm),unilateral:inferUnilateral(nm)};}out[p]={enabled:true,items};}return out;}
+  function sanitizeCustom(){
+    if(!customMatrix||!Object.keys(customMatrix).length){customMatrix=seedFromUnity();}
+    for(const p of PATTERNS){
+      if(!customMatrix[p]) customMatrix[p]={enabled:true,items:[{},{},{},{}]};
+      const it=customMatrix[p].items=customMatrix[p].items||[{},{},{},{}];
+      for(let i=0;i<4;i++){
+        it[i]=it[i]||{};
+        it[i].name=sanitizeName(it[i].name||'');
+        if(!it[i].name){
+          const seed=seedFromUnity()[p].items[i];
+          it[i].name=seed.name; it[i].ballistic=seed.ballistic; it[i].unilateral=seed.unilateral;
+        }else{
+          if(typeof it[i].ballistic!=='boolean') it[i].ballistic=inferBallistic(it[i].name);
+          if(typeof it[i].unilateral!=='boolean') it[i].unilateral=inferUnilateral(it[i].name);
+        }
       }
     }
+    saveJSON(CUSTOM_KEY,customMatrix);
   }
+  function effectiveMatrix(){
+    sanitizeCustom();
+    const out={}; for(const p of PATTERNS){
+      const it=customMatrix[p].items;
+      out[p]={main:it[0].name,acc:[it[1].name,it[2].name,it[3].name].filter(Boolean)};
+    }
+    return out;
+  }
+  function isBallisticName(nm){const name=clean(nm);for(const p of PATTERNS){const conf=customMatrix[p];if(!conf||!conf.items)continue;for(const it of conf.items){if(clean(it.name)===name) return !!it.ballistic;}}return DEFAULT_BALLISTICS.has(name);}
+  function isUnilateralName(nm){const name=clean(nm);for(const p of PATTERNS){const conf=customMatrix[p];if(!conf||!conf.items)continue;for(const it of conf.items){if(clean(it.name)===name) return !!it.unilateral;}}return inferUnilateral(name);}
 
-  // Plan Strong overlay (optioneel)
-  if(cfg.psPattern){
-    const psPat=cfg.psPattern;
-    const psBlock=+cfg.psVolume;
-    const fixedOrder=['Deload','Development','Maintenance','Stress']; // vaste volgorde
-    for(let w=0;w<4;w++){
-      const wt=fixedOrder[w];
-      const weekVol=Math.round(psBlock*(WEEK_PCT[wt]||0));
-      // verwijder PS-patroon uit gewone entries
-      for(let dd=0;dd<5;dd++){
-        weeks[w].days[dd].entries=weeks[w].days[dd].entries.filter(en=>en.pattern!==psPat);
+  // State
+  let state=loadJSON(LS_KEY,null)||{};
+  function save(){saveJSON(LS_KEY,state);}
+
+  // Splits & plan
+  function buildWeekSplitsWithPcts(blockVol,weekType){
+    const parts=(weekType==='Deload')?3:(weekType==='Stress'?5:4);
+    const base=SPLITS[parts].slice();
+    const {rounds}=roundsCap(blockVol);
+    const weekTotal=Math.round(blockVol*(WEEK_PCT[weekType]||0));
+    let sess=base.map(p=>Math.max(rounds,Math.round((weekTotal*p)/rounds)*rounds));
+    let diff=weekTotal-sess.reduce((a,b)=>a+b,0),idx=sess.length-1;
+    while(Math.abs(diff)>=rounds){
+      if(diff>0){sess[idx]+=rounds;diff-=rounds;}
+      else if(sess[idx]-rounds>=rounds){sess[idx]-=rounds;diff+=rounds;}
+      else{if(idx>0){idx--;continue;}break;}
+    }
+    const o=sess.map((_,i)=>i);shuffle(o);return o.map(i=>({vol:sess[i],pct:base[i]}));
+  }
+  function pickDays(count){const d=[0,1,2,3,4];shuffle(d);return d.slice(0,count).sort((a,b)=>a-b);}
+  function buildPlan(cfg){
+    const matrix=effectiveMatrix();
+    rnd=makeRNG(cfg.seed||'');
+    const lastEnds=state.lastEnds||{};
+    const weekOrders={};
+    for(const pat of Object.keys(matrix)){
+      const order=['Deload','Maintenance','Development','Stress']; shuffle(order);
+      if(lastEnds[pat]&&order[0]===lastEnds[pat]){[order[0],order[1]]=[order[1],order[0]];}
+      weekOrders[pat]=order;
+    }
+    const weeks=Array.from({length:4},()=>({days:Array.from({length:5},()=>({entries:[],ps:null}))}));
+    for(const [pat,def] of Object.entries(matrix)){
+      for(let w=0;w<4;w++){
+        const wt=weekOrders[pat][w];
+        const items=buildWeekSplitsWithPcts(cfg.volume,wt);
+        const dayIdxs=pickDays(items.length);
+        for(let i=0;i<items.length;i++){
+          const d=dayIdxs[i];
+          const {vol,pct}=items[i];
+          weeks[w].days[d].entries.push({
+            pattern:pat, main:def.main, acc:def.acc.slice(),
+            weekType:wt, volume:vol, pct:pct, bias:biasFromPct(wt,pct)
+          });
+        }
       }
-      const dayIdxs=pickDays(3);
-      let weights=[50,35,15];let labels=['Medium','High','Low'];let shOnHigh=false;
-      if(cfg.psAdvanced){weights=[30,55,15];labels=['Medium','High','Low'];shOnHigh=true;}
-      const sessVols=apportion2(weekVol,weights);
-      const psMainName=(matrix[psPat]&&matrix[psPat].main)?matrix[psPat].main:psPat;
-      for(let i=0;i<3;i++){
-        const d=dayIdxs[i];
-        weeks[w].days[d].ps=weeks[w].days[d].ps||{};
-        weeks[w].days[d].ps[psPat]={weekType:wt,reps:sessVols[i],mainName:psMainName,level:labels[i],sh:(labels[i]==='High'&&shOnHigh),mode:cfg.psAdvanced?'advanced':'basic'};
+    }
+    // Plan Strong overlay
+    if(cfg.psPattern){
+      const psPat=cfg.psPattern;
+      const psBlock=+cfg.psVolume||240;
+      const fixed=['Deload','Development','Maintenance','Stress'];
+      for(let w=0;w<4;w++){
+        const wt=fixed[w];
+        const weekVol=Math.round(psBlock*(WEEK_PCT[wt]||0));
+        for(let dd=0;dd<5;dd++){
+          weeks[w].days[dd].entries = weeks[w].days[dd].entries.filter(en=>en.pattern!==psPat);
+        }
+        const dayIdxs=pickDays(3);
+        let weights=[50,35,15], labels=['Medium','High','Low'], shOnHigh=false;
+        if(cfg.psAdvanced){weights=[30,55,15]; shOnHigh=true;}
+        const sessVols=apportion2(weekVol,weights);
+        const psMain=(matrix[psPat]?.main)||psPat;
+        for(let i=0;i<3;i++){
+          const d=dayIdxs[i];
+          weeks[w].days[d].ps = weeks[w].days[d].ps || {};
+          weeks[w].days[d].ps[psPat] = {weekType:wt,reps:sessVols[i],mainName:psMain,level:labels[i],sh:(labels[i]==='High'&&shOnHigh),mode:cfg.psAdvanced?'advanced':'basic'};
+        }
       }
     }
+    return {weeks, rc:roundsCap(cfg.volume), weekOrders, set:'advanced'};
   }
 
-  return {weeks, rc:roundsCap(cfg.volume), weekOrders, set:cfg.set};
-}
-
-/* ===== EMOM builder ===== */
-function buildEMOM(assigned){
-  const wantShown=10;
-  const have=new Map();
-  for(const a of assigned){
-    const nm=clean(a.name);
-    if(['Snatch','One-arm Swing','Two-arm Swing'].includes(nm) && a.shownPerRound===wantShown){
-      have.set(nm,true);
+  // Doordraaien per weektype
+  function patternSessionIndex(weekObj, currentDayIdx, patternName){
+    let idx=0,total=0;
+    for(let d=0; d<weekObj.days.length; d++){
+      const has = (weekObj.days[d].entries||[]).some(e=>e.pattern===patternName);
+      if(has){ total++; if(d<=currentDayIdx) idx++; }
+    }
+    return {idx:Math.max(1,idx), total};
+  }
+  function pickAccessoryOrder(weekType, sessIdx, accList){
+    const A1=0,A2=1,A3=2; const has=i=>i>=0&&i<accList.length;
+    switch(weekType){
+      case 'Deload': return [];
+      case 'Maintenance':
+        if(sessIdx===3) return has(A1)?[A1]:[];
+        if(sessIdx===4) return has(A2)?[A2]:[];
+        return [];
+      case 'Development':
+        if(sessIdx===2) return has(A1)?[A1]:[];
+        if(sessIdx===3) return has(A2)?[A2]:[];
+        if(sessIdx===4) return has(A3)?[A3]:[];
+        return [];
+      case 'Stress':
+        if(sessIdx===3) return has(A1)?[A1]:[];
+        if(sessIdx===4) return has(A2)?[A2]:[];
+        if(sessIdx===5){ const arr=[]; if(has(A3)) arr.push(A3); if(has(A1)) arr.push(A1); return arr; }
+        return [];
+      default: return [];
     }
   }
-  if(have.size<2) return null;
-  const order=['Snatch','One-arm Swing','Two-arm Swing'];
-  const parts=[], used=[];
-  for(const nm of order){
-    if(!have.has(nm)) continue;
-    used.push(nm);
-    if(nm==='Two-arm Swing'){
-      parts.push(`EMOM:\n3 minutes of 10 Two-arm Swings (30 totaal = 3 min)`);
-    }else{
-      const label=nm==='Snatch'?'Snatches':'One-arm Swings';
-      parts.push(`EMOM:\n6 minutes of 10 ${label} (alternate side each minute)\n\nThen`);
-    }
-  }
-  let text=parts.join('\n\n').replace(/\n\nThen$/,'');
-  return {text,_names:used};
-}
 
-/* ===== UI Renderers ===== */
-function renderInfo(){
-  if(!state.plan){$('#kpi').innerHTML='';$('#orders').innerHTML='';return;}
-  const rc=state.plan.rc;
-  const pills=[
-    `<span class="pill">Set: ${state.cfg.set==='basic'?'Basis':'Advanced'}</span>`,
-    `<span class="pill">Volume: ${state.cfg.volume}</span>`,
-    `<span class="pill">Rounds: ${rc.rounds}</span>`,
-    `<span class="pill">Cap/round: ${rc.cap}</span>`,
-    `<span class="pill">Blok #${state.blockIdx||1}</span>`,
-    `<span class="pill">KB-bias: ${state.cfg.bias==='on'?'Aan (▲/▼)':'Uit'}</span>`,
-    state.cfg.psPattern? `<span class="pill">Plan Strong: ${state.cfg.psPattern} • Vol: ${state.cfg.psVolume} • ${state.cfg.psAdvanced?'Advanced (H+SH)':'Basic'}</span>`:''
-  ].filter(Boolean).join(' ');
-  $('#kpi').innerHTML=pills;
-  const rows=Object.entries(state.plan.weekOrders).map(([k,v])=>`${k}: <b>${v.join(' → ')}</b>`).join('<br>');
-  $('#orders').innerHTML=rows;
-}
+  // Render
+  function renderSession(){
+    const out=$('#session'); if(!state.plan){out.textContent='Nog geen blok. Klik op “Nieuw blok”.';return;}
+    const {w,d}=state.cursor; const week=state.plan.weeks[w]; const day=week.days[d]; const rc=state.plan.rc;
 
-/* ===== Render Session ===== */
-function mkCounterHTML(exKey, max, current){
-  const safeKey = exKey.replace(/&/g,'&amp;').replace(/</g,'&lt;');
-  return `
-    <span class="counter" data-ex="${safeKey}" data-max="${max}">
-      <button class="cbtn" data-dec>−</button>
-      <span class="cval">${current}/${max}</span>
-      <button class="cbtn" data-inc>+</button>
-    </span>`;
-}
-function renderSession(){
-  try{
-    const out = document.getElementById('session');
-    if(!state.plan){ out.textContent='Nog geen blok. Klik op “Nieuw blok”.'; return; }
-
-    const {w,d} = state.cursor;
-    const day = state.plan.weeks[w].days[d];
-    const rc = state.plan.rc;
-
-    // Opener: Turkish Get Up (2+2 bij light-bias)
-    let openerHTML='';
-    const rot = day.entries.find(e=>e.pattern==='Rotation');
+    // Opener: Get Up
+    let openerHTML=''; const rot=day.entries.find(e=>e.pattern==='Rotation');
     if(rot){
-      const setsByBlock = rc.rounds;
-      const costPerSet = rc.cap;
-      const totalCost = setsByBlock * costPerSet;
-      const showTwoTwo = (state.cfg.bias==='on' && (rot.bias||'Medium')==='Light');
-      const exKeyOp = `Opener — Turkish Get Up`;
-      const cur = getCount(exKeyOp);
-      const line = `${setsByBlock} × (${showTwoTwo? '2+2':'1+1'}) Turkish Get Up`;
-      openerHTML = `<div class="line"><div class="txt">${line}</div>${mkCounterHTML(exKeyOp, setsByBlock, cur)}</div>`;
-      rot.volume = Math.max(0, (rot.volume|0) - totalCost);
+      const sets=rc.rounds;
+      const cost=rc.cap*sets;
+      const showTwoTwo=(state.cfg.bias==='on'&&(rot.bias||'Medium')==='Light');
+      openerHTML=`<div class="line"><div class="txt">${esc(`${sets} × (${showTwoTwo?'2+2':'1+1'}) Turkish Get Up`)}</div>${mkCounterHTML('Opener — Turkish Get Up',sets)}</div>`;
+      rot.volume=Math.max(0,(rot.volume|0)-cost);
     }
 
-    // Circuit
-    const assigned=[];
-    const entries = shuffle(day.entries.slice().filter(e=> e.pattern!=='Loaded Carry'));
-    const lineObjs=[];
+    const entries=shuffle(day.entries.slice().filter(e=>e.pattern!=='Loaded Carry'));
+    const lines=[];
 
-    for(const e of entries){
-      const mainName = sanitizeName(e.main);
-      let order;
-      if (e.pattern === 'Rotation') {
-        order = [...(e.acc || [])].map(sanitizeName).filter(Boolean);
-      } else {
-        order = [mainName, ...(e.acc||[]).map(sanitizeName)].filter(Boolean);
-      }
-
-      const seen = new Set();
-      let remaining = e.volume|0;
-      let usedCount=0;
-
-      for(let i=0; i<order.length && remaining>0 && usedCount<3; i++){
-        const nm = sanitizeName(order[i]);
-        if(!nm) continue;
-        if(seen.has(nm)) continue;
-        seen.add(nm);
-
-        let perRound = Math.min(rc.cap, Math.ceil(remaining/rc.rounds));
-        perRound = Math.max(1, Math.floor(perRound));
-
-        const isMainLine = (nm===mainName);
-        const lightBoost = (state.cfg.bias==='on' && e.bias==='Light' && isMainLine && !day.ps);
-        if(lightBoost){ perRound = Math.min(10, Math.max(perRound, rc.cap)); }
-
-        const ball = isBallistic(nm);
-        const uni = isUni(nm);
-        const shown = perRound * (ball?2:1);
-        const repText = uni ? `${shown}+${shown}` : `${shown}`;
-
-        let labelHTML = '';
-        if(isMainLine && state.cfg.bias==='on' && !day.ps){
-          labelHTML = (e.bias==='Heavy') ? badge('Heavy') : (e.bias==='Light') ? badge('Light') : '';
-        }
-
-        lineObjs.push({name:nm, repText, htmlLabel:labelHTML, isMain:isMainLine});
-        const totalUnity = perRound * rc.rounds;
-        assigned.push({name:nm,totalUnity,shownPerRound:shown});
-        remaining -= totalUnity; usedCount++;
-      }
-
-      // Filler indien rest
-      if(remaining > 0 && order.length){
-        const fallback = order[Math.min(2, order.length-1)] || order[0];
-        let safety=16;
-        while(remaining>0 && safety--){
-          const nm = sanitizeName(fallback);
-          if(!nm) break;
-          let perRound = Math.max(1, Math.min(rc.cap, Math.ceil(remaining/rc.rounds)));
-          const ball = isBallistic(nm);
-          const uni = isUni(nm);
-          const shown = perRound * (ball?2:1);
-          const repText = uni ? `${shown}+${shown}` : `${shown}`;
-          lineObjs.push({name:nm, repText, htmlLabel:'', isMain:false});
-          const totalUnity = perRound * rc.rounds;
-          assigned.push({name:nm,totalUnity,shownPerRound:shown});
-          remaining -= totalUnity;
-        }
-      }
-    }
-
-    // Plan Strong injectie
+    // PS inject
     if(day.ps){
-      const injected=[];
+      const rounds=rc.rounds; const roundsWeights=Array(rounds).fill(1);
       for(const [pat,info] of Object.entries(day.ps)){
-        const T = Math.max(0, info.reps|0);
-        const labels = (info.mode==='advanced'||info.sh)?['L','M','H','SH']:['L','M','H'];
-        const weights = (labels.length===4)?[45,30,20,5]:[50,35,15];
-        const buckets = apportion2(T, weights);
-        const rounds = state.plan.rc.rounds;
-        const roundsWeights = Array(rounds).fill(1);
-        const perRound = buckets.map(v => apportion2(v, roundsWeights));
-        const roundLabels=[];
-        for (let r=0;r<rounds;r++){
-          const parts=[];
-          for(let j=0;j<labels.length;j++){
-            if (perRound[j][r]>0) parts.push(`${labels[j]}${perRound[j][r]}`);
-          }
-          roundLabels.push(parts.length?parts.join('/'):'—');
-        }
-        const detail = roundLabels.map((s,i)=>`R${i+1}:${s}`).join(' • ');
-        injected.push({
-          name:`PS — ${info.mainName}`,
-          repText:`${rounds} rounds`,
-          htmlLabel:` — ${info.level || 'Medium'}${info.sh?' (H+SH)':''} — ${detail}`,
-          isMain:true
-        });
+        const T=Math.max(0,info.reps|0); let buckets,labels;
+        if(info.mode==='advanced'||info.sh){buckets=apportion2(T,[45,30,20,5]);labels=['L','M','H','SH'];}
+        else{buckets=apportion2(T,[50,35,15]);labels=['L','M','H'];}
+        const perRound=buckets.map(v=>apportion2(v,roundsWeights)); const roundLabels=[];
+        for(let r=0;r<rounds;r++){const parts=[];for(const lab of labels){const idx=labels.indexOf(lab);if(idx>=0&&perRound[idx][r]>0)parts.push(`${lab}${perRound[idx][r]}`);}roundLabels.push(parts.length?parts.join('/'):'—');}
+        const detail=roundLabels.map((s,i)=>`R${i+1}:${s}`).join(' • ');
+        lines.push({name:`PS — ${info.mainName}`,repText:`${rounds} rounds`,label:` — ${info.level}${info.sh?' (H+SH)':''} — ${detail}`});
       }
-      if(injected.length){ lineObjs.unshift(...injected); }
     }
 
-    // EMOM
-    const emom = buildEMOM(assigned);
-    let circuitObjs = lineObjs.slice();
-    if(emom){
-      const drop = new Set(emom._names.map(clean));
-      circuitObjs = circuitObjs.filter(o => !drop.has(clean(o.name)));
+    // Unity circuit — doordraaien
+    for(const e of entries){
+      const order=(e.pattern==='Rotation') ? [...(e.acc||[])].filter(Boolean)
+                                           : [e.main,...(e.acc||[])].filter(Boolean);
+      const {idx:sessIdx}=patternSessionIndex(week,d,e.pattern);
+      const accList=(e.pattern==='Rotation')?order:order.slice(1);
+      const accPick=pickAccessoryOrder(e.weekType,sessIdx,accList);
+
+      let remaining=e.volume;
+
+      // Main
+      if(e.pattern!=='Rotation' && order.length>0){
+        const nm=order[0];
+        let perRound=Math.min(rc.cap,Math.ceil(remaining/rc.rounds));
+        perRound=Math.max(1,Math.floor(perRound));
+        const isLightBoost=(state.cfg.bias==='on'&&e.bias==='Light'&&!day.ps);
+        if(isLightBoost) perRound=Math.min(10,Math.max(perRound,rc.cap));
+        const isBall=isBallisticName(nm);
+        const isUni =isUnilateralName(nm);
+        const shown=perRound*(isBall?2:1);
+        const repTxt=isUni?`${shown}+${shown}`:`${shown}`;
+        const label=(state.cfg.bias==='on'&&!day.ps)
+          ? (e.bias==='Heavy'?' <span class="badge">▲ +1</span>':(e.bias==='Light'?' <span class="badge">▼ −1</span>':'')):'';
+        lines.push({name:nm,repText:repTxt,label});
+        remaining-=perRound*rc.rounds;
+      }
+
+      // Accessoires
+      for(const i of accPick){
+        if(remaining<=0) break;
+        const nm=accList[i]; if(!nm) continue;
+        let perRound=Math.min(rc.cap,Math.ceil(remaining/rc.rounds));
+        perRound=Math.max(1,Math.floor(perRound));
+        const isBall=isBallisticName(nm);
+        const isUni =isUnilateralName(nm);
+        const shown=perRound*(isBall?2:1);
+        const repTxt=isUni?`${shown}+${shown}`:`${shown}`;
+        lines.push({name:nm,repText:repTxt,label:''});
+        remaining-=perRound*rc.rounds;
+      }
     }
 
     // Carry
-    const carrySet = (state.plan.set==='basic'?MATRIX_BASIC:MATRIX_ADV)['Loaded Carry'].acc;
-    const carryName = choice(carrySet);
-    const carryEntry = day.entries.find(e=>e.pattern==='Loaded Carry');
-    const carrySecs = carryEntry ? Math.max(30, (carryEntry.volume|0)*5) : 45;
-    const carryTxt = `${carrySecs}s ${carryName}`;
+    const carryEntry=day.entries.find(e=>e.pattern==='Loaded Carry');
+    const carryName=shuffle(MATRIX_ADV['Loaded Carry'].acc.slice())[0];
+    const carryTxt=carryEntry?`${Math.max(30,carryEntry.volume*5)}s ${carryName}`:`45s ${carryName}`;
 
-    // Compose HTML
-    const parts = [];
-    parts.push(esc(`Week ${w+1}, Dag ${d+1}`), '<br><br>');
-    if(openerHTML){ parts.push(openerHTML, '<br><br>'); }
-    parts.push('<hr>');
-    parts.push(esc(`${rc.rounds} rounds of following circuit:`), '<br>');
-
-    if(circuitObjs.length){
-      const lines = circuitObjs.map(o=>{
-        const exKey = `Circuit — ${o.name}`;
-        const cur = getCount(exKey);
-        const max = rc.rounds;
-        return `<div class="line"><div class="txt">${esc(o.repText)} ${esc(o.name)}${o.htmlLabel}</div>${mkCounterHTML(exKey, max, cur)}</div>`;
-      }).join('');
-      parts.push(lines, '<br>');
+    // Compose
+    const html=[];
+    html.push(esc(`Week ${w+1}, Dag ${d+1}`),'<br><br>');
+    if(openerHTML) html.push(openerHTML,'<br><br>');
+    html.push('<hr>',esc(`${rc.rounds} rounds of following circuit:`),'<br>');
+    if(lines.length){
+      html.push(lines.map(o=>`<div class="line"><div class="txt">${esc(o.repText)} ${esc(o.name)}${o.label||''}</div>${mkCounterHTML(`Circuit — ${esc(o.name)}`,rc.rounds)}</div>`).join(''));
     }else{
-      parts.push(esc('(Geen patronen actief in het circuit vandaag)'), '<br>');
+      html.push(esc('(Geen patronen actief in het circuit vandaag)'));
     }
+    html.push('<br><hr><br>',esc(`[ ${carryTxt} ]`));
+    document.getElementById('session').innerHTML=html.join('');
 
-    parts.push('<hr><br>');
-    if(emom){ parts.push(esc(emom.text).replace(/\n/g,'<br>'), '<br><hr><br>'); }
-    parts.push(esc(`[ ${carryTxt} ]`));
-
-    out.innerHTML = parts.join('');
-
-    // Bind counters
+    // counter bindings
     document.querySelectorAll('.counter').forEach($c=>{
-      const ex = $c.getAttribute('data-ex');
-      const max = +$c.getAttribute('data-max');
-      const $val=$c.querySelector('.cval');
-      const upd=()=>{ $val.textContent = `${getCount(ex)}/${max}`; };
-      const inc=$c.querySelector('[data-inc]');
-      const dec=$c.querySelector('[data-dec]');
-      if(inc) inc.onclick=()=>{ setCount(ex, getCount(ex)+1, max); upd(); };
-      if(dec) dec.onclick=()=>{ setCount(ex, getCount(ex)-1, max); upd(); };
+      const ex=$c.getAttribute('data-ex'); const max=+$c.getAttribute('data-max');
+      const $v=$c.querySelector('.cval');
+      const upd=()=>{$v.textContent=`${getCount(ex)}/${max}`};
+      $c.querySelector('[data-inc]').onclick=()=>{setCount(ex,getCount(ex)+1,max);upd();};
+      $c.querySelector('[data-dec]').onclick=()=>{setCount(ex,getCount(ex)-1,max);upd();};
     });
-
-  }catch(e){ diag('renderSession error: '+e.message); }
-}
-
-/* ===== Blokbesturing & Info ===== */
-function firstNonEmpty(plan){
-  for(let w=0; w<plan.weeks.length; w++){
-    for(let d=0; d<plan.weeks[w].days.length; d++){
-      if(plan.weeks[w].days[d].entries.length>0 || plan.weeks[w].days[d].ps){ return {w,d}; }
-    }
   }
-  return {w:0,d:0};
-}
-function readCfg(){
-  const psPatSel = (document.getElementById('selPS').value||'');
-  const psPat = psPatSel ? psPatSel : null;
-  const psVol = document.getElementById('selPSVol').value;
-  const advEl = document.getElementById('chkPSAdvanced');
-  return {
-    set: document.getElementById('selSet').value,
-    volume: +document.getElementById('selVol').value,
-    seed: (document.getElementById('inpSeed').value||'').trim(),
-    bias: document.getElementById('selBias').value,
-    psPattern: psPat,
-    psVolume: psPat ? psVol : null,
-    psAdvanced: (advEl && !advEl.disabled) ? advEl.checked : false,
-    chaos: document.getElementById('selChaos').value
-  };
-}
-function buildPlanAndState(cfg, keepBlock=false){
-  const plan = buildPlan(cfg);
-  const blockIdx = keepBlock ? (state.blockIdx||1) : ((state.blockIdx||0)+1);
-  const cursor = firstNonEmpty(plan);
-  return { blockIdx, cfg, plan, cursor, lastEnds: state.lastEnds || {} };
-}
-function renderInfoWrap(){
-  try{
-    if(!state.plan){ document.getElementById('kpi').innerHTML=''; document.getElementById('orders').innerHTML=''; return; }
-    const rc = state.plan.rc;
-    const kpi = [
-      `<span class="pill">Set: ${state.cfg.set==='basic'?'Basis':'Advanced'}</span>`,
+
+  function renderInfo(){
+    if(!state.plan){$('#kpi').innerHTML='';$('#orders').innerHTML='';return;}
+    const rc=state.plan.rc;
+    const kpi=[
       `<span class="pill">Volume: ${state.cfg.volume}</span>`,
       `<span class="pill">Rounds: ${rc.rounds}</span>`,
       `<span class="pill">Cap/round: ${rc.cap}</span>`,
-      `<span class="pill">Blok #${state.blockIdx||1}</span>`,
+      `<span class="pill">Blok #${state.blockIdx}</span>`,
       `<span class="pill">KB-bias: ${state.cfg.bias==='on'?'Aan (▲/▼)':'Uit'}</span>`,
-      state.cfg.psPattern? `<span class="pill">Plan Strong: ${state.cfg.psPattern} • Vol: ${state.cfg.psVolume} • ${state.cfg.psAdvanced?'Advanced (H+SH)':'Basic'}</span>`:''
+      state.cfg.psPattern?`<span class="pill">Plan Strong: ${state.cfg.psPattern} • Vol: ${state.cfg.psVolume} • ${state.cfg.psAdvanced?'Advanced (H+SH)':'Basic'}</span>`:''
     ].filter(Boolean).join(' ');
-    document.getElementById('kpi').innerHTML = kpi;
+    document.getElementById('kpi').innerHTML=kpi;
+    const rows=Object.entries(state.plan.weekOrders).map(([k,v])=>`${k}: <b>${v.join(' → ')}</b>`).join('<br>');
+    document.getElementById('orders').innerHTML=rows;
+  }
 
-    const rows = Object.entries(state.plan.weekOrders).map(([k,v])=>`${k}: <b>${v.join(' → ')}</b>`).join('<br>');
-    document.getElementById('orders').innerHTML = rows;
-  }catch(e){ diag('renderInfo error: '+e.message); }
-}
-function newBlock(){ try{ const cfg=readCfg(); state = buildPlanAndState(cfg,false); save(); renderInfoWrap(); renderSession(); toast('Blok aangemaakt'); }catch(e){ diag('newBlock error: '+e.message); } }
-function rebuildInPlace(){ try{ const cfg=readCfg(); state = buildPlanAndState(cfg,true); resetDayCounters(); save(); renderInfoWrap(); renderSession(); toast('Planner vernieuwd'); }catch(e){ diag('rebuild error: '+e.message); } }
-function next(){
-  if(!state.plan){ newBlock(); return; }
-  let {w,d} = state.cursor;
-  d++; if(d>=5){ d=0; w++; }
-  if(w>=4){ toast('Blok afgerond'); return; }
-  state.cursor={w,d}; save(); renderSession();
-}
-function prev(){
-  if(!state.plan) return;
-  let {w,d} = state.cursor;
-  d--; if(d<0){ w--; if(w<0){w=0; d=0;} else { d = 4; } }
-  state.cursor={w,d}; save(); renderSession();
-}
-function complete(){ next(); }
-
-/* ===== PS controls enable/disable ===== */
-document.getElementById('selPS').addEventListener('change', (e)=>{
-  const on = !!(e.target.value);
-  document.getElementById('selPSVol').disabled = !on;
-  const adv = document.getElementById('chkPSAdvanced'); if(adv) adv.disabled = !on;
-});
-
-/* ===== Buttons ===== */
-document.getElementById('btnNewBlock').onclick=newBlock;
-document.getElementById('btnRebuild').onclick=rebuildInPlace;
-document.getElementById('btnReset').onclick=()=>{
-  try{
-    localStorage.removeItem(LS_KEY);
-    state={};
+  // Block controls
+  function firstNonEmpty(plan){for(let w=0;w<plan.weeks.length;w++){for(let d=0;d<plan.weeks[w].days.length;d++){if(plan.weeks[w].days[d].entries.length>0||plan.weeks[w].days[d].ps){return{w,d};}}}return{w:0,d:0};}
+  function newBlock(){
+    const cfg=readCfg();
+    const plan=buildPlan(cfg);
+    const blockIdx=(state.blockIdx||0)+1;
+    state={blockIdx,cfg,plan,cursor:firstNonEmpty(plan),lastEnds:state.lastEnds||{}};
+    save(); renderInfo(); renderSession(); toast('Blok aangemaakt');
+  }
+  function next(){
+    if(!state.plan){newBlock();return;}
+    let {w,d}=state.cursor; const weeks=state.plan.weeks;
+    d++; if(d>=weeks[w].days.length){d=0; w++;}
+    if(w>=weeks.length){
+      const ends={}; const matrix=effectiveMatrix();
+      for(const pat of Object.keys(matrix)){ ends[pat]=state.plan.weekOrders[pat][3]; }
+      state.lastEnds=ends; save(); toast('Blok afgerond'); return;
+    }
+    state.cursor={w,d}; save(); renderSession();
+  }
+  function prev(){
+    if(!state.plan) return;
+    let {w,d}=state.cursor; d--;
+    if(d<0){ w--; if(w<0){w=0; d=0;} else { d=state.plan.weeks[w].days.length-1; } }
+    state.cursor={w,d}; save(); renderSession();
+  }
+  function complete(){ next(); }
+  function resetProgress(){
+    localStorage.removeItem(LS_KEY); state={};
     document.getElementById('session').textContent='Voortgang gewist. Klik “Nieuw blok”.';
-    document.getElementById('kpi').innerHTML=''; document.getElementById('orders').innerHTML='';
-    toast('Voortgang gereset');
-  }catch(e){ diag('reset error: '+e.message); }
-};
-document.getElementById('btnNextTop').onclick=next;
-document.getElementById('btnPrevTop').onclick=prev;
-document.getElementById('btnCompleteTop').onclick=complete;
-document.getElementById('btnResetCounters').onclick=()=>{ resetDayCounters(); renderSession(); toast('Tellers gereset voor deze sessie'); };
+    document.getElementById('kpi').innerHTML=''; document.getElementById('orders').innerHTML=''; toast('Voortgang gereset');
+  }
+  function readCfg(){
+    const psPatSel=(document.getElementById('selPS').value||''); const on=!!psPatSel;
+    return {
+      volume:+document.getElementById('selVol').value,
+      seed:(document.getElementById('inpSeed').value||'').trim(),
+      bias:document.getElementById('selBias').value,
+      psPattern: on ? psPatSel : null,
+      psVolume:  on ? document.getElementById('selPSVol').value : null,
+      psAdvanced:(document.getElementById('chkPSAdvanced') && !document.getElementById('chkPSAdvanced').disabled) ? document.getElementById('chkPSAdvanced').checked : false
+    };
+  }
 
-/* ===== Boot ===== */
-if(state && state.plan){ renderInfoWrap(); renderSession(); }
+  // Tabs
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.onclick=()=>{
+      const t=btn.getAttribute('data-tab');
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b===btn));
+      document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id===`tab-${t}`));
+    };
+  });
+
+  // UI bindings
+  document.getElementById('btnNewBlock').onclick=newBlock;
+  document.getElementById('btnRebuild').onclick=newBlock;
+  document.getElementById('btnReset').onclick=resetProgress;
+  document.getElementById('btnNextTop').onclick=()=>next();
+  document.getElementById('btnPrevTop').onclick=()=>prev();
+  document.getElementById('btnCompleteTop').onclick=complete;
+
+  document.getElementById('selPS').addEventListener('change',(e)=>{
+    const on=!!e.target.value;
+    document.getElementById('selPSVol').disabled=!on;
+    const adv=document.getElementById('chkPSAdvanced'); if(adv) adv.disabled=!on;
+  });
+
+  // Custom form
+  function renderCustomForm(){
+    const wrap=document.getElementById('customForm'); wrap.innerHTML='';
+    sanitizeCustom();
+    for(const pat of PATTERNS){
+      const conf=customMatrix[pat]; const it=conf.items;
+      const card=document.createElement('div'); card.className='card';
+      const rows=[0,1,2,3].map(i=>{
+        const nm=esc(it[i].name||''); const bal=!!it[i].ballistic; const uni=!!it[i].unilateral;
+        return `<div class="row-inline">
+          <div style="flex:1">
+            <label>${i===0?'1 (Main)':' '+(i+1)}</label>
+            <input type="text" data-p="${pat}" data-idx="${i}" placeholder="${i===0?'bijv. Military Press':'... (accessoire)'}" value="${nm}">
+          </div>
+          <label class="chk" style="margin-top:22px"><input type="checkbox" data-p="${pat}" data-idx="${i}" data-bal ${bal?'checked':''}> Ballistic (x2)</label>
+          <label class="chk" style="margin-top:22px"><input type="checkbox" data-p="${pat}" data-idx="${i}" data-uni ${uni?'checked':''}> Unilateral (+/+)</label>
+        </div>`;
+      }).join('');
+      card.innerHTML=`<div class="row" style="justify-content:space-between;align-items:center"><b>${pat}</b></div>${rows}`;
+      wrap.appendChild(card);
+    }
+  }
+  function readCustomFromForm(){
+    const obj=loadJSON(CUSTOM_KEY,{})||{};
+    for(const pat of PATTERNS){obj[pat]=obj[pat]||{enabled:true,items:[{},{},{},{}]};}
+    document.querySelectorAll('input[data-idx][type="text"]').forEach(inp=>{
+      const p=inp.getAttribute('data-p'); const i=+inp.getAttribute('data-idx');
+      obj[p].items[i]=obj[p].items[i]||{};
+      obj[p].items[i].name = sanitizeName(inp.value);
+    });
+    document.querySelectorAll('input[data-bal]').forEach(chk=>{
+      const p=chk.getAttribute('data-p'); const i=+chk.getAttribute('data-idx');
+      obj[p].items[i]=obj[p].items[i]||{}; obj[p].items[i].ballistic=chk.checked;
+    });
+    document.querySelectorAll('input[data-uni]').forEach(chk=>{
+      const p=chk.getAttribute('data-p'); const i=+chk.getAttribute('data-idx');
+      obj[p].items[i]=obj[p].items[i]||{}; obj[p].items[i].unilateral=chk.checked;
+    });
+    return obj;
+  }
+
+  renderCustomForm();
+
+  // Custom buttons
+  document.getElementById('btnSaveCustom').onclick=()=>{
+    customMatrix=readCustomFromForm(); saveJSON(CUSTOM_KEY,customMatrix);
+    document.querySelector('.tab-btn[data-tab="plan"]').click();
+    newBlock(); toast('Eigen oefeningen opgeslagen');
+  };
+  document.getElementById('btnClearCustom').onclick=()=>{
+    customMatrix={}; saveJSON(CUSTOM_KEY,customMatrix); renderCustomForm(); toast('Eigen oefeningen geleegd');
+  };
+
+  // Restore
+  if(state&&state.plan){renderInfo();renderSession();}
 
 })();
 </script>
