@@ -191,6 +191,11 @@
   function roundsCap(v){switch(+v){case 180:return{rounds:3,cap:3};case 240:return{rounds:3,cap:4};case 300:return{rounds:3,cap:5};case 400:return{rounds:4,cap:5};case 500:return{rounds:5,cap:5};default:return{rounds:3,cap:5};}}
   function apportion2(total,weights){const w=weights.slice();const W=w.reduce((a,b)=>a+b,0);if(W<=0)return Array(w.length).fill(0);const raw=w.map(v=>(v*total)/W);const base=raw.map(x=>Math.floor(x));let rem=total-base.reduce((a,b)=>a+b,0);const order=raw.map((x,i)=>({i,frac:x-Math.floor(x)})).sort((a,b)=>b.frac-a.frac);for(let k=0;k<order.length&&rem>0;k++){base[order[k].i]+=1;rem--;}return base;}
   function biasFromPct(weekType,pct){const parts=(weekType==='Deload')?3:((weekType==='Stress')?5:4);const base=SPLITS[parts];const mn=Math.min(...base),mx=Math.max(...base);const eq=(a,b)=>Math.abs(a-b)<1e-9; if(eq(pct,mn))return'Heavy'; if(eq(pct,mx))return'Light'; return'Medium';}
+function biasBadge(b){
+  return b==='Heavy' ? ' <span class="badge">▲ +1</span>'
+       : b==='Light' ? ' <span class="badge">▼ −1</span>'
+       : '';
+}
   function pickDays(count){const d=[0,1,2,3,4];shuffle(d);return d.slice(0,count).sort((a,b)=>a-b);}
 
   // LocalStorage JSON helpers
@@ -243,6 +248,18 @@
   // State
   let state=loadJSON(LS_KEY,null)||{};
   function save(){saveJSON(LS_KEY,state);}
+function doneKeyFor(w,d){
+  return `${state.blockIdx||0}_${w}_${d}`;
+}
+function markDone(w,d){
+  state.completed = state.completed || {};
+  state.completed[ doneKeyFor(w,d) ] = true;
+  save();
+}
+function isDone(w,d){
+  return !!(state.completed && state.completed[ doneKeyFor(w,d) ]);
+}
+
 
   // Splits & plan
   function buildWeekSplitsWithPcts(blockVol,weekType){
@@ -349,14 +366,19 @@
     const {w,d}=state.cursor; const week=state.plan.weeks[w]; const day=week.days[d]; const rc=state.plan.rc;
 
     // Opener: Get Up
-    let openerHTML=''; const rot=day.entries.find(e=>e.pattern==='Rotation');
-    if(rot){
-      const sets=rc.rounds;
-      const cost=rc.cap*sets;
-      const showTwoTwo=(state.cfg.bias==='on'&&(rot.bias||'Medium')==='Light');
-      openerHTML=`<div class="line"><div class="txt">${esc(`${sets} × (${showTwoTwo?'2+2':'1+1'}) Turkish Get Up`)}</div>${mkCounterHTML('Opener — Turkish Get Up',sets)}</div>`;
-      rot.volume=Math.max(0,(rot.volume|0)-cost);
-    }
+// Opener: Get Up (toon bias-badge; Light = 2+2, anders 1+1)
+let openerHTML=''; 
+const rot=day.entries.find(e=>e.pattern==='Rotation');
+if(rot){
+  const sets=rc.rounds;
+  const cost=rc.cap*sets;
+  const isLight = (state.cfg.bias==='on' && (rot.bias||'Medium')==='Light');
+  const badge  = (state.cfg.bias==='on') ? biasBadge(rot.bias||'Medium') : '';
+const repStr = `${sets} × (${isLight ? '2+2' : '1+1'}) Turkish Get Up${badge}`;
+// ❌ verwijder esc() zodat HTML-badge niet wordt geëscaped
+openerHTML = `<div class="line"><div class="txt">${repStr}</div>${mkCounterHTML('Opener — Turkish Get Up',sets)}</div>`;
+  rot.volume = Math.max(0,(rot.volume|0)-cost);
+}
 
     const entries=shuffle(day.entries.slice().filter(e=>e.pattern!=='Loaded Carry'));
     const lines=[];
@@ -424,7 +446,8 @@
 
     // Compose
     const html=[];
-    html.push(esc(`Week ${w+1}, Dag ${d+1}`),'<br><br>');
+    const doneMark = isDone(w,d) ? ' — ✔' : '';
+html.push(esc(`Week ${w+1}, Dag ${d+1}${doneMark}`), '<br><br>');
     if(openerHTML) html.push(openerHTML,'<br><br>');
     html.push('<hr>',esc(`${rc.rounds} rounds of following circuit:`),'<br>');
     if(lines.length){
@@ -463,13 +486,13 @@
 
   // Block controls
   function firstNonEmpty(plan){for(let w=0;w<plan.weeks.length;w++){for(let d=0;d<plan.weeks[w].days.length;d++){if(plan.weeks[w].days[d].entries.length>0||plan.weeks[w].days[d].ps){return{w,d};}}}return{w:0,d:0};}
-  function newBlock(){
-    const cfg=readCfg();
-    const plan=buildPlan(cfg);
-    const blockIdx=(state.blockIdx||0)+1;
-    state={blockIdx,cfg,plan,cursor:firstNonEmpty(plan),lastEnds:state.lastEnds||{}};
-    save(); renderInfo(); renderSession(); toast('Blok aangemaakt');
-  }
+function newBlock(){
+  const cfg=readCfg();
+  const plan=buildPlan(cfg);
+  const blockIdx=(state.blockIdx||0)+1;
+  state={blockIdx,cfg,plan,cursor:firstNonEmpty(plan),lastEnds:state.lastEnds||{}, completed:{}};
+  save(); renderInfo(); renderSession(); toast('Blok aangemaakt');
+}
   function next(){
     if(!state.plan){newBlock();return;}
     let {w,d}=state.cursor; const weeks=state.plan.weeks;
@@ -487,7 +510,12 @@
     if(d<0){ w--; if(w<0){w=0; d=0;} else { d=state.plan.weeks[w].days.length-1; } }
     state.cursor={w,d}; save(); renderSession();
   }
-  function complete(){ next(); }
+  function complete(){
+  if(!state.plan) return;
+  const {w,d} = state.cursor;
+  markDone(w,d);
+  next();
+}
   function resetProgress(){
     localStorage.removeItem(LS_KEY); state={};
     document.getElementById('session').textContent='Voortgang gewist. Klik “Nieuw blok”.';
