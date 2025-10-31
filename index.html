@@ -259,6 +259,16 @@ function markDone(w,d){
 function isDone(w,d){
   return !!(state.completed && state.completed[ doneKeyFor(w,d) ]);
 }
+// Accessoire-rotatie-cursor per patroon (alleen voor multi-accessoire momenten)
+function getAccCursor(pattern){
+  state.accCursor = state.accCursor || {};
+  return state.accCursor[pattern] | 0;
+}
+function setAccCursor(pattern, val){
+  state.accCursor = state.accCursor || {};
+  state.accCursor[pattern] = val | 0;
+  save();
+}
 
 
   // Splits & plan
@@ -338,27 +348,43 @@ function isDone(w,d){
     }
     return {idx:Math.max(1,idx), total};
   }
-  function pickAccessoryOrder(weekType, sessIdx, accList){
-    const A1=0,A2=1,A3=2; const has=i=>i>=0&&i<accList.length;
-    switch(weekType){
-      case 'Deload': return [];
-      case 'Maintenance':
-        if(sessIdx===3) return has(A1)?[A1]:[];
-        if(sessIdx===4) return has(A2)?[A2]:[];
-        return [];
-      case 'Development':
-        if(sessIdx===2) return has(A1)?[A1]:[];
-        if(sessIdx===3) return has(A2)?[A2]:[];
-        if(sessIdx===4) return has(A3)?[A3]:[];
-        return [];
-      case 'Stress':
-        if(sessIdx===3) return has(A1)?[A1]:[];
-        if(sessIdx===4) return has(A2)?[A2]:[];
-        if(sessIdx===5){ const arr=[]; if(has(A3)) arr.push(A3); if(has(A1)) arr.push(A1); return arr; }
-        return [];
-      default: return [];
-    }
+function pickAccessoryOrder(weekType, pct, accList, pattern){
+  const has = i => i>=0 && i<accList.length;
+  const P = x => Math.abs(pct - x) < 1e-9; // veilige float-vergelijking
+
+  if (weekType === 'Deload') return []; // geen accessoires
+
+  if (weekType === 'Maintenance') {
+    // 28% -> A1, 35% -> A2
+    if (P(0.28)) return has(0) ? [0] : []; // A1
+    if (P(0.35)) return has(1) ? [1] : []; // A2
+    return [];
   }
+
+  if (weekType === 'Development') {
+    // 24% (~0.28 label) -> A1, 33% (~0.35) -> A3
+    if (P(0.28)) return has(0) ? [0] : []; // A1
+    if (P(0.35)) return has(2) ? [2] : []; // A3
+    return [];
+  }
+
+  if (weekType === 'Stress') {
+    // 15% -> A1, 20% -> A2, 25% -> A3, 30% -> A3 + A1
+    if (P(0.15)) return has(0) ? [0] : [];        // A1
+    if (P(0.20)) return has(1) ? [1] : [];        // A2
+    if (P(0.25)) return has(2) ? [2] : [];        // A3
+    if (P(0.30)) {
+      const arr = [];
+      if (has(2)) arr.push(2); // A3
+      if (has(0)) arr.push(0); // A1
+      return arr;
+    }
+    return [];
+  }
+
+  return [];
+}
+
 
   // Render
   function renderSession(){
@@ -402,18 +428,27 @@ openerHTML = `<div class="line"><div class="txt">${repStr}</div>${mkCounterHTML(
       const order=(e.pattern==='Rotation') ? [...(e.acc||[])].filter(Boolean)
                                            : [e.main,...(e.acc||[])].filter(Boolean);
       const {idx:sessIdx}=patternSessionIndex(week,d,e.pattern);
-      const accList=(e.pattern==='Rotation')?order:order.slice(1);
-      const accPick=pickAccessoryOrder(e.weekType,sessIdx,accList);
+const accList=(e.pattern==='Rotation')?order:order.slice(1);
+const accPick=pickAccessoryOrder(e.weekType, e.pct, accList, e.pattern);
 
-      let remaining=e.volume;
+// Multi-accessoire rotatie: ...
+let accOrder = accPick.slice();
+if (accOrder.length > 1) {
+  const cur = getAccCursor(e.pattern) % accOrder.length;
+  accOrder = accOrder.slice(cur).concat(accOrder.slice(0, cur));
+}
+
+let remaining=e.volume;
 
       // Main
       if(e.pattern!=='Rotation' && order.length>0){
         const nm=order[0];
-        let perRound=Math.min(rc.cap,Math.ceil(remaining/rc.rounds));
-        perRound=Math.max(1,Math.floor(perRound));
-        const isLightBoost=(state.cfg.bias==='on'&&e.bias==='Light'&&!day.ps);
-        if(isLightBoost) perRound=Math.min(10,Math.max(perRound,rc.cap));
+const isLightBoost = (state.cfg.bias==='on' && e.bias==='Light' && !day.ps);
+// cap per ronde: Light -> 10, anders standaard cap
+const targetCap = isLightBoost ? 10 : rc.cap;
+// perRound = min(cap, wat nodig is)
+let perRound = Math.min(targetCap, Math.ceil(remaining / rc.rounds));
+perRound = Math.max(1, Math.floor(perRound));
         const isBall=isBallisticName(nm);
         const isUni =isUnilateralName(nm);
         const shown=perRound*(isBall?2:1);
@@ -425,18 +460,38 @@ openerHTML = `<div class="line"><div class="txt">${repStr}</div>${mkCounterHTML(
       }
 
       // Accessoires
-      for(const i of accPick){
-        if(remaining<=0) break;
-        const nm=accList[i]; if(!nm) continue;
-        let perRound=Math.min(rc.cap,Math.ceil(remaining/rc.rounds));
-        perRound=Math.max(1,Math.floor(perRound));
-        const isBall=isBallisticName(nm);
-        const isUni =isUnilateralName(nm);
-        const shown=perRound*(isBall?2:1);
-        const repTxt=isUni?`${shown}+${shown}`:`${shown}`;
-        lines.push({name:nm,repText:repTxt,label:''});
-        remaining-=perRound*rc.rounds;
-      }
+// Accessoires
+let advancedCursor = false; // schuiven we de startpositie straks door?
+for (const i of accOrder) {
+  if (remaining <= 0) break;
+  const nm = accList[i]; if (!nm) continue;
+
+  // perRound voor accessoires blijft standaard cap (geen cap-10 hier)
+  let perRound = Math.min(rc.cap, Math.ceil(remaining / rc.rounds));
+  perRound = Math.max(1, Math.floor(perRound));
+
+  // niets toe te wijzen? -> sla over zonder cursor-advance
+  if (perRound <= 0) continue;
+
+  const isBall = isBallisticName(nm);
+  const isUni  = isUnilateralName(nm);
+  const shown  = perRound * (isBall ? 2 : 1);
+  const repTxt = isUni ? `${shown}+${shown}` : `${shown}`;
+
+  lines.push({name:nm,repText:repTxt,label:''});
+  remaining -= perRound * rc.rounds;
+
+  // ✅ alleen als er echt volume naar deze accessoire ging, 'advance' aanzetten
+  advancedCursor = true;
+}
+
+// Na deze sessie: als het een multi-accessoire moment was én er is volume gegaan,
+// verschuif de cursor zodat de volgende keer de andere accessoire eerst komt.
+if (accPick.length > 1 && advancedCursor) {
+  const cur = getAccCursor(e.pattern);
+  setAccCursor(e.pattern, cur + 1);
+}
+
     }
 
     // Carry
