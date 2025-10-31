@@ -196,6 +196,19 @@ function biasBadge(b){
        : b==='Light' ? ' <span class="badge">▼ −1</span>'
        : '';
 }
+// --- Rounds utility: rond een waarde af naar een veelvoud van #rounds ---
+function toRounds(x, rounds){
+  if (!Number.isFinite(x) || x <= 0) return rounds;
+  const k = Math.round(x / rounds);   // dichtstbijzijnde veelvoud
+  return Math.max(rounds, k * rounds);
+}
+// Neem het grootste veelvoud van #rounds dat ≤ total is
+function takeRoundsLE(total, rounds){
+  if (!Number.isFinite(total) || total <= 0) return 0;
+  const k = Math.floor(total / rounds);
+  return Math.max(0, k * rounds);
+}
+
   function pickDays(count){const d=[0,1,2,3,4];shuffle(d);return d.slice(0,count).sort((a,b)=>a-b);}
 
   // LocalStorage JSON helpers
@@ -446,18 +459,25 @@ let remaining=e.volume;
 const isLightBoost = (state.cfg.bias==='on' && e.bias==='Light' && !day.ps);
 // cap per ronde: Light -> 10, anders standaard cap
 const targetCap = isLightBoost ? 10 : rc.cap;
-// perRound = min(cap, wat nodig is)
-let perRound = Math.min(targetCap, Math.ceil(remaining / rc.rounds));
-perRound = Math.max(1, Math.floor(perRound));
-        const isBall=isBallisticName(nm);
-        const isUni =isUnilateralName(nm);
-        const shown=perRound*(isBall?2:1);
-        const repTxt=isUni?`${shown}+${shown}`:`${shown}`;
-        const label=(state.cfg.bias==='on'&&!day.ps)
-          ? (e.bias==='Heavy'?' <span class="badge">▲ +1</span>':(e.bias==='Light'?' <span class="badge">▼ −1</span>':'')):'';
-        lines.push({name:nm,repText:repTxt,label});
-        remaining-=perRound*rc.rounds;
-      }
+  // verdeel in veelvouden van #rounds, en cap per ronde respecteren
+  const maxMainThis = targetCap * rc.rounds;                // max wat main mag pakken vandaag
+  const assign       = Math.min(maxMainThis, takeRoundsLE(remaining, rc.rounds));
+  let perRound       = Math.floor(assign / rc.rounds);
+  perRound           = Math.max(0, Math.min(targetCap, perRound));
+
+  if (perRound > 0) {
+    const isBall = isBallisticName(nm);
+    const isUni  = isUnilateralName(nm);
+    const shown  = perRound * (isBall ? 2 : 1);  // x2 is alleen UI, niet in toewijzing
+    const repTxt = isUni ? `${shown}+${shown}` : `${shown}`;
+    const label  = (state.cfg.bias==='on'&&!day.ps)
+      ? (e.bias==='Heavy' ? ' <span class="badge">▲ +1</span>'
+         : (e.bias==='Light' ? ' <span class="badge">▼ −1</span>' : ''))
+      : '';
+    lines.push({name:nm,repText:repTxt,label});
+    remaining -= assign; // exact veelvoud verrekend
+  }
+}
 
       // Accessoires
 // Accessoires
@@ -466,12 +486,12 @@ for (const i of accOrder) {
   if (remaining <= 0) break;
   const nm = accList[i]; if (!nm) continue;
 
-  // perRound voor accessoires blijft standaard cap (geen cap-10 hier)
-  let perRound = Math.min(rc.cap, Math.ceil(remaining / rc.rounds));
-  perRound = Math.max(1, Math.floor(perRound));
+  // toewijzen in veelvouden van #rounds (accessoires hebben altijd de standaard cap)
+  const maxAccThis = rc.cap * rc.rounds;
+  const assignAcc  = Math.min(maxAccThis, takeRoundsLE(remaining, rc.rounds));
+  const perRound   = Math.floor(assignAcc / rc.rounds);
 
-  // niets toe te wijzen? -> sla over zonder cursor-advance
-  if (perRound <= 0) continue;
+  if (perRound <= 0) continue; // geen volume -> geen advance
 
   const isBall = isBallisticName(nm);
   const isUni  = isUnilateralName(nm);
@@ -479,9 +499,9 @@ for (const i of accOrder) {
   const repTxt = isUni ? `${shown}+${shown}` : `${shown}`;
 
   lines.push({name:nm,repText:repTxt,label:''});
-  remaining -= perRound * rc.rounds;
+  remaining -= assignAcc;
 
-  // ✅ alleen als er echt volume naar deze accessoire ging, 'advance' aanzetten
+  // ✅ alleen als er echt volume naar deze accessoire ging, cursor voor multi-accessoire-momenten doordraaien
   advancedCursor = true;
 }
 
