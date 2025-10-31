@@ -169,14 +169,39 @@
 
   // Default Unity-matrix (Advanced leidend)
   const MATRIX_ADV={
-    'Push':{main:'Military Press',acc:['Push Press','Half-kneeling Press','Floor Press']},
-    'Pull':{main:'Double Clean',acc:['Pull-up / Chin-up','Double Bent-over Row','High Pull']},
-    'Squat':{main:'Double Front Squat',acc:['Goblet Squat','Bulgarian Split Squat','Step-up']},
-    'Lunge':{main:'Tactical Lunge',acc:['Double Reverse Lunge','Athletic Lunge','Side Lunge']},
-    'Hinge':{main:'Two-arm Swing',acc:['Single-leg Glute Bridge','Double Deadlift','Double Snatch']},
-    'Rotation':{main:'Turkish Get Up',acc:['Windmill','Half-kneeling Windmill','Bent Press']},
-    'Anti-Rotation':{main:'Snatch',acc:['One-arm Swing','Single-leg Deadlift','Renegade Row']},
-    'Loaded Carry':{main:'Suitcase Carry',acc:['Front Rack Carry','Overhead Carry','Bear Crawl']}
+  'Push':{
+    main:'Military Press',
+    acc:['Push Press','Half-kneeling Press','Floor Press']
+  },
+  'Pull':{
+    main:'Double Clean',
+    acc:['Pull-up / Chin-up','Double Bent-over Row','High Pull'] // A1 = pull-up/chin-up
+  },
+  'Squat':{
+    main:'Double Front Squat',
+    acc:['Pistol / Box Pistol','Step-up','B-Stance Goblet Squat'] // zoals afgesproken
+  },
+  'Lunge':{
+    main:'Double Reverse Lunge',                                   // main aangepast
+    acc:['Tactical Lunge','Bulgarian Split Squat','Side Lunge']     // Bulgarian blijft hier als lunge-variant
+  },
+  'Hinge':{
+    main:'Two-arm Swing',
+    acc:['Single-leg Glute Bridge','Double Deadlift','Double Snatch']
+  },
+  'Rotation':{
+    main:'Turkish Get Up',
+    acc:['Windmill','Half-kneeling Lift','Bent Press']              // HK Lift i.p.v. HK Windmill
+  },
+  'Anti-Rotation':{
+    main:'Snatch',
+    acc:['One-arm Swing','Single-leg Deadlift','Renegade Row']      // One-arm swing blijft hier “liefde” krijgen
+  },
+  'Loaded Carry':{
+    main:'Suitcase Carry',
+    acc:['Front Rack Carry','Bottom-Up Rack Carry','Bear Crawl']    // Bottom-Up toegevoegd i.p.v. Overhead
+  }
+
   };
 
   // ===== Helpers =====
@@ -226,7 +251,11 @@ function takeRoundsLE(total, rounds){
   // Custom matrix (met ballistic/unilateral)
   let customMatrix=loadJSON(CUSTOM_KEY,{})||{};
   function inferBallistic(name){const nm=clean(name);return DEFAULT_BALLISTICS.has(nm)||/(swing|snatch|high pull|double clean)/i.test(nm)}
-  function inferUnilateral(name){const n=clean(name).toLowerCase();return /(one-arm|single-leg|pull-up|chin-up|lunge|windmill|bent press|renegade row|military press|push press|snatch)/i.test(n)}
+function inferUnilateral(name){
+  const n = clean(name).toLowerCase();
+  return /(one[-\s]?arm|single[-\s]?leg|split[-\s]?squat|pistol|step[-\s]?up|lunge|windmill|bent\s?press|half[-\s]?kneeling|kneeling|reverse\s?lunge|tactical\s?lunge|athletic\s?lunge|side\s?lunge|cossack|suitcase\s?carry|front\s?rack\s?carry|bottom[-\s]?up\s?carry|renegade\s?row|pull[-\s]?up|chin[-\s]?up|military\s?press|push\s?press|snatch)/i.test(n);
+}
+
   function seedFromUnity(){const out={};for(const p of PATTERNS){const m=MATRIX_ADV[p];const items=[];items[0]={name:m.main,ballistic:inferBallistic(m.main),unilateral:inferUnilateral(m.main)};for(let i=0;i<3;i++){const nm=m.acc[i]||'';items[i+1]={name:nm,ballistic:inferBallistic(nm),unilateral:inferUnilateral(nm)};}out[p]={enabled:true,items};}return out;}
   function sanitizeCustom(){
     if(!customMatrix||!Object.keys(customMatrix).length){customMatrix=seedFromUnity();}
