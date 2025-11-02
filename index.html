@@ -328,7 +328,6 @@ function setAccCursor(pattern, val){
     }
     const o=sess.map((_,i)=>i);shuffle(o);return o.map(i=>({vol:sess[i],pct:base[i]}));
   }
-  function pickDays(count){const d=[0,1,2,3,4];shuffle(d);return d.slice(0,count).sort((a,b)=>a-b);}
   function buildPlan(cfg){
     const matrix=effectiveMatrix();
     rnd=makeRNG(cfg.seed||'');
@@ -390,42 +389,16 @@ function setAccCursor(pattern, val){
     }
     return {idx:Math.max(1,idx), total};
   }
-function pickAccessoryOrder(weekType, pct, accList, pattern){
-  const has = i => i>=0 && i<accList.length;
-  const P = x => Math.abs(pct - x) < 1e-9; // veilige float-vergelijking
-
-  if (weekType === 'Deload') return []; // geen accessoires
-
-  if (weekType === 'Maintenance') {
-    // 28% -> A1, 35% -> A2
-    if (P(0.28)) return has(0) ? [0] : []; // A1
-    if (P(0.35)) return has(1) ? [1] : []; // A2
-    return [];
-  }
-
-  if (weekType === 'Development') {
-    // 24% (~0.28 label) -> A1, 33% (~0.35) -> A3
-    if (P(0.28)) return has(0) ? [0] : []; // A1
-    if (P(0.35)) return has(2) ? [2] : []; // A3
-    return [];
-  }
-
-  if (weekType === 'Stress') {
-    // 15% -> A1, 20% -> A2, 25% -> A3, 30% -> A3 + A1
-    if (P(0.15)) return has(0) ? [0] : [];        // A1
-    if (P(0.20)) return has(1) ? [1] : [];        // A2
-    if (P(0.25)) return has(2) ? [2] : [];        // A3
-    if (P(0.30)) {
-      const arr = [];
-      if (has(2)) arr.push(2); // A3
-      if (has(0)) arr.push(0); // A1
-      return arr;
-    }
-    return [];
-  }
-
-  return [];
+// Vloeiende round-robin i.p.v. weektype/pct-logica
+function pickAccessoryOrderRoundRobin(accList, pattern){
+  const n = accList.length;
+  if (n === 0) return [];
+  const start = getAccCursor(pattern) % n;
+  const order = [];
+  for (let k = 0; k < n; k++) order.push((start + k) % n);
+  return order;
 }
+
 
 
   // Render
@@ -470,15 +443,10 @@ openerHTML = `<div class="line"><div class="txt">${repStr}</div>${mkCounterHTML(
       const order=(e.pattern==='Rotation') ? [...(e.acc||[])].filter(Boolean)
                                            : [e.main,...(e.acc||[])].filter(Boolean);
       const {idx:sessIdx}=patternSessionIndex(week,d,e.pattern);
-const accList=(e.pattern==='Rotation')?order:order.slice(1);
-const accPick=pickAccessoryOrder(e.weekType, e.pct, accList, e.pattern);
+const accList = (e.pattern === 'Rotation') ? order : order.slice(1);
+// kies vaste start per sessie (cursor) en vul in volgorde door
+const accOrder = pickAccessoryOrderRoundRobin(accList, e.pattern);
 
-// Multi-accessoire rotatie: ...
-let accOrder = accPick.slice();
-if (accOrder.length > 1) {
-  const cur = getAccCursor(e.pattern) % accOrder.length;
-  accOrder = accOrder.slice(cur).concat(accOrder.slice(0, cur));
-}
 
 let remaining=e.volume;
 
@@ -486,8 +454,11 @@ let remaining=e.volume;
       if(e.pattern!=='Rotation' && order.length>0){
         const nm=order[0];
 const isLightBoost = (state.cfg.bias==='on' && e.bias==='Light' && !day.ps);
-// cap per ronde: Light -> 10, anders standaard cap
-const targetCap = isLightBoost ? 10 : rc.cap;
+const isHeavyBias  = (state.cfg.bias==='on' && e.bias==='Heavy' && !day.ps);
+
+// Heavy bias krijgt ALTIJD cap 3 per ronde
+const targetCap = isHeavyBias ? 3 : (isLightBoost ? 10 : rc.cap);
+
   // verdeel in veelvouden van #rounds, en cap per ronde respecteren
   const maxMainThis = targetCap * rc.rounds;                // max wat main mag pakken vandaag
   const assign       = Math.min(maxMainThis, takeRoundsLE(remaining, rc.rounds));
@@ -509,18 +480,17 @@ const targetCap = isLightBoost ? 10 : rc.cap;
 }
 
       // Accessoires
-// Accessoires
-let advancedCursor = false; // schuiven we de startpositie straks door?
+// Accessoires — round-robin met behoud van dagvolume
+let assignedSomething = false;
 for (const i of accOrder) {
   if (remaining <= 0) break;
   const nm = accList[i]; if (!nm) continue;
 
-  // toewijzen in veelvouden van #rounds (accessoires hebben altijd de standaard cap)
+  // maximale toewijzing per accessoire (cap/round × rounds)
   const maxAccThis = rc.cap * rc.rounds;
   const assignAcc  = Math.min(maxAccThis, takeRoundsLE(remaining, rc.rounds));
   const perRound   = Math.floor(assignAcc / rc.rounds);
-
-  if (perRound <= 0) continue; // geen volume -> geen advance
+  if (perRound <= 0) continue;
 
   const isBall = isBallisticName(nm);
   const isUni  = isUnilateralName(nm);
@@ -529,15 +499,14 @@ for (const i of accOrder) {
 
   lines.push({name:nm,repText:repTxt,label:''});
   remaining -= assignAcc;
+  assignedSomething = true;
 
-  // ✅ alleen als er echt volume naar deze accessoire ging, cursor voor multi-accessoire-momenten doordraaien
-  advancedCursor = true;
+  // We gaan pas naar de volgende accessoire als er nog leftover is.
 }
 
-// Na deze sessie: als het een multi-accessoire moment was én er is volume gegaan,
-// verschuif de cursor zodat de volgende keer de andere accessoire eerst komt.
-if (accPick.length > 1 && advancedCursor) {
-  const cur = getAccCursor(e.pattern);
+// Na de sessie schuiven we de cursor één plek door als er iets is toegewezen.
+if (accOrder.length > 0 && assignedSomething) {
+  const cur = getAccCursor(e.pattern) | 0;
   setAccCursor(e.pattern, cur + 1);
 }
 
@@ -594,7 +563,16 @@ function newBlock(){
   const cfg=readCfg();
   const plan=buildPlan(cfg);
   const blockIdx=(state.blockIdx||0)+1;
-  state={blockIdx,cfg,plan,cursor:firstNonEmpty(plan),lastEnds:state.lastEnds||{}, completed:{}};
+  state={
+  blockIdx,
+  cfg,
+  plan,
+  cursor: firstNonEmpty(plan),
+  lastEnds: state.lastEnds || {},
+  completed: {},
+  accCursor: state.accCursor || {}   // ✅ cursor blijft bestaan over blokken
+};
+
   save(); renderInfo(); renderSession(); toast('Blok aangemaakt');
 }
   function next(){
