@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Unity 2025 — Go-time Edition (Patched)</title>
+<title>Unity 2025 — Go-time Edition (Patched • Accessoire-fix)</title>
 <style>
   :root{color-scheme:dark}
   *{box-sizing:border-box}
@@ -282,6 +282,18 @@
   function getAccCursor(pattern){state.accCursor = state.accCursor || {}; return state.accCursor[pattern] | 0;}
   function setAccCursor(pattern, val){state.accCursor = state.accCursor || {}; state.accCursor[pattern] = val | 0; save();}
 
+  // === Nieuw: dag-locks voor accessoire startpositie ===
+  function accStartKey(pattern,w,d){ return `${state.blockIdx||0}|${pattern}|${w}|${d}`; }
+  function getAccStart(pattern,w,d){
+    state.accStart = state.accStart || {};
+    const k = accStartKey(pattern,w,d);
+    if (typeof state.accStart[k] === 'number') return state.accStart[k];
+    const v = getAccCursor(pattern) | 0; // lock op eerste render van deze dag
+    state.accStart[k] = v;
+    save();
+    return v;
+  }
+
   // Splits & plan
   function buildWeekSplitsWithPcts(blockVol,weekType){
     const parts=(weekType==='Deload')?3:(weekType==='Stress'?5:4);
@@ -298,10 +310,10 @@
     const o=sess.map((_,i)=>i);shuffle(o);return o.map(i=>({vol:sess[i],pct:base[i]}));
   }
 
-  function pickAccessoryOrderRoundRobin(accList, pattern){
+  function pickAccessoryOrderRoundRobin(accList, pattern, w, d){
     const n = accList.length;
     if (n === 0) return [];
-    const start = getAccCursor(pattern) % n;
+    const start = getAccStart(pattern, w, d) % n; // dag-locked start
     const order = [];
     for (let k = 0; k < n; k++) order.push((start + k) % n);
     return order;
@@ -373,6 +385,9 @@
     const out=$('#session'); if(!state.plan){out.textContent='Nog geen blok. Klik op “Nieuw blok”.';return;}
     const {w,d}=state.cursor; const week=state.plan.weeks[w]; const day=week.days[d]; const rc=state.plan.rc;
 
+    // track patronen met toegewezen accessoires vandaag; cursor++ pas bij complete()
+    const pendingPatterns = new Set();
+
     // Opener: Get Up (toon bias-badge; Light = 2+2, anders 1+1)
     let openerHTML=''; 
     const rot=day.entries.find(e=>e.pattern==='Rotation');
@@ -411,7 +426,7 @@
       const order=(e.pattern==='Rotation') ? [e.main] : [e.main,...(e.acc||[])].filter(Boolean);
       const {idx:sessIdx}=patternSessionIndex(week,d,e.pattern);
       const accList=(e.pattern==='Rotation')?[]:order.slice(1);
-      const accOrder=pickAccessoryOrderRoundRobin(accList,e.pattern);
+      const accOrder=pickAccessoryOrderRoundRobin(accList,e.pattern,w,d);
       let remaining=e.volume;
 
       // Main
@@ -452,8 +467,7 @@
         assignedSomething=true;
       }
       if(accOrder.length>0 && assignedSomething){
-        const cur=getAccCursor(e.pattern)|0;
-        setAccCursor(e.pattern,cur+1);
+        pendingPatterns.add(e.pattern); // markeer voor commit
       }
     }
 
@@ -487,6 +501,11 @@
       $c.querySelector('[data-inc]').onclick=()=>{setCount(ex,getCount(ex)+1,max);upd();};
       $c.querySelector('[data-dec]').onclick=()=>{setCount(ex,getCount(ex)-1,max);upd();};
     });
+
+    // Bewaar welke patronen vandaag een accessoire-advance verdienen (cursor++ bij Complete)
+    state.pendingAccAdvance = state.pendingAccAdvance || {};
+    state.pendingAccAdvance[dayKey()] = Array.from(pendingPatterns);
+    save();
   }
 
   function renderInfo(){
@@ -525,6 +544,8 @@
       lastEnds:state.lastEnds||{},
       completed:{},
       accCursor: state.accCursor || {},
+      accStart: {},                 // dag-locked starts
+      pendingAccAdvance: {},        // pending cursor advances per dag
       fixedCarry
     };
     save(); renderInfo(); renderSession(); toast('Blok aangemaakt');
@@ -549,6 +570,18 @@
   function complete(){
     if(!state.plan) return;
     const {w,d} = state.cursor;
+
+    // Cursor-advance op commit van deze dag
+    const key = dayKey();
+    const pend = (state.pendingAccAdvance && state.pendingAccAdvance[key]) || [];
+    if (pend.length) {
+      for (const pat of pend) {
+        setAccCursor(pat, (getAccCursor(pat) | 0) + 1);
+      }
+      delete state.pendingAccAdvance[key];
+      save();
+    }
+
     markDone(w,d);
     next();
   }
