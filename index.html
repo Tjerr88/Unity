@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Unity 2025 — Go-time Edition</title>
+<title>Unity 2025 — Go-time Edition (Patched)</title>
 <style>
   :root{color-scheme:dark}
   *{box-sizing:border-box}
@@ -175,15 +175,15 @@
   },
   'Pull':{
     main:'Double Clean',
-    acc:['Pull-up / Chin-up','Double Bent-over Row','High Pull'] // A1 = pull-up/chin-up
+    acc:['Pull-up / Chin-up','Double Bent-over Row','High Pull']
   },
   'Squat':{
     main:'Double Front Squat',
-    acc:['Pistol / Box Pistol','Step-up','B-Stance Goblet Squat'] // zoals afgesproken
+    acc:['Pistol / Box Pistol','Step-up','B-Stance Goblet Squat']
   },
   'Lunge':{
-    main:'Double Reverse Lunge',                                   // main aangepast
-    acc:['Tactical Lunge','Bulgarian Split Squat','Side Lunge']     // Bulgarian blijft hier als lunge-variant
+    main:'Double Reverse Lunge',
+    acc:['Tactical Lunge','Bulgarian Split Squat','Side Lunge']
   },
   'Hinge':{
     main:'Two-arm Swing',
@@ -191,17 +191,16 @@
   },
   'Rotation':{
     main:'Turkish Get Up',
-    acc:['Windmill','Half-kneeling Lift','Bent Press']              // HK Lift i.p.v. HK Windmill
+    acc:['Windmill','Half-kneeling Lift','Bent Press']
   },
   'Anti-Rotation':{
     main:'Snatch',
-    acc:['One-arm Swing','Single-leg Deadlift','Renegade Row']      // One-arm swing blijft hier “liefde” krijgen
+    acc:['One-arm Swing','Single-leg Deadlift','Renegade Row']
   },
   'Loaded Carry':{
     main:'Suitcase Carry',
-    acc:['Front Rack Carry','Bottom-Up Rack Carry','Bear Crawl']    // Bottom-Up toegevoegd i.p.v. Overhead
+    acc:['Front Rack Carry','Bottom-Up Rack Carry','Bear Crawl']
   }
-
   };
 
   // ===== Helpers =====
@@ -216,24 +215,9 @@
   function roundsCap(v){switch(+v){case 180:return{rounds:3,cap:3};case 240:return{rounds:3,cap:4};case 300:return{rounds:3,cap:5};case 400:return{rounds:4,cap:5};case 500:return{rounds:5,cap:5};default:return{rounds:3,cap:5};}}
   function apportion2(total,weights){const w=weights.slice();const W=w.reduce((a,b)=>a+b,0);if(W<=0)return Array(w.length).fill(0);const raw=w.map(v=>(v*total)/W);const base=raw.map(x=>Math.floor(x));let rem=total-base.reduce((a,b)=>a+b,0);const order=raw.map((x,i)=>({i,frac:x-Math.floor(x)})).sort((a,b)=>b.frac-a.frac);for(let k=0;k<order.length&&rem>0;k++){base[order[k].i]+=1;rem--;}return base;}
   function biasFromPct(weekType,pct){const parts=(weekType==='Deload')?3:((weekType==='Stress')?5:4);const base=SPLITS[parts];const mn=Math.min(...base),mx=Math.max(...base);const eq=(a,b)=>Math.abs(a-b)<1e-9; if(eq(pct,mn))return'Heavy'; if(eq(pct,mx))return'Light'; return'Medium';}
-function biasBadge(b){
-  return b==='Heavy' ? ' <span class="badge">▲ +1</span>'
-       : b==='Light' ? ' <span class="badge">▼ −1</span>'
-       : '';
-}
-// --- Rounds utility: rond een waarde af naar een veelvoud van #rounds ---
-function toRounds(x, rounds){
-  if (!Number.isFinite(x) || x <= 0) return rounds;
-  const k = Math.round(x / rounds);   // dichtstbijzijnde veelvoud
-  return Math.max(rounds, k * rounds);
-}
-// Neem het grootste veelvoud van #rounds dat ≤ total is
-function takeRoundsLE(total, rounds){
-  if (!Number.isFinite(total) || total <= 0) return 0;
-  const k = Math.floor(total / rounds);
-  return Math.max(0, k * rounds);
-}
-
+  function biasBadge(b){return b==='Heavy' ? ' <span class="badge">▲ +1</span>' : b==='Light' ? ' <span class="badge">▼ −1</span>' : '';}
+  function toRounds(x, rounds){if (!Number.isFinite(x) || x <= 0) return rounds; const k = Math.round(x / rounds); return Math.max(rounds, k * rounds);}
+  function takeRoundsLE(total, rounds){if (!Number.isFinite(total) || total <= 0) return 0; const k = Math.floor(total / rounds); return Math.max(0, k * rounds);}
   function pickDays(count){const d=[0,1,2,3,4];shuffle(d);return d.slice(0,count).sort((a,b)=>a-b);}
 
   // LocalStorage JSON helpers
@@ -251,10 +235,10 @@ function takeRoundsLE(total, rounds){
   // Custom matrix (met ballistic/unilateral)
   let customMatrix=loadJSON(CUSTOM_KEY,{})||{};
   function inferBallistic(name){const nm=clean(name);return DEFAULT_BALLISTICS.has(nm)||/(swing|snatch|high pull|double clean)/i.test(nm)}
-function inferUnilateral(name){
-  const n = clean(name).toLowerCase();
-  return /(one[-\s]?arm|single[-\s]?leg|split[-\s]?squat|pistol|step[-\s]?up|lunge|windmill|bent\s?press|half[-\s]?kneeling|kneeling|reverse\s?lunge|tactical\s?lunge|athletic\s?lunge|side\s?lunge|cossack|suitcase\s?carry|front\s?rack\s?carry|bottom[-\s]?up\s?carry|renegade\s?row|pull[-\s]?up|chin[-\s]?up|military\s?press|push\s?press|snatch)/i.test(n);
-}
+  function inferUnilateral(name){
+    const n = clean(name).toLowerCase();
+    return /(one[-\s]?arm|single[-\s]?leg|split[-\s]?squat|pistol|step[-\s]?up|lunge|windmill|bent\s?press|half[-\s]?kneeling|kneeling|reverse\s?lunge|tactical\s?lunge|athletic\s?lunge|side\s?lunge|cossack|suitcase\s?carry|front\s?rack\s?carry|bottom[-\s]?up\s?carry|renegade\s?row|pull[-\s]?up|chin[-\s]?up|military\s?press|push\s?press|snatch)/i.test(n);
+  }
 
   function seedFromUnity(){const out={};for(const p of PATTERNS){const m=MATRIX_ADV[p];const items=[];items[0]={name:m.main,ballistic:inferBallistic(m.main),unilateral:inferUnilateral(m.main)};for(let i=0;i<3;i++){const nm=m.acc[i]||'';items[i+1]={name:nm,ballistic:inferBallistic(nm),unilateral:inferUnilateral(nm)};}out[p]={enabled:true,items};}return out;}
   function sanitizeCustom(){
@@ -290,28 +274,13 @@ function inferUnilateral(name){
   // State
   let state=loadJSON(LS_KEY,null)||{};
   function save(){saveJSON(LS_KEY,state);}
-function doneKeyFor(w,d){
-  return `${state.blockIdx||0}_${w}_${d}`;
-}
-function markDone(w,d){
-  state.completed = state.completed || {};
-  state.completed[ doneKeyFor(w,d) ] = true;
-  save();
-}
-function isDone(w,d){
-  return !!(state.completed && state.completed[ doneKeyFor(w,d) ]);
-}
-// Accessoire-rotatie-cursor per patroon (alleen voor multi-accessoire momenten)
-function getAccCursor(pattern){
-  state.accCursor = state.accCursor || {};
-  return state.accCursor[pattern] | 0;
-}
-function setAccCursor(pattern, val){
-  state.accCursor = state.accCursor || {};
-  state.accCursor[pattern] = val | 0;
-  save();
-}
+  function doneKeyFor(w,d){return `${state.blockIdx||0}_${w}_${d}`;}
+  function markDone(w,d){state.completed = state.completed || {}; state.completed[ doneKeyFor(w,d) ] = true; save();}
+  function isDone(w,d){return !!(state.completed && state.completed[ doneKeyFor(w,d) ]);}
 
+  // Accessoire-rotatie-cursor per patroon (persist over blocks)
+  function getAccCursor(pattern){state.accCursor = state.accCursor || {}; return state.accCursor[pattern] | 0;}
+  function setAccCursor(pattern, val){state.accCursor = state.accCursor || {}; state.accCursor[pattern] = val | 0; save();}
 
   // Splits & plan
   function buildWeekSplitsWithPcts(blockVol,weekType){
@@ -328,6 +297,16 @@ function setAccCursor(pattern, val){
     }
     const o=sess.map((_,i)=>i);shuffle(o);return o.map(i=>({vol:sess[i],pct:base[i]}));
   }
+
+  function pickAccessoryOrderRoundRobin(accList, pattern){
+    const n = accList.length;
+    if (n === 0) return [];
+    const start = getAccCursor(pattern) % n;
+    const order = [];
+    for (let k = 0; k < n; k++) order.push((start + k) % n);
+    return order;
+  }
+
   function buildPlan(cfg){
     const matrix=effectiveMatrix();
     rnd=makeRNG(cfg.seed||'');
@@ -366,21 +345,20 @@ function setAccCursor(pattern, val){
           weeks[w].days[dd].entries = weeks[w].days[dd].entries.filter(en=>en.pattern!==psPat);
         }
         const dayIdxs=pickDays(3);
-        let weights=[50,35,15], labels=['Medium','High','Low'], shOnHigh=false;
+        let weights=[50,35,15], labels=['L','M','H'], shOnHigh=false;
         if(cfg.psAdvanced){weights=[30,55,15]; shOnHigh=true;}
         const sessVols=apportion2(weekVol,weights);
         const psMain=(matrix[psPat]?.main)||psPat;
         for(let i=0;i<3;i++){
           const d=dayIdxs[i];
           weeks[w].days[d].ps = weeks[w].days[d].ps || {};
-          weeks[w].days[d].ps[psPat] = {weekType:wt,reps:sessVols[i],mainName:psMain,level:labels[i],sh:(labels[i]==='High'&&shOnHigh),mode:cfg.psAdvanced?'advanced':'basic'};
+          weeks[w].days[d].ps[psPat] = {weekType:wt,reps:sessVols[i],mainName:psMain,level:labels[i],sh:(labels[i]==='H'&&shOnHigh),mode:cfg.psAdvanced?'advanced':'basic'};
         }
       }
     }
     return {weeks, rc:roundsCap(cfg.volume), weekOrders, set:'advanced'};
   }
 
-  // Doordraaien per weektype
   function patternSessionIndex(weekObj, currentDayIdx, patternName){
     let idx=0,total=0;
     for(let d=0; d<weekObj.days.length; d++){
@@ -389,42 +367,32 @@ function setAccCursor(pattern, val){
     }
     return {idx:Math.max(1,idx), total};
   }
-// Vloeiende round-robin i.p.v. weektype/pct-logica
-function pickAccessoryOrderRoundRobin(accList, pattern){
-  const n = accList.length;
-  if (n === 0) return [];
-  const start = getAccCursor(pattern) % n;
-  const order = [];
-  for (let k = 0; k < n; k++) order.push((start + k) % n);
-  return order;
-}
-
-
 
   // Render
   function renderSession(){
     const out=$('#session'); if(!state.plan){out.textContent='Nog geen blok. Klik op “Nieuw blok”.';return;}
     const {w,d}=state.cursor; const week=state.plan.weeks[w]; const day=week.days[d]; const rc=state.plan.rc;
 
-    // Opener: Get Up
-// Opener: Get Up (toon bias-badge; Light = 2+2, anders 1+1)
-let openerHTML=''; 
-const rot=day.entries.find(e=>e.pattern==='Rotation');
-if(rot){
-  const sets=rc.rounds;
-  const cost=rc.cap*sets;
-  const isLight = (state.cfg.bias==='on' && (rot.bias||'Medium')==='Light');
-  const badge  = (state.cfg.bias==='on') ? biasBadge(rot.bias||'Medium') : '';
-const repStr = `${sets} × (${isLight ? '2+2' : '1+1'}) Turkish Get Up${badge}`;
-// ❌ verwijder esc() zodat HTML-badge niet wordt geëscaped
-openerHTML = `<div class="line"><div class="txt">${repStr}</div>${mkCounterHTML('Opener — Turkish Get Up',sets)}</div>`;
-  rot.volume = Math.max(0,(rot.volume|0)-cost);
-}
+    // Opener: Get Up (toon bias-badge; Light = 2+2, anders 1+1)
+    let openerHTML=''; 
+    const rot=day.entries.find(e=>e.pattern==='Rotation');
+    if(rot){
+      const sets=rc.rounds;
+      const cost=rc.cap*sets;
+      const isLight = (state.cfg.bias==='on' && (rot.bias||'Medium')==='Light');
+      const badge  = (state.cfg.bias==='on') ? biasBadge(rot.bias||'Medium') : '';
+      const repStr = `${sets} × (${isLight ? '2+2' : '1+1'}) Turkish Get Up${badge}`;
+      openerHTML = `<div class="line"><div class="txt">${repStr}</div>${mkCounterHTML('Opener — Turkish Get Up',sets)}</div>`;
+      rot.volume = Math.max(0,(rot.volume|0)-cost);
+    }
 
-    const entries=shuffle(day.entries.slice().filter(e=>e.pattern!=='Loaded Carry'));
-    const lines=[];
+    // Verzamel alle oefeningen (zonder Carry) en shuffle
+    const baseEntries = day.entries.slice().filter(e=>e.pattern!=='Loaded Carry');
+    shuffle(baseEntries);
 
-    // PS inject
+    const circuitExercises = [];
+
+    // PS inject eerst als "oefeningen" (niet beïnvloed door caps; alleen weergave)
     if(day.ps){
       const rounds=rc.rounds; const roundsWeights=Array(rounds).fill(1);
       for(const [pat,info] of Object.entries(day.ps)){
@@ -434,97 +402,77 @@ openerHTML = `<div class="line"><div class="txt">${repStr}</div>${mkCounterHTML(
         const perRound=buckets.map(v=>apportion2(v,roundsWeights)); const roundLabels=[];
         for(let r=0;r<rounds;r++){const parts=[];for(const lab of labels){const idx=labels.indexOf(lab);if(idx>=0&&perRound[idx][r]>0)parts.push(`${lab}${perRound[idx][r]}`);}roundLabels.push(parts.length?parts.join('/'):'—');}
         const detail=roundLabels.map((s,i)=>`R${i+1}:${s}`).join(' • ');
-        lines.push({name:`PS — ${info.mainName}`,repText:`${rounds} rounds`,label:` — ${info.level}${info.sh?' (H+SH)':''} — ${detail}`});
+        circuitExercises.push({name:`PS — ${info.mainName}`,repText:`${rounds} rounds`,label:` — ${info.level}${info.sh?' (H+SH)':''} — ${detail}`});
       }
     }
 
-    // Unity circuit — doordraaien
-    for(const e of entries){
-      const order=(e.pattern==='Rotation') ? [...(e.acc||[])].filter(Boolean)
-                                           : [e.main,...(e.acc||[])].filter(Boolean);
+    // Unity circuit — per patroon main + accessoires als losse items
+    for(const e of baseEntries){
+      const order=(e.pattern==='Rotation') ? [e.main] : [e.main,...(e.acc||[])].filter(Boolean);
       const {idx:sessIdx}=patternSessionIndex(week,d,e.pattern);
-const accList = (e.pattern === 'Rotation') ? order : order.slice(1);
-// kies vaste start per sessie (cursor) en vul in volgorde door
-const accOrder = pickAccessoryOrderRoundRobin(accList, e.pattern);
-
-
-let remaining=e.volume;
+      const accList=(e.pattern==='Rotation')?[]:order.slice(1);
+      const accOrder=pickAccessoryOrderRoundRobin(accList,e.pattern);
+      let remaining=e.volume;
 
       // Main
       if(e.pattern!=='Rotation' && order.length>0){
         const nm=order[0];
-const isLightBoost = (state.cfg.bias==='on' && e.bias==='Light' && !day.ps);
-const isHeavyBias  = (state.cfg.bias==='on' && e.bias==='Heavy' && !day.ps);
+        const isLightBoost = (state.cfg.bias==='on' && e.bias==='Light' && !day.ps);
+        const isHeavyBias  = (state.cfg.bias==='on' && e.bias==='Heavy' && !day.ps);
+        const targetCap = isHeavyBias ? 3 : (isLightBoost ? 10 : rc.cap);
+        const maxMainThis = targetCap * rc.rounds;
+        const assign = Math.min(maxMainThis, takeRoundsLE(remaining, rc.rounds));
+        const perRound = Math.floor(assign/rc.rounds);
+        if(perRound>0){
+          const isBall=isBallisticName(nm);
+          const isUni=isUnilateralName(nm);
+          const shown=perRound*(isBall?2:1);
+          const repTxt=isUni?`${shown}+${shown}`:`${shown}`;
+          const label=(state.cfg.bias==='on'&&!day.ps)?biasBadge(e.bias):'';
+          circuitExercises.push({name:nm,repText:repTxt,label});
+          remaining-=assign;
+        }
+      }
 
-// Heavy bias krijgt ALTIJD cap 3 per ronde
-const targetCap = isHeavyBias ? 3 : (isLightBoost ? 10 : rc.cap);
-
-  // verdeel in veelvouden van #rounds, en cap per ronde respecteren
-  const maxMainThis = targetCap * rc.rounds;                // max wat main mag pakken vandaag
-  const assign       = Math.min(maxMainThis, takeRoundsLE(remaining, rc.rounds));
-  let perRound       = Math.floor(assign / rc.rounds);
-  perRound           = Math.max(0, Math.min(targetCap, perRound));
-
-  if (perRound > 0) {
-    const isBall = isBallisticName(nm);
-    const isUni  = isUnilateralName(nm);
-    const shown  = perRound * (isBall ? 2 : 1);  // x2 is alleen UI, niet in toewijzing
-    const repTxt = isUni ? `${shown}+${shown}` : `${shown}`;
-    const label  = (state.cfg.bias==='on'&&!day.ps)
-      ? (e.bias==='Heavy' ? ' <span class="badge">▲ +1</span>'
-         : (e.bias==='Light' ? ' <span class="badge">▼ −1</span>' : ''))
-      : '';
-    lines.push({name:nm,repText:repTxt,label});
-    remaining -= assign; // exact veelvoud verrekend
-  }
-}
-
-      // Accessoires
-// Accessoires — round-robin met behoud van dagvolume
-let assignedSomething = false;
-for (const i of accOrder) {
-  if (remaining <= 0) break;
-  const nm = accList[i]; if (!nm) continue;
-
-  // maximale toewijzing per accessoire (cap/round × rounds)
-  const maxAccThis = rc.cap * rc.rounds;
-  const assignAcc  = Math.min(maxAccThis, takeRoundsLE(remaining, rc.rounds));
-  const perRound   = Math.floor(assignAcc / rc.rounds);
-  if (perRound <= 0) continue;
-
-  const isBall = isBallisticName(nm);
-  const isUni  = isUnilateralName(nm);
-  const shown  = perRound * (isBall ? 2 : 1);
-  const repTxt = isUni ? `${shown}+${shown}` : `${shown}`;
-
-  lines.push({name:nm,repText:repTxt,label:''});
-  remaining -= assignAcc;
-  assignedSomething = true;
-
-  // We gaan pas naar de volgende accessoire als er nog leftover is.
-}
-
-// Na de sessie schuiven we de cursor één plek door als er iets is toegewezen.
-if (accOrder.length > 0 && assignedSomething) {
-  const cur = getAccCursor(e.pattern) | 0;
-  setAccCursor(e.pattern, cur + 1);
-}
-
+      // Accessoires — round-robin met behoud van dagvolume
+      let assignedSomething=false;
+      for(const i of accOrder){
+        if(remaining<=0) break;
+        const nm=accList[i]; if(!nm) continue;
+        const maxAccThis=rc.cap*rc.rounds;
+        const assignAcc=Math.min(maxAccThis,takeRoundsLE(remaining,rc.rounds));
+        const perRound=Math.floor(assignAcc/rc.rounds);
+        if(perRound<=0) continue;
+        const isBall=isBallisticName(nm);
+        const isUni=isUnilateralName(nm);
+        const shown=perRound*(isBall?2:1);
+        const repTxt=isUni?`${shown}+${shown}`:`${shown}`;
+        circuitExercises.push({name:nm,repText:repTxt,label:''});
+        remaining-=assignAcc;
+        assignedSomething=true;
+      }
+      if(accOrder.length>0 && assignedSomething){
+        const cur=getAccCursor(e.pattern)|0;
+        setAccCursor(e.pattern,cur+1);
+      }
     }
+
+    // Shuffle alles in het circuit (PS + main + accessoires), opener blijft vooraan
+    shuffle(circuitExercises);
 
     // Carry
     const carryEntry=day.entries.find(e=>e.pattern==='Loaded Carry');
-    const carryName=shuffle(MATRIX_ADV['Loaded Carry'].acc.slice())[0];
+    const carryName = state.fixedCarry || MATRIX_ADV['Loaded Carry'].acc[0];
     const carryTxt=carryEntry?`${Math.max(30,carryEntry.volume*5)}s ${carryName}`:`45s ${carryName}`;
 
     // Compose
     const html=[];
     const doneMark = isDone(w,d) ? ' — ✔' : '';
-html.push(esc(`Week ${w+1}, Dag ${d+1}${doneMark}`), '<br><br>');
+    html.push(esc(`Week ${w+1}, Dag ${d+1}${doneMark}`), '<br><br>');
     if(openerHTML) html.push(openerHTML,'<br><br>');
     html.push('<hr>',esc(`${rc.rounds} rounds of following circuit:`),'<br>');
-    if(lines.length){
-      html.push(lines.map(o=>`<div class="line"><div class="txt">${esc(o.repText)} ${esc(o.name)}${o.label||''}</div>${mkCounterHTML(`Circuit — ${esc(o.name)}`,rc.rounds)}</div>`).join(''));
+    if(circuitExercises.length){
+      html.push(circuitExercises.map(o=>`<div class="line"><div class="txt">${esc(o.repText)} ${esc(o.name)}${o.label||''}</div>${mkCounterHTML(`Circuit — ${esc(o.name)}`,rc.rounds)}</div>`).join(''));
     }else{
       html.push(esc('(Geen patronen actief in het circuit vandaag)'));
     }
@@ -559,22 +507,28 @@ html.push(esc(`Week ${w+1}, Dag ${d+1}${doneMark}`), '<br><br>');
 
   // Block controls
   function firstNonEmpty(plan){for(let w=0;w<plan.weeks.length;w++){for(let d=0;d<plan.weeks[w].days.length;d++){if(plan.weeks[w].days[d].entries.length>0||plan.weeks[w].days[d].ps){return{w,d};}}}return{w:0,d:0};}
-function newBlock(){
-  const cfg=readCfg();
-  const plan=buildPlan(cfg);
-  const blockIdx=(state.blockIdx||0)+1;
-  state={
-  blockIdx,
-  cfg,
-  plan,
-  cursor: firstNonEmpty(plan),
-  lastEnds: state.lastEnds || {},
-  completed: {},
-  accCursor: state.accCursor || {}   // ✅ cursor blijft bestaan over blokken
-};
+  function newBlock(){
+    const cfg=readCfg();
+    const plan=buildPlan(cfg);
+    const blockIdx=(state.blockIdx||0)+1;
 
-  save(); renderInfo(); renderSession(); toast('Blok aangemaakt');
-}
+    // kies en bewaar vaste Carry voor dit blok (seeded)
+    const carryOptions = MATRIX_ADV['Loaded Carry'].acc.slice();
+    rnd = makeRNG(cfg.seed || '');
+    const fixedCarry = carryOptions[Math.floor(rnd()*carryOptions.length)];
+
+    state={
+      blockIdx,
+      cfg,
+      plan,
+      cursor:firstNonEmpty(plan),
+      lastEnds:state.lastEnds||{},
+      completed:{},
+      accCursor: state.accCursor || {},
+      fixedCarry
+    };
+    save(); renderInfo(); renderSession(); toast('Blok aangemaakt');
+  }
   function next(){
     if(!state.plan){newBlock();return;}
     let {w,d}=state.cursor; const weeks=state.plan.weeks;
@@ -593,11 +547,11 @@ function newBlock(){
     state.cursor={w,d}; save(); renderSession();
   }
   function complete(){
-  if(!state.plan) return;
-  const {w,d} = state.cursor;
-  markDone(w,d);
-  next();
-}
+    if(!state.plan) return;
+    const {w,d} = state.cursor;
+    markDone(w,d);
+    next();
+  }
   function resetProgress(){
     localStorage.removeItem(LS_KEY); state={};
     document.getElementById('session').textContent='Voortgang gewist. Klik “Nieuw blok”.';
