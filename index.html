@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Unity 2025 — Go-time Edition (Patched • Accessoire-fix)</title>
+<title>Unity 2025 — Prelocked + Barbell</title>
 <style>
   :root{color-scheme:dark}
   *{box-sizing:border-box}
@@ -28,21 +28,20 @@
   select,input[type="text"]{width:100%;background:#0d1830;border:1px solid rgba(255,255,255,.18);color:#e6eaf2;padding:10px;border-radius:10px}
   .grid{display:grid;gap:10px}
   .cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}
   @media (max-width:760px){
-    .cols-2{grid-template-columns:1fr}
+    .cols-2,.cols-4{grid-template-columns:1fr}
     .row.stack{display:grid;grid-template-columns:1fr;gap:8px}
     .btn{padding:14px 16px;border-radius:14px}
   }
   .muted{opacity:.75;font-size:12px}
   .toast{position:fixed;right:12px;bottom:12px;background:#0f1a34;border:1px solid rgba(255,255,255,.15);padding:10px 12px;border-radius:12px;font-size:13px;display:none}
   .badge{display:inline-block;font-weight:800;font-size:12px;padding:3px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.25);margin-left:6px;background:#0f1a34}
-  /* Tabs */
   .tabs{display:flex;gap:8px;margin:10px 0 6px}
   .tab-btn{background:#0f1a34;border:1px solid rgba(255,255,255,.15);color:#e6eaf2;padding:10px 12px;border-radius:12px;font-weight:800;cursor:pointer}
   .tab-btn.active{background:#2b63ff;border-color:#2b63ff}
   .tab-pane{display:none}
   .tab-pane.active{display:block}
-  /* Counters & lines */
   .counter{display:inline-flex;align-items:center;gap:8px;margin-left:12px;flex:0 0 auto}
   .counter .cbtn{background:#0f1a34;border:1px solid rgba(255,255,255,.2);color:#e6eaf2;border-radius:10px;padding:4px 10px;font-weight:800;cursor:pointer}
   .counter .cval{min-width:64px;text-align:center;font-weight:900}
@@ -51,6 +50,7 @@
   .row-inline{display:flex;gap:8px;align-items:center}
   .row-inline input[type="text"]{flex:1}
   .chk{display:inline-flex;gap:6px;align-items:center;font-size:12px;opacity:.9}
+  .barbell-box{padding:10px;border:1px dashed rgba(255,255,255,.25);border-radius:10px;background:#0f1a34}
 </style>
 </head>
 <body>
@@ -62,7 +62,6 @@
     <button class="tab-btn" data-tab="custom" aria-selected="false">Eigen oefeningen</button>
   </div>
 
-  <!-- Planner -->
   <div id="tab-plan" class="tab-pane active">
     <div class="row stack" style="margin:8px 0 12px">
       <button id="btnPrevTop" class="btn ghost" aria-label="Vorige sessie">◀ Vorige</button>
@@ -117,6 +116,13 @@
               <span>Advanced: High + Super Heavy</span>
             </label>
           </div>
+          <div>
+            <label>Basis kettlebell (kg)</label>
+            <input id="inpBaseKB" type="text" placeholder="bijv. 16">
+          </div>
+          <div>
+            <label class="row"><input type="checkbox" id="chkBarbellMode"> Barbell‑mode (Heavy Bias = Barbell)</label>
+          </div>
         </div>
 
         <div class="card" style="margin-top:12px">
@@ -126,7 +132,7 @@
             Weekpercentages: Deload 15% • Maintenance 22% • Development 28% • Stress 35%.<br>
             Splits per partitie: 3 → [15,35,50]% • 4 → [15,22,28,35]% • 5 → [10,15,20,25,30]%.<br>
             Bias (alleen mains): min%=Heavy ▲, max%=Light ▼. Light-bias main: cap-boost tot 10 per ronde (geen PS).<br>
-            Anti-Rotation main: Snatch (default), maar override via eigen oefeningen is toegestaan.
+            Barbell‑mode: vervangt Heavy‑bias mains van Push/Pull/Squat/Hinge door jouw barbell‑varianten. Carry roteert 1→2→3→4→1 per blokdag.
           </div>
         </div>
 
@@ -139,12 +145,24 @@
     </details>
   </div>
 
-  <!-- Custom -->
   <div id="tab-custom" class="tab-pane">
     <div class="card">
       <h2>Eigen oefeningen</h2>
       <p class="muted">Per patroon: vul <b>1 (Main)</b> en 2–4 (accessoires) in. Zet <b>Ballistic (x2)</b> voor swings/snatches e.d. en <b>Unilateral (+/+)</b> voor uni-oefeningen (weergave x+x). Leeg = Unity-standaard.</p>
       <div id="customForm" class="grid cols-2" style="margin-top:8px"></div>
+      <div class="card barbell-box" style="margin-top:12px">
+        <b>Barbell‑mapping (voor Heavy Bias)</b>
+        <div class="grid cols-4" style="margin-top:8px">
+          <div><label>Push (bijv. Barbell Bench Press)</label><input type="text" id="barbellPush" placeholder="Barbell Bench Press"></div>
+          <div><label>Pull (bijv. Barbell Row)</label><input type="text" id="barbellPull" placeholder="Barbell Row"></div>
+          <div><label>Squat (bijv. Back Squat)</label><input type="text" id="barbellSquat" placeholder="Barbell Back Squat"></div>
+          <div><label>Hinge (bijv. Deadlift)</label><input type="text" id="barbellHinge" placeholder="Barbell Deadlift"></div>
+        </div>
+        <div class="row stack" style="margin-top:8px">
+          <button id="btnSaveBarbell" class="btn inline">Barbell‑lifts opslaan</button>
+        </div>
+        <p class="muted" style="margin-top:6px">Wanneer <b>Barbell‑mode</b> aanstaat én een patroon Heavy‑bias is, wordt de main automatisch vervangen door jouw barbell‑lift.</p>
+      </div>
       <div class="row stack" style="margin-top:8px">
         <button id="btnSaveCustom" class="btn">Opslaan</button>
         <button id="btnClearCustom" class="btn ghost">Leegmaken</button>
@@ -158,99 +176,92 @@
 
 <script>
 (function(){
-  const LS_KEY='unity2025_state';
-  const COUNTERS_KEY='unity2025_counters';
-  const CUSTOM_KEY='unity2025_custom_matrix_v5';
-  const PATTERNS=['Push','Pull','Squat','Lunge','Hinge','Rotation','Anti-Rotation','Loaded Carry'];
-  const WEEK_TYPES=['Deload','Maintenance','Development','Stress'];
-  const WEEK_PCT={Deload:.15,Maintenance:.22,Development:.28,Stress:.35};
-  const SPLITS={3:[0.15,0.35,0.50],4:[0.15,0.22,0.28,0.35],5:[0.10,0.15,0.20,0.25,0.30]};
-  const DEFAULT_BALLISTICS=new Set(['Snatch','One-arm Swing','Two-arm Swing','High Pull','Double Clean']);
+  var LS_KEY='unity2025_state';
+  var COUNTERS_KEY='unity2025_counters';
+  var CUSTOM_KEY='unity2025_custom_matrix_v5';
+  var BARBELL_KEY='unity2025_barbell_map_v1';
+  var PRELOCK_ALL = true; // accessoires en carry bij blok-build locken
+  var PATTERNS=['Push','Pull','Squat','Lunge','Hinge','Rotation','Anti-Rotation','Loaded Carry'];
+  var WEEK_PCT={Deload:.15,Maintenance:.22,Development:.28,Stress:.35};
+  var SPLITS={3:[0.15,0.35,0.50],4:[0.15,0.22,0.28,0.35],5:[0.10,0.15,0.20,0.25,0.30]};
+  var DEFAULT_BALLISTICS=new Set(['Snatch','One-arm Swing','Two-arm Swing','High Pull','Double Clean']);
 
-  // Default Unity-matrix (Advanced leidend)
-  const MATRIX_ADV={
-  'Push':{
-    main:'Military Press',
-    acc:['Push Press','Half-kneeling Press','Floor Press']
-  },
-  'Pull':{
-    main:'Double Clean',
-    acc:['Pull-up / Chin-up','Double Bent-over Row','High Pull']
-  },
-  'Squat':{
-    main:'Double Front Squat',
-    acc:['Pistol / Box Pistol','Step-up','B-Stance Goblet Squat']
-  },
-  'Lunge':{
-    main:'Double Reverse Lunge',
-    acc:['Tactical Lunge','Bulgarian Split Squat','Side Lunge']
-  },
-  'Hinge':{
-    main:'Two-arm Swing',
-    acc:['Single-leg Glute Bridge','Double Deadlift','Double Snatch']
-  },
-  'Rotation':{
-    main:'Turkish Get Up',
-    acc:['Windmill','Half-kneeling Lift','Bent Press']
-  },
-  'Anti-Rotation':{
-    main:'Snatch',
-    acc:['One-arm Swing','Single-leg Deadlift','Renegade Row']
-  },
-  'Loaded Carry':{
-    main:'Suitcase Carry',
-    acc:['Front Rack Carry','Bottom-Up Rack Carry','Bear Crawl']
-  }
+  var MATRIX_ADV={
+  'Push':{ main:'Military Press', acc:['Push Press','Half-kneeling Press','Floor Press'] },
+  'Pull':{ main:'Double Clean', acc:['Pull-up / Chin-up','Double Bent-over Row','High Pull'] },
+  'Squat':{ main:'Double Front Squat', acc:['Pistol / Box Pistol','Step-up','B-Stance Goblet Squat'] },
+  'Lunge':{ main:'Double Reverse Lunge', acc:['Tactical Lunge','Bulgarian Split Squat','Side Lunge'] },
+  'Hinge':{ main:'Two-arm Swing', acc:['Single-leg Glute Bridge','Double Deadlift','Double Snatch'] },
+  'Rotation':{ main:'Turkish Get Up', acc:['Windmill','Half-kneeling Lift','Bent Press'] },
+  'Anti-Rotation':{ main:'Snatch', acc:['One-arm Swing','Single-leg Deadlift','Renegade Row'] },
+  'Loaded Carry':{ main:'Suitcase Carry', acc:['Front Rack Carry','Bottom-Up Rack Carry','Bear Crawl'] }
   };
 
-  // ===== Helpers =====
-  const $=s=>document.querySelector(s);
-  const toast=(m)=>{const t=$('#toast');t.textContent=m;t.style.display='block';setTimeout(()=>t.style.display='none',1500);};
-  const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const clean=s=>String(s).replace(/\s+/g,' ').trim();
-  function sanitizeName(s){const x=String(s||'').trim(); if(!x) return ''; if(x==='on'||x==='off') return ''; return x;}
-  function makeRNG(seed){let h=2166136261>>>0;if(seed){for(let i=0;i<seed.length;i++){h^=seed.charCodeAt(i);h=Math.imul(h,16777619);}}else{h=(Date.now()>>>0);}return function(){h+=0x6D2B79F5;let t=h;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return ((t^t>>>14)>>>0)/4294967296;}}
-  let rnd=makeRNG('');
-  function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(rnd()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a;}
+  function $(s){return document.querySelector(s);}
+  function toast(m){var t=$('#toast');t.textContent=m;t.style.display='block';setTimeout(function(){t.style.display='none';},1500);}
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]);});}
+  function clean(s){return String(s).replace(/\s+/g,' ').trim();}
+  function sanitizeName(s){var x=String(s||'').trim(); if(!x) return ''; if(x==='on'||x==='off') return ''; return x;}
+  function makeRNG(seed){var h=2166136261>>>0;if(seed){for(var i=0;i<seed.length;i++){h^=seed.charCodeAt(i);h=Math.imul(h,16777619);} } else {h=(Date.now()>>>0);} return function(){h+=0x6D2B79F5;var t=h;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return ((t^t>>>14)>>>0)/4294967296;};}
+  var rnd=makeRNG('');
+  function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(rnd()*(i+1));var tmp=a[i];a[i]=a[j];a[j]=tmp;}return a;}
   function roundsCap(v){switch(+v){case 180:return{rounds:3,cap:3};case 240:return{rounds:3,cap:4};case 300:return{rounds:3,cap:5};case 400:return{rounds:4,cap:5};case 500:return{rounds:5,cap:5};default:return{rounds:3,cap:5};}}
-  function apportion2(total,weights){const w=weights.slice();const W=w.reduce((a,b)=>a+b,0);if(W<=0)return Array(w.length).fill(0);const raw=w.map(v=>(v*total)/W);const base=raw.map(x=>Math.floor(x));let rem=total-base.reduce((a,b)=>a+b,0);const order=raw.map((x,i)=>({i,frac:x-Math.floor(x)})).sort((a,b)=>b.frac-a.frac);for(let k=0;k<order.length&&rem>0;k++){base[order[k].i]+=1;rem--;}return base;}
-  function biasFromPct(weekType,pct){const parts=(weekType==='Deload')?3:((weekType==='Stress')?5:4);const base=SPLITS[parts];const mn=Math.min(...base),mx=Math.max(...base);const eq=(a,b)=>Math.abs(a-b)<1e-9; if(eq(pct,mn))return'Heavy'; if(eq(pct,mx))return'Light'; return'Medium';}
+  function apportion2(total,weights){var w=weights.slice();var W=w.reduce(function(a,b){return a+b;},0);if(W<=0)return Array(w.length).fill(0);var raw=w.map(function(v){return (v*total)/W;});var base=raw.map(function(x){return Math.floor(x);});var rem=total-base.reduce(function(a,b){return a+b;},0);var order=raw.map(function(x,i){return {i:i,frac:x-Math.floor(x)};}).sort(function(a,b){return b.frac-a.frac;});for(var k=0;k<order.length&&rem>0;k++){base[order[k].i]+=1;rem--;}return base;}
+  function biasFromPct(weekType,pct){var parts=(weekType==='Deload')?3:((weekType==='Stress')?5:4);var base=SPLITS[parts];var mn=Math.min.apply(null,base),mx=Math.max.apply(null,base);function eq(a,b){return Math.abs(a-b)<1e-9;} if(eq(pct,mn))return'Heavy'; if(eq(pct,mx))return'Light'; return'Medium';}
   function biasBadge(b){return b==='Heavy' ? ' <span class="badge">▲ +1</span>' : b==='Light' ? ' <span class="badge">▼ −1</span>' : '';}
-  function toRounds(x, rounds){if (!Number.isFinite(x) || x <= 0) return rounds; const k = Math.round(x / rounds); return Math.max(rounds, k * rounds);}
-  function takeRoundsLE(total, rounds){if (!Number.isFinite(total) || total <= 0) return 0; const k = Math.floor(total / rounds); return Math.max(0, k * rounds);}
-  function pickDays(count){const d=[0,1,2,3,4];shuffle(d);return d.slice(0,count).sort((a,b)=>a-b);}
+  function takeRoundsLE(total, rounds){if (!Number.isFinite(total) || total <= 0) return 0; var k = Math.floor(total / rounds); return Math.max(0, k * rounds);}
+  function pickDays(count){var d=[0,1,2,3,4];shuffle(d);return d.slice(0,count).sort(function(a,b){return a-b;});}
 
-  // LocalStorage JSON helpers
-  function loadJSON(k,def){try{const v=localStorage.getItem(k);return v?JSON.parse(v):def}catch(e){return def}}
+  function loadJSON(k,def){try{var v=localStorage.getItem(k);return v?JSON.parse(v):def}catch(e){return def}}
   function saveJSON(k,o){try{localStorage.setItem(k,JSON.stringify(o))}catch(e){}}
 
-  // Counters
-  let counters=loadJSON(COUNTERS_KEY,{}); function countersSave(){saveJSON(COUNTERS_KEY,counters);}
-  function dayKey(){if(!state.plan||!state.cursor)return'nokey';const{w,d}=state.cursor;return`${state.blockIdx||0}_${w}_${d}`;}
-  function getCount(exKey){const k=dayKey();return(counters[k]&&counters[k][exKey])|0;}
-  function setCount(exKey,val,max){const k=dayKey();counters[k]=counters[k]||{};counters[k][exKey]=Math.max(0,Math.min(max,val|0));countersSave();}
-  function resetDayCounters(){const k=dayKey();if(counters[k]){delete counters[k];countersSave();}}
-  function mkCounterHTML(exKey,max){const cur=getCount(exKey);const safe=exKey.replace(/&/g,'&amp;').replace(/</g,'&lt;');return`<span class="counter" data-ex="${safe}" data-max="${max}"><button class="cbtn" data-dec>−</button><span class="cval">${cur}/${max}</span><button class="cbtn" data-inc>+</button></span>`}
+  var barbellMap=loadJSON(BARBELL_KEY,{
+    Push:'Barbell Bench Press',
+    Pull:'Barbell Row',
+    Squat:'Barbell Back Squat',
+    Hinge:'Barbell Deadlift'
+  })||{};
+  function saveBarbell(){saveJSON(BARBELL_KEY,barbellMap);}
 
-  // Custom matrix (met ballistic/unilateral)
-  let customMatrix=loadJSON(CUSTOM_KEY,{})||{};
-  function inferBallistic(name){const nm=clean(name);return DEFAULT_BALLISTICS.has(nm)||/(swing|snatch|high pull|double clean)/i.test(nm)}
+  var counters=loadJSON(COUNTERS_KEY,{})||{}; function countersSave(){saveJSON(COUNTERS_KEY,counters);}
+  function dayKey(){if(!state.plan||!state.cursor)return'nokey';var c=state.cursor;return String((state.blockIdx||0))+'_'+String(c.w)+'_'+String(c.d);}
+  function getCount(exKey){var k=dayKey();return (counters[k]&&counters[k][exKey])|0;}
+  function setCount(exKey,val,max){var k=dayKey();counters[k]=counters[k]||{};counters[k][exKey]=Math.max(0,Math.min(max,val|0));countersSave();}
+  function mkCounterHTML(exKey,max){var cur=getCount(exKey);var safe=exKey.replace(/&/g,'&amp;').replace(/</g,'&lt;');return'<span class="counter" data-ex="'+safe+'" data-max="'+max+'"><button class="cbtn" data-dec>−</button><span class="cval">'+cur+'/'+max+'</span><button class="cbtn" data-inc>+</button></span>';}
+
+  var customMatrix=loadJSON(CUSTOM_KEY,{})||{};
+  function inferBallistic(name){var nm=clean(name);return DEFAULT_BALLISTICS.has(nm)||/(swing|snatch|high pull|double clean)/i.test(nm)}
   function inferUnilateral(name){
-    const n = clean(name).toLowerCase();
+    var n = clean(name).toLowerCase();
     return /(one[-\s]?arm|single[-\s]?leg|split[-\s]?squat|pistol|step[-\s]?up|lunge|windmill|bent\s?press|half[-\s]?kneeling|kneeling|reverse\s?lunge|tactical\s?lunge|athletic\s?lunge|side\s?lunge|cossack|suitcase\s?carry|front\s?rack\s?carry|bottom[-\s]?up\s?carry|renegade\s?row|pull[-\s]?up|chin[-\s]?up|military\s?press|push\s?press|snatch)/i.test(n);
   }
 
-  function seedFromUnity(){const out={};for(const p of PATTERNS){const m=MATRIX_ADV[p];const items=[];items[0]={name:m.main,ballistic:inferBallistic(m.main),unilateral:inferUnilateral(m.main)};for(let i=0;i<3;i++){const nm=m.acc[i]||'';items[i+1]={name:nm,ballistic:inferBallistic(nm),unilateral:inferUnilateral(nm)};}out[p]={enabled:true,items};}return out;}
+  function seedFromUnity(){
+    var out={};
+    for(var pidx=0;pidx<PATTERNS.length;pidx++){
+      var p=PATTERNS[pidx];
+      var m=MATRIX_ADV[p];
+      var items=[];
+      items[0]={name:m.main,ballistic:inferBallistic(m.main),unilateral:inferUnilateral(m.main)};
+      for(var i=0;i<3;i++){
+        var nm=m.acc[i]||'';
+        items[i+1]={name:nm,ballistic:inferBallistic(nm),unilateral:inferUnilateral(nm)};
+      }
+      out[p]={enabled:true,items:items};
+    }
+    return out;
+  }
   function sanitizeCustom(){
     if(!customMatrix||!Object.keys(customMatrix).length){customMatrix=seedFromUnity();}
-    for(const p of PATTERNS){
+    for(var pidx=0;pidx<PATTERNS.length;pidx++){
+      var p=PATTERNS[pidx];
       if(!customMatrix[p]) customMatrix[p]={enabled:true,items:[{},{},{},{}]};
-      const it=customMatrix[p].items=customMatrix[p].items||[{},{},{},{}];
-      for(let i=0;i<4;i++){
+      var it=customMatrix[p].items=customMatrix[p].items||[{},{},{},{}];
+      for(var i=0;i<4;i++){
         it[i]=it[i]||{};
         it[i].name=sanitizeName(it[i].name||'');
         if(!it[i].name){
-          const seed=seedFromUnity()[p].items[i];
+          var seed=seedFromUnity()[p].items[i];
           it[i].name=seed.name; it[i].ballistic=seed.ballistic; it[i].unilateral=seed.unilateral;
         }else{
           if(typeof it[i].ballistic!=='boolean') it[i].ballistic=inferBallistic(it[i].name);
@@ -262,325 +273,428 @@
   }
   function effectiveMatrix(){
     sanitizeCustom();
-    const out={}; for(const p of PATTERNS){
-      const it=customMatrix[p].items;
+    var out={};
+    for(var pidx=0;pidx<PATTERNS.length;pidx++){
+      var p=PATTERNS[pidx];
+      var it=customMatrix[p].items;
       out[p]={main:it[0].name,acc:[it[1].name,it[2].name,it[3].name].filter(Boolean)};
     }
     return out;
   }
-  function isBallisticName(nm){const name=clean(nm);for(const p of PATTERNS){const conf=customMatrix[p];if(!conf||!conf.items)continue;for(const it of conf.items){if(clean(it.name)===name) return !!it.ballistic;}}return DEFAULT_BALLISTICS.has(name);}
-  function isUnilateralName(nm){const name=clean(nm);for(const p of PATTERNS){const conf=customMatrix[p];if(!conf||!conf.items)continue;for(const it of conf.items){if(clean(it.name)===name) return !!it.unilateral;}}return inferUnilateral(name);}
+  function isBallisticName(nm){
+    var name=clean(nm);
+    for(var pidx=0;pidx<PATTERNS.length;pidx++){
+      var p=PATTERNS[pidx]; var conf=customMatrix[p];
+      if(!conf||!conf.items)continue;
+      for(var j=0;j<conf.items.length;j++){
+        var it=conf.items[j];
+        if(clean(it.name)===name) return !!it.ballistic;
+      }
+    }
+    return DEFAULT_BALLISTICS.has(name);
+  }
+  function isUnilateralName(nm){
+    var name=clean(nm);
+    for(var pidx=0;pidx<PATTERNS.length;pidx++){
+      var p=PATTERNS[pidx]; var conf=customMatrix[p];
+      if(!conf||!conf.items)continue;
+      for(var j=0;j<conf.items.length;j++){
+        var it=conf.items[j];
+        if(clean(it.name)===name) return !!it.unilateral;
+      }
+    }
+    return inferUnilateral(name);
+  }
 
-  // State
-  let state=loadJSON(LS_KEY,null)||{};
+  // ==== State & cursors ====
+  var state=loadJSON(LS_KEY,null)||{};
   function save(){saveJSON(LS_KEY,state);}
-  function doneKeyFor(w,d){return `${state.blockIdx||0}_${w}_${d}`;}
+  function doneKeyFor(w,d){return String((state.blockIdx||0))+'_'+String(w)+'_'+String(d);}
   function markDone(w,d){state.completed = state.completed || {}; state.completed[ doneKeyFor(w,d) ] = true; save();}
   function isDone(w,d){return !!(state.completed && state.completed[ doneKeyFor(w,d) ]);}
 
-  // Accessoire-rotatie-cursor per patroon (persist over blocks)
+  // Accessoire cursor per patroon (cross-block continuïteit)
   function getAccCursor(pattern){state.accCursor = state.accCursor || {}; return state.accCursor[pattern] | 0;}
   function setAccCursor(pattern, val){state.accCursor = state.accCursor || {}; state.accCursor[pattern] = val | 0; save();}
 
-  // === Nieuw: dag-locks voor accessoire startpositie ===
-  function accStartKey(pattern,w,d){ return `${state.blockIdx||0}|${pattern}|${w}|${d}`; }
+  // Carry cursor 1->2->3->4->1 (cross-block)
+  function getCarryCursor(){ state.carryCursor = state.carryCursor | 0; return state.carryCursor|0; }
+  function setCarryCursor(v){ state.carryCursor = (v|0); save(); }
+  function carryKey(w,d){ return String((state.blockIdx||0))+'|'+String(w)+'|'+String(d); }
+
+  // Dag-locked accessoire start
+  function accStartKey(pattern,w,d){ return String((state.blockIdx||0))+'|'+pattern+'|'+String(w)+'|'+String(d); }
   function getAccStart(pattern,w,d){
     state.accStart = state.accStart || {};
-    const k = accStartKey(pattern,w,d);
+    var k = accStartKey(pattern,w,d);
     if (typeof state.accStart[k] === 'number') return state.accStart[k];
-    const v = getAccCursor(pattern) | 0; // lock op eerste render van deze dag
+    var v = getAccCursor(pattern) | 0;
     state.accStart[k] = v;
     save();
     return v;
   }
 
-  // Splits & plan
   function buildWeekSplitsWithPcts(blockVol,weekType){
-    const parts=(weekType==='Deload')?3:(weekType==='Stress'?5:4);
-    const base=SPLITS[parts].slice();
-    const {rounds}=roundsCap(blockVol);
-    const weekTotal=Math.round(blockVol*(WEEK_PCT[weekType]||0));
-    let sess=base.map(p=>Math.max(rounds,Math.round((weekTotal*p)/rounds)*rounds));
-    let diff=weekTotal-sess.reduce((a,b)=>a+b,0),idx=sess.length-1;
-    while(Math.abs(diff)>=rounds){
-      if(diff>0){sess[idx]+=rounds;diff-=rounds;}
-      else if(sess[idx]-rounds>=rounds){sess[idx]-=rounds;diff+=rounds;}
+    var parts=(weekType==='Deload')?3:(weekType==='Stress'?5:4);
+    var base=SPLITS[parts].slice();
+    var rc=roundsCap(blockVol);
+    var weekTotal=Math.round(blockVol*(WEEK_PCT[weekType]||0));
+    var sess=base.map(function(p){return Math.max(rc.rounds,Math.round((weekTotal*p)/rc.rounds)*rc.rounds);});
+    var diff=weekTotal-sess.reduce(function(a,b){return a+b;},0),idx=sess.length-1;
+    while(Math.abs(diff)>=rc.rounds){
+      if(diff>0){sess[idx]+=rc.rounds;diff-=rc.rounds;}
+      else if(sess[idx]-rc.rounds>=rc.rounds){sess[idx]-=rc.rounds;diff+=rc.rounds;}
       else{if(idx>0){idx--;continue;}break;}
     }
-    const o=sess.map((_,i)=>i);shuffle(o);return o.map(i=>({vol:sess[i],pct:base[i]}));
+    var o=sess.map(function(_,i){return i;});shuffle(o);
+    return o.map(function(i){return {vol:sess[i],pct:base[i]};});
   }
 
   function pickAccessoryOrderRoundRobin(accList, pattern, w, d){
-    const n = accList.length;
+    var n = accList.length;
     if (n === 0) return [];
-    const start = getAccStart(pattern, w, d) % n; // dag-locked start
-    const order = [];
-    for (let k = 0; k < n; k++) order.push((start + k) % n);
+    var start = getAccStart(pattern, w, d) % n;
+    var order = [];
+    for (var k = 0; k < n; k++) order.push((start + k) % n);
     return order;
   }
 
   function buildPlan(cfg){
-    const matrix=effectiveMatrix();
+    var matrix=effectiveMatrix();
     rnd=makeRNG(cfg.seed||'');
-    const lastEnds=state.lastEnds||{};
-    const weekOrders={};
-    for(const pat of Object.keys(matrix)){
-      const order=['Deload','Maintenance','Development','Stress']; shuffle(order);
-      if(lastEnds[pat]&&order[0]===lastEnds[pat]){[order[0],order[1]]=[order[1],order[0]];}
-      weekOrders[pat]=order;
+    var lastEnds=state.lastEnds||{};
+    var weekOrders={};
+    for(var p in matrix){
+      var order=['Deload','Maintenance','Development','Stress']; shuffle(order);
+      if(lastEnds[p]&&order[0]===lastEnds[p]){var tmp=order[0];order[0]=order[1];order[1]=tmp;}
+      weekOrders[p]=order;
     }
-    const weeks=Array.from({length:4},()=>({days:Array.from({length:5},()=>({entries:[],ps:null}))}));
-    for(const [pat,def] of Object.entries(matrix)){
-      for(let w=0;w<4;w++){
-        const wt=weekOrders[pat][w];
-        const items=buildWeekSplitsWithPcts(cfg.volume,wt);
-        const dayIdxs=pickDays(items.length);
-        for(let i=0;i<items.length;i++){
-          const d=dayIdxs[i];
-          const {vol,pct}=items[i];
-          weeks[w].days[d].entries.push({
-            pattern:pat, main:def.main, acc:def.acc.slice(),
-            weekType:wt, volume:vol, pct:pct, bias:biasFromPct(wt,pct)
-          });
+    var weeks=[]; for(var w=0;w<4;w++){var days=[]; for(var dd=0;dd<5;dd++){days.push({entries:[],ps:null});} weeks.push({days:days});}
+    for(var pat in matrix){
+      for(var w2=0;w2<4;w2++){
+        var wt=weekOrders[pat][w2];
+        var items=buildWeekSplitsWithPcts(cfg.volume,wt);
+        var dayIdxs=pickDays(items.length);
+        for(var i2=0;i2<items.length;i2++){
+          var d=dayIdxs[i2];
+          var obj={
+            pattern:pat, main:matrix[pat].main, acc:matrix[pat].acc.slice(0),
+            weekType:wt, volume:items[i2].vol, pct:items[i2].pct, bias:biasFromPct(wt,items[i2].pct)
+          };
+          weeks[w2].days[d].entries.push(obj);
         }
       }
     }
-    // Plan Strong overlay
     if(cfg.psPattern){
-      const psPat=cfg.psPattern;
-      const psBlock=+cfg.psVolume||240;
-      const fixed=['Deload','Development','Maintenance','Stress'];
-      for(let w=0;w<4;w++){
-        const wt=fixed[w];
-        const weekVol=Math.round(psBlock*(WEEK_PCT[wt]||0));
-        for(let dd=0;dd<5;dd++){
-          weeks[w].days[dd].entries = weeks[w].days[dd].entries.filter(en=>en.pattern!==psPat);
+      var psPat=cfg.psPattern;
+      var psBlock=+cfg.psVolume||240;
+      var fixed=['Deload','Development','Maintenance','Stress'];
+      for(var w3=0;w3<4;w3++){
+        var wt2=fixed[w3];
+        var weekVol=Math.round(psBlock*(WEEK_PCT[wt2]||0));
+        for(var dd2=0;dd2<5;dd2++){
+          weeks[w3].days[dd2].entries = weeks[w3].days[dd2].entries.filter(function(en){return en.pattern!==psPat;});
         }
-        const dayIdxs=pickDays(3);
-        let weights=[50,35,15], labels=['L','M','H'], shOnHigh=false;
+        var dayIdxs2=pickDays(3);
+        var weights=[50,35,15], labels=['L','M','H'], shOnHigh=false;
         if(cfg.psAdvanced){weights=[30,55,15]; shOnHigh=true;}
-        const sessVols=apportion2(weekVol,weights);
-        const psMain=(matrix[psPat]?.main)||psPat;
-        for(let i=0;i<3;i++){
-          const d=dayIdxs[i];
-          weeks[w].days[d].ps = weeks[w].days[d].ps || {};
-          weeks[w].days[d].ps[psPat] = {weekType:wt,reps:sessVols[i],mainName:psMain,level:labels[i],sh:(labels[i]==='H'&&shOnHigh),mode:cfg.psAdvanced?'advanced':'basic'};
+        var sessVols=apportion2(weekVol,weights);
+        var psMain=(matrix[psPat]&&matrix[psPat].main)?matrix[psPat].main:psPat;
+        for(var ii=0;ii<3;ii++){
+          var d2=dayIdxs2[ii];
+          weeks[w3].days[d2].ps = weeks[w3].days[d2].ps || {};
+          weeks[w3].days[d2].ps[psPat] = {weekType:wt2,reps:sessVols[ii],mainName:psMain,level:labels[ii],sh:(labels[ii]==='H'&&shOnHigh),mode:cfg.psAdvanced?'advanced':'basic'};
         }
       }
     }
-    return {weeks, rc:roundsCap(cfg.volume), weekOrders, set:'advanced'};
+    return { weeks: weeks, rc: roundsCap(cfg.volume), weekOrders: weekOrders, set: 'advanced' };
   }
 
   function patternSessionIndex(weekObj, currentDayIdx, patternName){
-    let idx=0,total=0;
-    for(let d=0; d<weekObj.days.length; d++){
-      const has = (weekObj.days[d].entries||[]).some(e=>e.pattern===patternName);
+    var idx=0,total=0;
+    for(var d=0; d<weekObj.days.length; d++){
+      var has = (weekObj.days[d].entries||[]).some(function(e){return e.pattern===patternName;});
       if(has){ total++; if(d<=currentDayIdx) idx++; }
     }
-    return {idx:Math.max(1,idx), total};
+    return {idx:Math.max(1,idx), total:total};
   }
 
-  // Render
   function renderSession(){
-    const out=$('#session'); if(!state.plan){out.textContent='Nog geen blok. Klik op “Nieuw blok”.';return;}
-    const {w,d}=state.cursor; const week=state.plan.weeks[w]; const day=week.days[d]; const rc=state.plan.rc;
+    var out=$('#session'); if(!state.plan){out.textContent='Nog geen blok. Klik op “Nieuw blok”.';return;}
+    var w=state.cursor.w, d=state.cursor.d; var week=state.plan.weeks[w]; var day=week.days[d]; var rc=state.plan.rc;
+    var isBarbell = !!(state.cfg && state.cfg.barbellMode);
 
-    // track patronen met toegewezen accessoires vandaag; cursor++ pas bij complete()
-    const pendingPatterns = new Set();
+    var pendingPatterns = new Set();
 
-    // Opener: Get Up (toon bias-badge; Light = 2+2, anders 1+1)
-    let openerHTML=''; 
-    const rot=day.entries.find(e=>e.pattern==='Rotation');
+    // Opener: Get Up (Light-bias = 2+2, anders 1+1)
+    var openerHTML=''; 
+    var rot=null;
+    for(var ii=0;ii<day.entries.length;ii++){ if(day.entries[ii].pattern==='Rotation'){rot=day.entries[ii];break;} }
     if(rot){
-      const sets=rc.rounds;
-      const cost=rc.cap*sets;
-      const isLight = (state.cfg.bias==='on' && (rot.bias||'Medium')==='Light');
-      const badge  = (state.cfg.bias==='on') ? biasBadge(rot.bias||'Medium') : '';
-      const repStr = `${sets} × (${isLight ? '2+2' : '1+1'}) Turkish Get Up${badge}`;
-      openerHTML = `<div class="line"><div class="txt">${repStr}</div>${mkCounterHTML('Opener — Turkish Get Up',sets)}</div>`;
+      var sets=rc.rounds;
+      var cost=rc.cap*sets;
+      var isLight = (state.cfg.bias==='on' && (rot.bias||'Medium')==='Light');
+      var badge  = (state.cfg.bias==='on') ? biasBadge(rot.bias||'Medium') : '';
+      var repStr = String(sets)+' × ('+(isLight ? '2+2' : '1+1')+') Turkish Get Up'+badge;
+      openerHTML = '<div class="line"><div class="txt">'+repStr+'</div>'+mkCounterHTML('Opener — Turkish Get Up',sets)+'</div>';
       rot.volume = Math.max(0,(rot.volume|0)-cost);
     }
 
-    // Verzamel alle oefeningen (zonder Carry) en shuffle
-    const baseEntries = day.entries.slice().filter(e=>e.pattern!=='Loaded Carry');
+    var baseEntries = day.entries.slice(0).filter(function(e){return e.pattern!=='Loaded Carry';});
     shuffle(baseEntries);
 
-    const circuitExercises = [];
+    var circuitExercises = [];
 
-    // PS inject eerst als "oefeningen" (niet beïnvloed door caps; alleen weergave)
+    // Plan Strong overlay (weergave)
     if(day.ps){
-      const rounds=rc.rounds; const roundsWeights=Array(rounds).fill(1);
-      for(const [pat,info] of Object.entries(day.ps)){
-        const T=Math.max(0,info.reps|0); let buckets,labels;
+      var rounds=rc.rounds; 
+      for(var key in day.ps){
+        var info=day.ps[key];
+        var T=Math.max(0,info.reps|0); var buckets,labels;
         if(info.mode==='advanced'||info.sh){buckets=apportion2(T,[45,30,20,5]);labels=['L','M','H','SH'];}
         else{buckets=apportion2(T,[50,35,15]);labels=['L','M','H'];}
-        const perRound=buckets.map(v=>apportion2(v,roundsWeights)); const roundLabels=[];
-        for(let r=0;r<rounds;r++){const parts=[];for(const lab of labels){const idx=labels.indexOf(lab);if(idx>=0&&perRound[idx][r]>0)parts.push(`${lab}${perRound[idx][r]}`);}roundLabels.push(parts.length?parts.join('/'):'—');}
-        const detail=roundLabels.map((s,i)=>`R${i+1}:${s}`).join(' • ');
-        circuitExercises.push({name:`PS — ${info.mainName}`,repText:`${rounds} rounds`,label:` — ${info.level}${info.sh?' (H+SH)':''} — ${detail}`});
+        var perRound=[];
+        for(var bi=0;bi<buckets.length;bi++){ perRound[bi]=apportion2(buckets[bi],rounds); }
+        var roundLabels=[];
+        for(var rr=0;rr<rounds;rr++){
+          var parts=[];
+          for(var li=0;li<labels.length;li++){ if(perRound[li][rr]>0){ parts.push(labels[li]+String(perRound[li][rr])); } }
+          roundLabels.push(parts.length?parts.join('/'):'—');
+        }
+        var detail=roundLabels.map(function(s,i){return 'R'+String(i+1)+':'+s;}).join(' • ');
+        circuitExercises.push({name:'PS — '+info.mainName,repText:String(rounds)+' rounds',label:' — '+info.level+(info.sh?' (H+SH)':'')+' — '+detail});
       }
     }
 
-    // Unity circuit — per patroon main + accessoires als losse items
-    for(const e of baseEntries){
-      const order=(e.pattern==='Rotation') ? [e.main] : [e.main,...(e.acc||[])].filter(Boolean);
-      const {idx:sessIdx}=patternSessionIndex(week,d,e.pattern);
-      const accList=(e.pattern==='Rotation')?[]:order.slice(1);
-      const accOrder=pickAccessoryOrderRoundRobin(accList,e.pattern,w,d);
-      let remaining=e.volume;
+    // Unity-circuit — mains + accessoires
+    for(var ei=0;ei<baseEntries.length;ei++){
+      var e=baseEntries[ei];
+      var order=(e.pattern==='Rotation') ? [e.main] : [e.main].concat(e.acc||[]).filter(Boolean);
+      var accList=(e.pattern==='Rotation')?[]:order.slice(1);
+      var accOrder=pickAccessoryOrderRoundRobin(accList,e.pattern,w,d);
+      var remaining=e.volume;
 
       // Main
       if(e.pattern!=='Rotation' && order.length>0){
-        const nm=order[0];
-        const isLightBoost = (state.cfg.bias==='on' && e.bias==='Light' && !day.ps);
-        const isHeavyBias  = (state.cfg.bias==='on' && e.bias==='Heavy' && !day.ps);
-        const targetCap = isHeavyBias ? 3 : (isLightBoost ? 10 : rc.cap);
-        const maxMainThis = targetCap * rc.rounds;
-        const assign = Math.min(maxMainThis, takeRoundsLE(remaining, rc.rounds));
-        const perRound = Math.floor(assign/rc.rounds);
+        var nm=order[0];
+
+        // Barbell-mode vervanging voor Heavy-bias mains
+        if(isBarbell && (e.bias==='Heavy') && (e.pattern==='Push' || e.pattern==='Pull' || e.pattern==='Squat' || e.pattern==='Hinge')){
+          var repl = barbellMap[e.pattern] || nm;
+          if(repl && clean(repl).length>0){ nm=repl; }
+        }
+
+        var isLightBoost = (state.cfg.bias==='on' && e.bias==='Light' && !day.ps);
+        var isHeavyBias  = (state.cfg.bias==='on' && e.bias==='Heavy' && !day.ps);
+        var targetCap = isHeavyBias ? 3 : (isLightBoost ? 10 : rc.cap); // Heavy cap=3, Light cap=10
+        var assign = Math.min(targetCap * rc.rounds, takeRoundsLE(remaining, rc.rounds));
+        var perRound = Math.floor(assign/rc.rounds);
         if(perRound>0){
-          const isBall=isBallisticName(nm);
-          const isUni=isUnilateralName(nm);
-          const shown=perRound*(isBall?2:1);
-          const repTxt=isUni?`${shown}+${shown}`:`${shown}`;
-          const label=(state.cfg.bias==='on'&&!day.ps)?biasBadge(e.bias):'';
-          circuitExercises.push({name:nm,repText:repTxt,label});
+          var isBall=isBallisticName(nm);
+          var isUni=isUnilateralName(nm);
+          var shown=perRound*(isBall?2:1);
+          var repTxt=isUni?String(shown)+'+'+String(shown):String(shown);
+          var label=(state.cfg.bias==='on'&&!day.ps)?biasBadge(e.bias):'';
+          circuitExercises.push({name:nm,repText:repTxt,label:label});
           remaining-=assign;
         }
       }
 
-      // Accessoires — round-robin met behoud van dagvolume
-      let assignedSomething=false;
-      for(const i of accOrder){
+      // Accessoires — round-robin; leftover gaat hierheen
+      var assignedSomething=false;
+      for(var ai=0;ai<accOrder.length;ai++){
         if(remaining<=0) break;
-        const nm=accList[i]; if(!nm) continue;
-        const maxAccThis=rc.cap*rc.rounds;
-        const assignAcc=Math.min(maxAccThis,takeRoundsLE(remaining,rc.rounds));
-        const perRound=Math.floor(assignAcc/rc.rounds);
-        if(perRound<=0) continue;
-        const isBall=isBallisticName(nm);
-        const isUni=isUnilateralName(nm);
-        const shown=perRound*(isBall?2:1);
-        const repTxt=isUni?`${shown}+${shown}`:`${shown}`;
-        circuitExercises.push({name:nm,repText:repTxt,label:''});
+        var idx=accOrder[ai];
+        var nm2=accList[idx]; if(!nm2) continue;
+        var maxAccThis=rc.cap*rc.rounds;
+        var assignAcc=Math.min(maxAccThis,takeRoundsLE(remaining,rc.rounds));
+        var perRound2=Math.floor(assignAcc/rc.rounds);
+        if(perRound2<=0) continue;
+        var isBall2=isBallisticName(nm2);
+        var isUni2=isUnilateralName(nm2);
+        var shown2=perRound2*(isBall2?2:1);
+        var repTxt2=isUni2?String(shown2)+'+'+String(shown2):String(shown2);
+        circuitExercises.push({name:nm2,repText:repTxt2,label:''});
         remaining-=assignAcc;
         assignedSomething=true;
       }
       if(accOrder.length>0 && assignedSomething){
-        pendingPatterns.add(e.pattern); // markeer voor commit
+        state.pendingAccAdvance = state.pendingAccAdvance || {};
+        var dk = dayKey();
+        var arr = state.pendingAccAdvance[dk] || [];
+        if(arr.indexOf(e.pattern)===-1) arr.push(e.pattern);
+        state.pendingAccAdvance[dk] = arr;
+        save();
       }
     }
 
-    // Shuffle alles in het circuit (PS + main + accessoires), opener blijft vooraan
+    // Shuffle alle circuit-items (opener blijft apart)
     shuffle(circuitExercises);
 
-    // Carry
-    const carryEntry=day.entries.find(e=>e.pattern==='Loaded Carry');
-    const carryName = state.fixedCarry || MATRIX_ADV['Loaded Carry'].acc[0];
-    const carryTxt=carryEntry?`${Math.max(30,carryEntry.volume*5)}s ${carryName}`:`45s ${carryName}`;
+    // Carry — prelocked 1->2->3->4->1
+    var carryEntry = day.entries.find(function(e){return e.pattern==='Loaded Carry';});
+    var carryName = MATRIX_ADV['Loaded Carry'].acc[0];
+    if (carryEntry){
+      var list = MATRIX_ADV['Loaded Carry'].acc;
+      var idx = (state.carryStart && state.carryStart[ carryKey(w,d) ]) | 0;
+      carryName = list[ idx % list.length ] || list[0];
+    }
+    var carryTxt = carryEntry ? String(Math.max(30,(carryEntry.volume|0)*5))+'s '+carryName : '45s '+carryName;
 
     // Compose
-    const html=[];
-    const doneMark = isDone(w,d) ? ' — ✔' : '';
-    html.push(esc(`Week ${w+1}, Dag ${d+1}${doneMark}`), '<br><br>');
+    var html=[];
+    var doneMark = isDone(w,d) ? ' — ✔' : '';
+    var baseKB = (state.cfg && state.cfg.baseKB) ? state.cfg.baseKB : '';
+    var headerLine = 'Week '+String(w+1)+', Dag '+String(d+1)+doneMark;
+    var kbBadge = baseKB ? ' <span class="badge">KB ['+esc(baseKB)+']</span>' : '';
+    html.push('<div class="line"><div class="txt">'+esc(headerLine)+'</div><div>'+kbBadge+'</div></div>', '<br>');
     if(openerHTML) html.push(openerHTML,'<br><br>');
-    html.push('<hr>',esc(`${rc.rounds} rounds of following circuit:`),'<br>');
+    html.push('<hr>',esc(String(rc.rounds)+' rounds of following circuit:'),'<br>');
     if(circuitExercises.length){
-      html.push(circuitExercises.map(o=>`<div class="line"><div class="txt">${esc(o.repText)} ${esc(o.name)}${o.label||''}</div>${mkCounterHTML(`Circuit — ${esc(o.name)}`,rc.rounds)}</div>`).join(''));
+      html.push(circuitExercises.map(function(o){
+        return '<div class="line"><div class="txt">'+esc(o.repText)+' '+esc(o.name)+(o.label||'')+'</div>'+mkCounterHTML('Circuit — '+esc(o.name),rc.rounds)+'</div>';
+      }).join(''));
     }else{
       html.push(esc('(Geen patronen actief in het circuit vandaag)'));
     }
-    html.push('<br><hr><br>',esc(`[ ${carryTxt} ]`));
+    html.push('<br><hr><br>',esc('[ '+carryTxt+' ]'));
+    var finishedBlocks = (state.completedBlocks|0);
+    html.push('<br>', '<div class="muted">Finished blocks: '+String(finishedBlocks)+'</div>');
     document.getElementById('session').innerHTML=html.join('');
 
-    // counter bindings
-    document.querySelectorAll('.counter').forEach($c=>{
-      const ex=$c.getAttribute('data-ex'); const max=+$c.getAttribute('data-max');
-      const $v=$c.querySelector('.cval');
-      const upd=()=>{$v.textContent=`${getCount(ex)}/${max}`};
-      $c.querySelector('[data-inc]').onclick=()=>{setCount(ex,getCount(ex)+1,max);upd();};
-      $c.querySelector('[data-dec]').onclick=()=>{setCount(ex,getCount(ex)-1,max);upd();};
+    document.querySelectorAll('.counter').forEach(function($c){
+      var ex=$c.getAttribute('data-ex'); var max=+$c.getAttribute('data-max');
+      var $v=$c.querySelector('.cval');
+      var upd=function(){ $v.textContent=String(getCount(ex))+'/'+String(max); };
+      $c.querySelector('[data-inc]').onclick=function(){ setCount(ex,getCount(ex)+1,max); upd(); };
+      $c.querySelector('[data-dec]').onclick=function(){ setCount(ex,getCount(ex)-1,max); upd(); };
     });
-
-    // Bewaar welke patronen vandaag een accessoire-advance verdienen (cursor++ bij Complete)
-    state.pendingAccAdvance = state.pendingAccAdvance || {};
-    state.pendingAccAdvance[dayKey()] = Array.from(pendingPatterns);
-    save();
   }
 
   function renderInfo(){
     if(!state.plan){$('#kpi').innerHTML='';$('#orders').innerHTML='';return;}
-    const rc=state.plan.rc;
-    const kpi=[
-      `<span class="pill">Volume: ${state.cfg.volume}</span>`,
-      `<span class="pill">Rounds: ${rc.rounds}</span>`,
-      `<span class="pill">Cap/round: ${rc.cap}</span>`,
-      `<span class="pill">Blok #${state.blockIdx}</span>`,
-      `<span class="pill">KB-bias: ${state.cfg.bias==='on'?'Aan (▲/▼)':'Uit'}</span>`,
-      state.cfg.psPattern?`<span class="pill">Plan Strong: ${state.cfg.psPattern} • Vol: ${state.cfg.psVolume} • ${state.cfg.psAdvanced?'Advanced (H+SH)':'Basic'}</span>`:''
-    ].filter(Boolean).join(' ');
-    document.getElementById('kpi').innerHTML=kpi;
-    const rows=Object.entries(state.plan.weekOrders).map(([k,v])=>`${k}: <b>${v.join(' → ')}</b>`).join('<br>');
-    document.getElementById('orders').innerHTML=rows;
+    var rc=state.plan.rc;
+    var pills=[];
+    pills.push('<span class="pill">Volume: '+String(state.cfg.volume)+'</span>');
+    pills.push('<span class="pill">Rounds: '+String(rc.rounds)+'</span>');
+    pills.push('<span class="pill">Cap/round: '+String(rc.cap)+'</span>');
+    pills.push('<span class="pill">Blok #'+String(state.blockIdx)+'</span>');
+    pills.push('<span class="pill">KB-basis: '+(state.cfg.baseKB||'-')+'</span>');
+    pills.push('<span class="pill">Finished blocks: '+String(state.completedBlocks|0)+'</span>');
+    pills.push('<span class="pill">KB-bias: '+(state.cfg.bias==='on'?'Aan (▲/▼)':'Uit')+'</span>');
+    pills.push('<span class="pill">Barbell-mode: '+(state.cfg.barbellMode?'Aan':'Uit')+'</span>');
+    if(state.cfg.psPattern){pills.push('<span class="pill">Plan Strong: '+state.cfg.psPattern+' • Vol: '+state.cfg.psVolume+' • '+(state.cfg.psAdvanced?'Advanced (H+SH)':'Basic')+'</span>');}
+    document.getElementById('kpi').innerHTML=pills.join(' ');
+    var rows=[]; for(var k in state.plan.weekOrders){rows.push(k+': <b>'+state.plan.weekOrders[k].join(' → ')+'</b>');}
+    document.getElementById('orders').innerHTML=rows.join('<br>');
   }
 
-  // Block controls
-  function firstNonEmpty(plan){for(let w=0;w<plan.weeks.length;w++){for(let d=0;d<plan.weeks[w].days.length;d++){if(plan.weeks[w].days[d].entries.length>0||plan.weeks[w].days[d].ps){return{w,d};}}}return{w:0,d:0};}
-  function newBlock(){
-    const cfg=readCfg();
-    const plan=buildPlan(cfg);
-    const blockIdx=(state.blockIdx||0)+1;
+  function firstNonEmpty(plan){
+    for(var w=0;w<plan.weeks.length;w++){
+      for(var d=0;d<plan.weeks[w].days.length;d++){
+        if(plan.weeks[w].days[d].entries.length>0||plan.weeks[w].days[d].ps){return{w:w,d:d};}
+      }
+    }
+    return {w:0,d:0};
+  }
 
-    // kies en bewaar vaste Carry voor dit blok (seeded)
-    const carryOptions = MATRIX_ADV['Loaded Carry'].acc.slice();
-    rnd = makeRNG(cfg.seed || '');
-    const fixedCarry = carryOptions[Math.floor(rnd()*carryOptions.length)];
+  function newBlock(){
+    var cfg=readCfg();
+    var plan=buildPlan(cfg);
+    var blockIdx=(state.blockIdx||0)+1;
+
+    // Pre-lock accessoires (A1->A2->A3 volgorde) en carry 1->2->3->4->1
+    var preAccStart = {};
+    var preCarryStart = {};
+    if (PRELOCK_ALL){
+      // Accessoires: cursor per patroon door het blok heen
+      var startCursor = {};
+      for (var i=0;i<PATTERNS.length;i++){ startCursor[PATTERNS[i]] = (getAccCursor(PATTERNS[i])|0); }
+      for (var w=0; w<plan.weeks.length; w++){
+        for (var d=0; d<plan.weeks[w].days.length; d++){
+          var entries = plan.weeks[w].days[d].entries || [];
+          // carry prelock
+          var hasCarry = entries.some(function(e){return e.pattern==='Loaded Carry';});
+          if (hasCarry){
+            var list = MATRIX_ADV['Loaded Carry'].acc;
+            var cidx = (getCarryCursor() + Object.keys(preCarryStart).length) % list.length; // 1->2->3->4->1
+            preCarryStart[ carryKey(w,d).replace(/^\d+\|/, String(blockIdx)+'|') ] = cidx;
+          }
+          // accessoires
+          for (var eIdx=0; eIdx<entries.length; eIdx++){
+            var e = entries[eIdx];
+            if (e.pattern==='Rotation' || e.pattern==='Loaded Carry') continue;
+            var accList = (e.acc||[]).filter(Boolean);
+            var n = accList.length;
+            if (!n) continue;
+            var idx = (startCursor[e.pattern] % n);
+            preAccStart[ String(blockIdx)+'|'+e.pattern+'|'+String(w)+'|'+String(d) ] = idx;
+            startCursor[e.pattern] = (startCursor[e.pattern] + 1) | 0;
+          }
+        }
+      }
+    }
 
     state={
-      blockIdx,
-      cfg,
-      plan,
-      cursor:firstNonEmpty(plan),
-      lastEnds:state.lastEnds||{},
-      completed:{},
+      blockIdx: blockIdx,
+      cfg: cfg,
+      plan: plan,
+      cursor: firstNonEmpty(plan),
+      lastEnds: state.lastEnds||{},
+      completed: {},
+      completedBlocks: (state.completedBlocks|0),
       accCursor: state.accCursor || {},
-      accStart: {},                 // dag-locked starts
-      pendingAccAdvance: {},        // pending cursor advances per dag
-      fixedCarry
+      accStart: preAccStart,            // dag-locked accessoires
+      pendingAccAdvance: {},            // pending cursor advances per dag
+      carryStart: preCarryStart         // dag-locked carry index
     };
-    save(); renderInfo(); renderSession(); toast('Blok aangemaakt');
+    save(); renderInfo(); renderSession(); wireLiveKB(); toast('Blok aangemaakt');
   }
+
   function next(){
     if(!state.plan){newBlock();return;}
-    let {w,d}=state.cursor; const weeks=state.plan.weeks;
+    var w=state.cursor.w, d=state.cursor.d; var weeks=state.plan.weeks;
     d++; if(d>=weeks[w].days.length){d=0; w++;}
     if(w>=weeks.length){
-      const ends={}; const matrix=effectiveMatrix();
-      for(const pat of Object.keys(matrix)){ ends[pat]=state.plan.weekOrders[pat][3]; }
-      state.lastEnds=ends; save(); toast('Blok afgerond'); return;
+      var ends={}; var matrix=effectiveMatrix();
+      for(var pat in matrix){ ends[pat]=state.plan.weekOrders[pat][3]; }
+      state.lastEnds=ends;
+      state.completedBlocks = (state.completedBlocks|0) + 1;
+      save(); toast('Blok afgerond'); return;
     }
-    state.cursor={w,d}; save(); renderSession();
+    state.cursor={w:w,d:d}; save(); renderSession(); wireLiveKB();
   }
   function prev(){
     if(!state.plan) return;
-    let {w,d}=state.cursor; d--;
+    var w=state.cursor.w, d=state.cursor.d;
+    d--;
     if(d<0){ w--; if(w<0){w=0; d=0;} else { d=state.plan.weeks[w].days.length-1; } }
-    state.cursor={w,d}; save(); renderSession();
+    state.cursor={w:w,d:d}; save(); renderSession(); wireLiveKB();
   }
   function complete(){
     if(!state.plan) return;
-    const {w,d} = state.cursor;
+    var w=state.cursor.w, d=state.cursor.d;
 
-    // Cursor-advance op commit van deze dag
-    const key = dayKey();
-    const pend = (state.pendingAccAdvance && state.pendingAccAdvance[key]) || [];
+    // Accessoire cursor advance
+    var key = dayKey();
+    var pend = (state.pendingAccAdvance && state.pendingAccAdvance[key]) || [];
     if (pend.length) {
-      for (const pat of pend) {
+      for (var i=0;i<pend.length;i++) {
+        var pat = pend[i];
         setAccCursor(pat, (getAccCursor(pat) | 0) + 1);
       }
       delete state.pendingAccAdvance[key];
       save();
+      // Locks van toekomstige dagen voor deze patronen wissen, zodat ze met nieuwe cursor re-locken? Niet nodig bij PRELOCK_ALL.
     }
+
+    // Carry cursor +1 als dag carry had (voor cross-block)
+    try{
+      var week = state.plan.weeks[w];
+      var day  = week.days[d];
+      var hasCarry = (day.entries||[]).some(function(e){return e.pattern==='Loaded Carry';});
+      if (hasCarry) setCarryCursor( (getCarryCursor()|0) + 1 );
+    }catch(_){}
 
     markDone(w,d);
     next();
@@ -591,76 +705,116 @@
     document.getElementById('kpi').innerHTML=''; document.getElementById('orders').innerHTML=''; toast('Voortgang gereset');
   }
   function readCfg(){
-    const psPatSel=(document.getElementById('selPS').value||''); const on=!!psPatSel;
+    var psPatSel=(document.getElementById('selPS').value||''); var on=!!psPatSel;
     return {
       volume:+document.getElementById('selVol').value,
       seed:(document.getElementById('inpSeed').value||'').trim(),
       bias:document.getElementById('selBias').value,
       psPattern: on ? psPatSel : null,
       psVolume:  on ? document.getElementById('selPSVol').value : null,
-      psAdvanced:(document.getElementById('chkPSAdvanced') && !document.getElementById('chkPSAdvanced').disabled) ? document.getElementById('chkPSAdvanced').checked : false
+      psAdvanced:(document.getElementById('chkPSAdvanced') && !document.getElementById('chkPSAdvanced').disabled) ? document.getElementById('chkPSAdvanced').checked : false,
+      baseKB:(document.getElementById('inpBaseKB') ? document.getElementById('inpBaseKB').value : '').trim(),
+      barbellMode: !!document.getElementById('chkBarbellMode').checked
     };
   }
 
   // Tabs
-  document.querySelectorAll('.tab-btn').forEach(btn=>{
-    btn.onclick=()=>{
-      const t=btn.getAttribute('data-tab');
-      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b===btn));
-      document.querySelectorAll('.tab-pane').forEach(p=>p.classList.toggle('active',p.id===`tab-${t}`));
+  document.querySelectorAll('.tab-btn').forEach(function(btn){
+    btn.onclick=function(){
+      var t=btn.getAttribute('data-tab');
+      document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b===btn);});
+      document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.toggle('active',p.id==='tab-'+t);});
     };
   });
+
+  // Live KB badge update (no rebuild needed)
+  function wireLiveKB(){
+    try {
+      var el = document.getElementById('inpBaseKB');
+      if(!el) return;
+      if(state && state.cfg && typeof state.cfg.baseKB !== 'undefined' && el.value.trim()===''){
+        el.value = String(state.cfg.baseKB || '').trim();
+      }
+      var handler = function(e){
+        state = state || {};
+        state.cfg = state.cfg || {};
+        state.cfg.baseKB = (e.target.value || '').trim();
+        save();
+        renderInfo();
+        renderSession();
+      };
+      el.oninput = handler;
+      el.onchange = handler;
+    } catch(e){}
+  }
 
   // UI bindings
   document.getElementById('btnNewBlock').onclick=newBlock;
   document.getElementById('btnRebuild').onclick=newBlock;
   document.getElementById('btnReset').onclick=resetProgress;
-  document.getElementById('btnNextTop').onclick=()=>next();
-  document.getElementById('btnPrevTop').onclick=()=>prev();
-  document.getElementById('btnCompleteTop').onclick=complete;
+  document.getElementById('btnNextTop').onclick=function(){next();};
+  document.getElementById('btnPrevTop').onclick=function(){prev();};
+  document.getElementById('btnCompleteTop').onclick=function(){complete();};
 
-  document.getElementById('selPS').addEventListener('change',(e)=>{
-    const on=!!e.target.value;
+  document.getElementById('selPS').addEventListener('change',function(e){
+    var on=!!e.target.value;
     document.getElementById('selPSVol').disabled=!on;
-    const adv=document.getElementById('chkPSAdvanced'); if(adv) adv.disabled=!on;
+    var adv=document.getElementById('chkPSAdvanced'); if(adv) adv.disabled=!on;
   });
+
+  function loadBarbellFields(){
+    document.getElementById('barbellPush').value = barbellMap.Push || '';
+    document.getElementById('barbellPull').value = barbellMap.Pull || '';
+    document.getElementById('barbellSquat').value = barbellMap.Squat || '';
+    document.getElementById('barbellHinge').value = barbellMap.Hinge || '';
+  }
+  document.getElementById('btnSaveBarbell').onclick=function(){
+    barbellMap.Push = sanitizeName(document.getElementById('barbellPush').value);
+    barbellMap.Pull = sanitizeName(document.getElementById('barbellPull').value);
+    barbellMap.Squat = sanitizeName(document.getElementById('barbellSquat').value);
+    barbellMap.Hinge = sanitizeName(document.getElementById('barbellHinge').value);
+    saveBarbell();
+    toast('Barbell‑lifts opgeslagen'); 
+  };
+  loadBarbellFields();
 
   // Custom form
   function renderCustomForm(){
-    const wrap=document.getElementById('customForm'); wrap.innerHTML='';
+    var wrap=document.getElementById('customForm'); wrap.innerHTML='';
     sanitizeCustom();
-    for(const pat of PATTERNS){
-      const conf=customMatrix[pat]; const it=conf.items;
-      const card=document.createElement('div'); card.className='card';
-      const rows=[0,1,2,3].map(i=>{
-        const nm=esc(it[i].name||''); const bal=!!it[i].ballistic; const uni=!!it[i].unilateral;
-        return `<div class="row-inline">
-          <div style="flex:1">
-            <label>${i===0?'1 (Main)':' '+(i+1)}</label>
-            <input type="text" data-p="${pat}" data-idx="${i}" placeholder="${i===0?'bijv. Military Press':'... (accessoire)'}" value="${nm}">
-          </div>
-          <label class="chk" style="margin-top:22px"><input type="checkbox" data-p="${pat}" data-idx="${i}" data-bal ${bal?'checked':''}> Ballistic (x2)</label>
-          <label class="chk" style="margin-top:22px"><input type="checkbox" data-p="${pat}" data-idx="${i}" data-uni ${uni?'checked':''}> Unilateral (+/+)</label>
-        </div>`;
-      }).join('');
-      card.innerHTML=`<div class="row" style="justify-content:space-between;align-items:center"><b>${pat}</b></div>${rows}`;
+    for(var pidx=0;pidx<PATTERNS.length;pidx++){
+      var pat=PATTERNS[pidx]; var conf=customMatrix[pat]; var it=conf.items;
+      var card=document.createElement('div'); card.className='card';
+      var rows=['<div class="row" style="justify-content:space-between;align-items:center"><b>'+pat+'</b></div>'];
+      for(var i=0;i<4;i++){
+        var nm=esc(it[i].name||''); var bal=!!it[i].ballistic; var uni=!!it[i].unilateral;
+        rows.push('<div class="row-inline">\
+          <div style="flex:1">\
+            <label>'+ (i===0?'1 (Main)':' '+String(i+1)) +'</label>\
+            <input type="text" data-p="'+pat+'" data-idx="'+String(i)+'" placeholder="'+(i===0?'bijv. Military Press':'... (accessoire)')+'" value="'+nm+'">\
+          </div>\
+          <label class="chk" style="margin-top:22px"><input type="checkbox" data-p="'+pat+'" data-idx="'+String(i)+'" data-bal '+(bal?'checked':'')+'> Ballistic (x2)</label>\
+          <label class="chk" style="margin-top:22px"><input type="checkbox" data-p="'+pat+'" data-idx="'+String(i)+'" data-uni '+(uni?'checked':'')+'> Unilateral (+/+) </label>\
+        </div>');
+      }
+      card.innerHTML=rows.join('');
       wrap.appendChild(card);
     }
   }
   function readCustomFromForm(){
-    const obj=loadJSON(CUSTOM_KEY,{})||{};
-    for(const pat of PATTERNS){obj[pat]=obj[pat]||{enabled:true,items:[{},{},{},{}]};}
-    document.querySelectorAll('input[data-idx][type="text"]').forEach(inp=>{
-      const p=inp.getAttribute('data-p'); const i=+inp.getAttribute('data-idx');
+    var obj=loadJSON(CUSTOM_KEY,{})||{};
+    for(var pidx=0;pidx<PATTERNS.length;pidx++){var pat=PATTERNS[pidx]; obj[pat]=obj[pat]||{enabled:true,items:[{},{},{},{}]};}
+    document.querySelectorAll('input[data-idx][type="text"]').forEach(function(inp){
+      var p=inp.getAttribute('data-p'); var i=+inp.getAttribute('data-idx');
       obj[p].items[i]=obj[p].items[i]||{};
       obj[p].items[i].name = sanitizeName(inp.value);
     });
-    document.querySelectorAll('input[data-bal]').forEach(chk=>{
-      const p=chk.getAttribute('data-p'); const i=+chk.getAttribute('data-idx');
+    document.querySelectorAll('input[data-bal]').forEach(function(chk){
+      var p=chk.getAttribute('data-p'); var i=+chk.getAttribute('data-idx');
       obj[p].items[i]=obj[p].items[i]||{}; obj[p].items[i].ballistic=chk.checked;
     });
-    document.querySelectorAll('input[data-uni]').forEach(chk=>{
-      const p=chk.getAttribute('data-p'); const i=+chk.getAttribute('data-idx');
+    document.querySelectorAll('input[data-uni]').forEach(function(chk){
+      var p=chk.getAttribute('data-p'); var i=+chk.getAttribute('data-idx');
       obj[p].items[i]=obj[p].items[i]||{}; obj[p].items[i].unilateral=chk.checked;
     });
     return obj;
@@ -668,19 +822,17 @@
 
   renderCustomForm();
 
-  // Custom buttons
-  document.getElementById('btnSaveCustom').onclick=()=>{
+  document.getElementById('btnSaveCustom').onclick=function(){
     customMatrix=readCustomFromForm(); saveJSON(CUSTOM_KEY,customMatrix);
     document.querySelector('.tab-btn[data-tab="plan"]').click();
     newBlock(); toast('Eigen oefeningen opgeslagen');
   };
-  document.getElementById('btnClearCustom').onclick=()=>{
+  document.getElementById('btnClearCustom').onclick=function(){
     customMatrix={}; saveJSON(CUSTOM_KEY,customMatrix); renderCustomForm(); toast('Eigen oefeningen geleegd');
   };
 
-  // Restore
   if(state&&state.plan){renderInfo();renderSession();}
-
+  wireLiveKB();
 })();
 </script>
 </body>
