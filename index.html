@@ -185,6 +185,13 @@
   var WEEK_PCT={Deload:.15,Maintenance:.22,Development:.28,Stress:.35};
   var SPLITS={3:[0.15,0.35,0.50],4:[0.15,0.22,0.28,0.35],5:[0.10,0.15,0.20,0.25,0.30]};
   var DEFAULT_BALLISTICS=new Set(['Snatch','One-arm Swing','Two-arm Swing','High Pull','Double Clean']);
+// Heavy-bias cap volgt blokvolume: 180→1 • 240→2 • 300/400/500→3
+function heavyBiasCapFor(blockVol){
+  if (+blockVol <= 180) return 1;
+  if (+blockVol <= 240) return 2;
+  return 3; // 300, 400, 500
+}
+
 
   var MATRIX_ADV={
   'Push':{ main:'Military Press', acc:['Push Press','Half-kneeling Press','Floor Press'] },
@@ -484,9 +491,10 @@
           if(repl && clean(repl).length>0){ nm=repl; }
         }
 
-        var isLightBoost = (state.cfg.bias==='on' && e.bias==='Light' && !day.ps);
-        var isHeavyBias  = (state.cfg.bias==='on' && e.bias==='Heavy' && !day.ps);
-        var targetCap = isHeavyBias ? 3 : (isLightBoost ? 10 : rc.cap); // Heavy cap=3, Light cap=10
+var isLightBoost = (state.cfg.bias==='on' && e.bias==='Light' && !day.ps);
+var isHeavyBias  = (state.cfg.bias==='on' && e.bias==='Heavy' && !day.ps);
+var heavyCap     = heavyBiasCapFor(state.cfg.volume);
+var targetCap    = isHeavyBias ? heavyCap : (isLightBoost ? 10 : rc.cap);
         var assign = Math.min(targetCap * rc.rounds, takeRoundsLE(remaining, rc.rounds));
         var perRound = Math.floor(assign/rc.rounds);
         if(perRound>0){
@@ -578,6 +586,7 @@
     pills.push('<span class="pill">Volume: '+String(state.cfg.volume)+'</span>');
     pills.push('<span class="pill">Rounds: '+String(rc.rounds)+'</span>');
     pills.push('<span class="pill">Cap/round: '+String(rc.cap)+'</span>');
+pills.push('<span class="pill">Heavy cap: '+String(heavyBiasCapFor(state.cfg.volume))+' (by volume)</span>');
     pills.push('<span class="pill">Blok #'+String(state.blockIdx)+'</span>');
     pills.push('<span class="pill">KB-basis: '+(state.cfg.baseKB||'-')+'</span>');
     pills.push('<span class="pill">Finished blocks: '+String(state.completedBlocks|0)+'</span>');
