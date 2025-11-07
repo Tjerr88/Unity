@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Unity 2025 — Prelocked + Barbell</title>
+<title>Unity 2025 — Go‑Time • 2025‑11‑07 (Patched)</title>
 <style>
   :root{color-scheme:dark}
   *{box-sizing:border-box}
@@ -16,16 +16,16 @@
   .btn.inline{padding:8px 10px;border-radius:10px}
   .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
   .row.stack>*.btn{flex:1}
-  .card{background:#101a30;border:1px solid rgba(255,255,255,.08);border-radius:14px;padding:12px;margin:10px 0}
-  .session{white-space:pre-wrap;background:#0e182c;border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:16px;line-height:1.7;font-family:ui-monospace,monospace;font-size:clamp(13px,1.9vw,16px)}
+  .card{background:#101a30;border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:12px;margin:10px 0}
+  .session{white-space:pre-wrap;background:#0e182c;border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:16px;line-height:1.7;font-family:ui-monospace,monospace;font-size:clamp(13px,1.9vw,16px)}
   .pill{display:inline-block;background:#182446;border-radius:999px;padding:5px 12px;font-size:12px;margin:3px 3px 0 0}
-  details{border:1px solid rgba(255,255,255,.08);border-radius:12px}
+  details{border:1px solid rgba(255,255,255,0.08);border-radius:12px}
   summary{list-style:none;cursor:pointer;padding:12px;font-weight:800;background:#0f1a34;border-radius:12px}
   summary::-webkit-details-marker{display:none}
-  details[open]>summary{border-bottom:1px solid rgba(255,255,255,.08);border-bottom-left-radius:0;border-bottom-right-radius:0}
+  details[open]>summary{border-bottom:1px solid rgba(255,255,255,0.08);border-bottom-left-radius:0;border-bottom-right-radius:0}
   .panel{padding:12px}
   label{font-size:12px;opacity:.88;display:block;margin:8px 0 4px}
-  select,input[type="text"]{width:100%;background:#0d1830;border:1px solid rgba(255,255,255,.18);color:#e6eaf2;padding:10px;border-radius:10px}
+  select,input[type="text"]{width:100%;background:#0d1830;border:1px solid rgba(255,255,255,0.18);color:#e6eaf2;padding:10px;border-radius:10px}
   .grid{display:grid;gap:10px}
   .cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
   .cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}
@@ -35,22 +35,22 @@
     .btn{padding:14px 16px;border-radius:14px}
   }
   .muted{opacity:.75;font-size:12px}
-  .toast{position:fixed;right:12px;bottom:12px;background:#0f1a34;border:1px solid rgba(255,255,255,.15);padding:10px 12px;border-radius:12px;font-size:13px;display:none}
-  .badge{display:inline-block;font-weight:800;font-size:12px;padding:3px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.25);margin-left:6px;background:#0f1a34}
+  .toast{position:fixed;right:12px;bottom:12px;background:#0f1a34;border:1px solid rgba(255,255,255,0.15);padding:10px 12px;border-radius:12px;font-size:13px;display:none}
+  .badge{display:inline-block;font-weight:800;font-size:12px;padding:3px 8px;border-radius:10px;border:1px solid rgba(255,255,255,0.25);margin-left:6px;background:#0f1a34}
   .tabs{display:flex;gap:8px;margin:10px 0 6px}
-  .tab-btn{background:#0f1a34;border:1px solid rgba(255,255,255,.15);color:#e6eaf2;padding:10px 12px;border-radius:12px;font-weight:800;cursor:pointer}
+  .tab-btn{background:#0f1a34;border:1px solid rgba(255,255,255,0.15);color:#e6eaf2;padding:10px 12px;border-radius:12px;font-weight:800;cursor:pointer}
   .tab-btn.active{background:#2b63ff;border-color:#2b63ff}
   .tab-pane{display:none}
   .tab-pane.active{display:block}
   .counter{display:inline-flex;align-items:center;gap:8px;margin-left:12px;flex:0 0 auto}
-  .counter .cbtn{background:#0f1a34;border:1px solid rgba(255,255,255,.2);color:#e6eaf2;border-radius:10px;padding:4px 10px;font-weight:800;cursor:pointer}
+  .counter .cbtn{background:#0f1a34;border:1px solid rgba(255,255,255,0.2);color:#e6eaf2;border-radius:10px;padding:4px 10px;font-weight:800;cursor:pointer}
   .counter .cval{min-width:64px;text-align:center;font-weight:900}
   .session .line{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap}
   .session .line .txt{flex:1;min-width:0;white-space:normal}
   .row-inline{display:flex;gap:8px;align-items:center}
   .row-inline input[type="text"]{flex:1}
   .chk{display:inline-flex;gap:6px;align-items:center;font-size:12px;opacity:.9}
-  .barbell-box{padding:10px;border:1px dashed rgba(255,255,255,.25);border-radius:10px;background:#0f1a34}
+  .barbell-box{padding:10px;border:1px dashed rgba(255,255,255,0.25);border-radius:10px;background:#0f1a34}
 </style>
 </head>
 <body>
@@ -180,18 +180,32 @@
   var COUNTERS_KEY='unity2025_counters';
   var CUSTOM_KEY='unity2025_custom_matrix_v5';
   var BARBELL_KEY='unity2025_barbell_map_v1';
+  var ACC_TOTAL_KEY='unity2025_acc_totals_v1';
   var PRELOCK_ALL = true; // accessoires en carry bij blok-build locken
   var PATTERNS=['Push','Pull','Squat','Lunge','Hinge','Rotation','Anti-Rotation','Loaded Carry'];
   var WEEK_PCT={Deload:.15,Maintenance:.22,Development:.28,Stress:.35};
   var SPLITS={3:[0.15,0.35,0.50],4:[0.15,0.22,0.28,0.35],5:[0.10,0.15,0.20,0.25,0.30]};
   var DEFAULT_BALLISTICS=new Set(['Snatch','One-arm Swing','Two-arm Swing','High Pull','Double Clean']);
-// Heavy-bias cap volgt blokvolume: 180→1 • 240→2 • 300/400/500→3
-function heavyBiasCapFor(blockVol){
-  if (+blockVol <= 180) return 1;
-  if (+blockVol <= 240) return 2;
-  return 3; // 300, 400, 500
-}
 
+  function heavyBiasCapFor(blockVol){
+    if (+blockVol <= 180) return 1;
+    if (+blockVol <= 240) return 2;
+    return 3;
+  }
+
+  function loadJSON(k,def){try{var v=localStorage.getItem(k);return v?JSON.parse(v):def}catch(e){return def}}
+  function saveJSON(k,o){try{localStorage.setItem(k,JSON.stringify(o))}catch(e){}}
+  var accTotals = loadJSON(ACC_TOTAL_KEY, {}) || {};
+  function saveAccTotals(){ saveJSON(ACC_TOTAL_KEY, accTotals); }
+  function getAccTotal(pattern, name){
+    var k = String(pattern)+'|'+String(name).trim();
+    return accTotals[k] | 0;
+  }
+  function addAccTotal(pattern, name, reps){
+    var k = String(pattern)+'|'+String(name).trim();
+    accTotals[k] = (accTotals[k] | 0) + (reps|0);
+    saveAccTotals();
+  }
 
   var MATRIX_ADV={
   'Push':{ main:'Military Press', acc:['Push Press','Half-kneeling Press','Floor Press'] },
@@ -211,16 +225,13 @@ function heavyBiasCapFor(blockVol){
   function sanitizeName(s){var x=String(s||'').trim(); if(!x) return ''; if(x==='on'||x==='off') return ''; return x;}
   function makeRNG(seed){var h=2166136261>>>0;if(seed){for(var i=0;i<seed.length;i++){h^=seed.charCodeAt(i);h=Math.imul(h,16777619);} } else {h=(Date.now()>>>0);} return function(){h+=0x6D2B79F5;var t=h;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return ((t^t>>>14)>>>0)/4294967296;};}
   var rnd=makeRNG('');
-  function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(rnd()*(i+1));var tmp=a[i];a[i]=a[j];a[j]=tmp;}return a;}
+  function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(rnd()*(i+1));var tmp=a[i];a[i]=a[j];a[i]=tmp;}return a;}
   function roundsCap(v){switch(+v){case 180:return{rounds:3,cap:3};case 240:return{rounds:3,cap:4};case 300:return{rounds:3,cap:5};case 400:return{rounds:4,cap:5};case 500:return{rounds:5,cap:5};default:return{rounds:3,cap:5};}}
   function apportion2(total,weights){var w=weights.slice();var W=w.reduce(function(a,b){return a+b;},0);if(W<=0)return Array(w.length).fill(0);var raw=w.map(function(v){return (v*total)/W;});var base=raw.map(function(x){return Math.floor(x);});var rem=total-base.reduce(function(a,b){return a+b;},0);var order=raw.map(function(x,i){return {i:i,frac:x-Math.floor(x)};}).sort(function(a,b){return b.frac-a.frac;});for(var k=0;k<order.length&&rem>0;k++){base[order[k].i]+=1;rem--;}return base;}
   function biasFromPct(weekType,pct){var parts=(weekType==='Deload')?3:((weekType==='Stress')?5:4);var base=SPLITS[parts];var mn=Math.min.apply(null,base),mx=Math.max.apply(null,base);function eq(a,b){return Math.abs(a-b)<1e-9;} if(eq(pct,mn))return'Heavy'; if(eq(pct,mx))return'Light'; return'Medium';}
   function biasBadge(b){return b==='Heavy' ? ' <span class="badge">▲ +1</span>' : b==='Light' ? ' <span class="badge">▼ −1</span>' : '';}
   function takeRoundsLE(total, rounds){if (!Number.isFinite(total) || total <= 0) return 0; var k = Math.floor(total / rounds); return Math.max(0, k * rounds);}
   function pickDays(count){var d=[0,1,2,3,4];shuffle(d);return d.slice(0,count).sort(function(a,b){return a-b;});}
-
-  function loadJSON(k,def){try{var v=localStorage.getItem(k);return v?JSON.parse(v):def}catch(e){return def}}
-  function saveJSON(k,o){try{localStorage.setItem(k,JSON.stringify(o))}catch(e){}}
 
   var barbellMap=loadJSON(BARBELL_KEY,{
     Push:'Barbell Bench Press',
@@ -320,16 +331,13 @@ function heavyBiasCapFor(blockVol){
   function markDone(w,d){state.completed = state.completed || {}; state.completed[ doneKeyFor(w,d) ] = true; save();}
   function isDone(w,d){return !!(state.completed && state.completed[ doneKeyFor(w,d) ]);}
 
-  // Accessoire cursor per patroon (cross-block continuïteit)
   function getAccCursor(pattern){state.accCursor = state.accCursor || {}; return state.accCursor[pattern] | 0;}
   function setAccCursor(pattern, val){state.accCursor = state.accCursor || {}; state.accCursor[pattern] = val | 0; save();}
 
-  // Carry cursor 1->2->3->4->1 (cross-block)
   function getCarryCursor(){ state.carryCursor = state.carryCursor | 0; return state.carryCursor|0; }
   function setCarryCursor(v){ state.carryCursor = (v|0); save(); }
   function carryKey(w,d){ return String((state.blockIdx||0))+'|'+String(w)+'|'+String(d); }
 
-  // Dag-locked accessoire start
   function accStartKey(pattern,w,d){ return String((state.blockIdx||0))+'|'+pattern+'|'+String(w)+'|'+String(d); }
   function getAccStart(pattern,w,d){
     state.accStart = state.accStart || {};
@@ -357,13 +365,21 @@ function heavyBiasCapFor(blockVol){
     return o.map(function(i){return {vol:sess[i],pct:base[i]};});
   }
 
-  function pickAccessoryOrderRoundRobin(accList, pattern, w, d){
+  function pickAccessoryOrderLeastTotalFirst(accList, pattern, w, d){
     var n = accList.length;
     if (n === 0) return [];
     var start = getAccStart(pattern, w, d) % n;
-    var order = [];
-    for (var k = 0; k < n; k++) order.push((start + k) % n);
-    return order;
+    return accList
+      .map(function(nm, idx){
+        var total = getAccTotal(pattern, nm);
+        var tie = (idx - start + n) % n;
+        return { idx: idx, total: total, tie: tie };
+      })
+      .sort(function(a,b){
+        if (a.total !== b.total) return a.total - b.total;
+        return a.tie - b.tie;
+      })
+      .map(function(o){ return o.idx; });
   }
 
   function buildPlan(cfg){
@@ -433,8 +449,7 @@ function heavyBiasCapFor(blockVol){
 
     var pendingPatterns = new Set();
 
-    // Opener: Get Up (Light-bias = 2+2, anders 1+1)
-    var openerHTML=''; 
+    var openerHTML='';
     var rot=null;
     for(var ii=0;ii<day.entries.length;ii++){ if(day.entries[ii].pattern==='Rotation'){rot=day.entries[ii];break;} }
     if(rot){
@@ -452,7 +467,6 @@ function heavyBiasCapFor(blockVol){
 
     var circuitExercises = [];
 
-    // Plan Strong overlay (weergave)
     if(day.ps){
       var rounds=rc.rounds; 
       for(var key in day.ps){
@@ -473,28 +487,23 @@ function heavyBiasCapFor(blockVol){
       }
     }
 
-    // Unity-circuit — mains + accessoires
     for(var ei=0;ei<baseEntries.length;ei++){
       var e=baseEntries[ei];
       var order=(e.pattern==='Rotation') ? [e.main] : [e.main].concat(e.acc||[]).filter(Boolean);
       var accList=(e.pattern==='Rotation')?[]:order.slice(1);
-      var accOrder=pickAccessoryOrderRoundRobin(accList,e.pattern,w,d);
+      var accOrder=pickAccessoryOrderLeastTotalFirst(accList,e.pattern,w,d);
       var remaining=e.volume;
 
-      // Main
       if(e.pattern!=='Rotation' && order.length>0){
         var nm=order[0];
-
-        // Barbell-mode vervanging voor Heavy-bias mains
         if(isBarbell && (e.bias==='Heavy') && (e.pattern==='Push' || e.pattern==='Pull' || e.pattern==='Squat' || e.pattern==='Hinge')){
           var repl = barbellMap[e.pattern] || nm;
           if(repl && clean(repl).length>0){ nm=repl; }
         }
-
-var isLightBoost = (state.cfg.bias==='on' && e.bias==='Light' && !day.ps);
-var isHeavyBias  = (state.cfg.bias==='on' && e.bias==='Heavy' && !day.ps);
-var heavyCap     = heavyBiasCapFor(state.cfg.volume);
-var targetCap    = isHeavyBias ? heavyCap : (isLightBoost ? 10 : rc.cap);
+        var isLightBoost = (state.cfg.bias==='on' && e.bias==='Light' && !day.ps);
+        var isHeavyBias  = (state.cfg.bias==='on' && e.bias==='Heavy' && !day.ps);
+        var heavyCap     = heavyBiasCapFor(state.cfg.volume);
+        var targetCap    = isHeavyBias ? heavyCap : (isLightBoost ? 10 : rc.cap);
         var assign = Math.min(targetCap * rc.rounds, takeRoundsLE(remaining, rc.rounds));
         var perRound = Math.floor(assign/rc.rounds);
         if(perRound>0){
@@ -508,7 +517,6 @@ var targetCap    = isHeavyBias ? heavyCap : (isLightBoost ? 10 : rc.cap);
         }
       }
 
-      // Accessoires — round-robin; leftover gaat hierheen
       var assignedSomething=false;
       for(var ai=0;ai<accOrder.length;ai++){
         if(remaining<=0) break;
@@ -523,6 +531,7 @@ var targetCap    = isHeavyBias ? heavyCap : (isLightBoost ? 10 : rc.cap);
         var shown2=perRound2*(isBall2?2:1);
         var repTxt2=isUni2?String(shown2)+'+'+String(shown2):String(shown2);
         circuitExercises.push({name:nm2,repText:repTxt2,label:''});
+        addAccTotal(e.pattern, nm2, assignAcc);
         remaining-=assignAcc;
         assignedSomething=true;
       }
@@ -536,10 +545,8 @@ var targetCap    = isHeavyBias ? heavyCap : (isLightBoost ? 10 : rc.cap);
       }
     }
 
-    // Shuffle alle circuit-items (opener blijft apart)
     shuffle(circuitExercises);
 
-    // Carry — prelocked 1->2->3->4->1
     var carryEntry = day.entries.find(function(e){return e.pattern==='Loaded Carry';});
     var carryName = MATRIX_ADV['Loaded Carry'].acc[0];
     if (carryEntry){
@@ -549,7 +556,6 @@ var targetCap    = isHeavyBias ? heavyCap : (isLightBoost ? 10 : rc.cap);
     }
     var carryTxt = carryEntry ? String(Math.max(30,(carryEntry.volume|0)*5))+'s '+carryName : '45s '+carryName;
 
-    // Compose
     var html=[];
     var doneMark = isDone(w,d) ? ' — ✔' : '';
     var baseKB = (state.cfg && state.cfg.baseKB) ? state.cfg.baseKB : '';
@@ -586,7 +592,7 @@ var targetCap    = isHeavyBias ? heavyCap : (isLightBoost ? 10 : rc.cap);
     pills.push('<span class="pill">Volume: '+String(state.cfg.volume)+'</span>');
     pills.push('<span class="pill">Rounds: '+String(rc.rounds)+'</span>');
     pills.push('<span class="pill">Cap/round: '+String(rc.cap)+'</span>');
-pills.push('<span class="pill">Heavy cap: '+String(heavyBiasCapFor(state.cfg.volume))+' (by volume)</span>');
+    pills.push('<span class="pill">Heavy cap: '+String(heavyBiasCapFor(state.cfg.volume))+' (by volume)</span>');
     pills.push('<span class="pill">Blok #'+String(state.blockIdx)+'</span>');
     pills.push('<span class="pill">KB-basis: '+(state.cfg.baseKB||'-')+'</span>');
     pills.push('<span class="pill">Finished blocks: '+String(state.completedBlocks|0)+'</span>');
@@ -608,28 +614,26 @@ pills.push('<span class="pill">Heavy cap: '+String(heavyBiasCapFor(state.cfg.vol
   }
 
   function newBlock(){
-    var cfg=readCfg();
-    var plan=buildPlan(cfg);
-    var blockIdx=(state.blockIdx||0)+1;
+    var cfg = readCfg();
+    var plan = buildPlan(cfg);
+    var blockIdx = (state.blockIdx || 0) + 1;
 
-    // Pre-lock accessoires (A1->A2->A3 volgorde) en carry 1->2->3->4->1
+    accTotals = {}; saveAccTotals();
+
     var preAccStart = {};
     var preCarryStart = {};
     if (PRELOCK_ALL){
-      // Accessoires: cursor per patroon door het blok heen
       var startCursor = {};
       for (var i=0;i<PATTERNS.length;i++){ startCursor[PATTERNS[i]] = (getAccCursor(PATTERNS[i])|0); }
       for (var w=0; w<plan.weeks.length; w++){
         for (var d=0; d<plan.weeks[w].days.length; d++){
           var entries = plan.weeks[w].days[d].entries || [];
-          // carry prelock
           var hasCarry = entries.some(function(e){return e.pattern==='Loaded Carry';});
           if (hasCarry){
             var list = MATRIX_ADV['Loaded Carry'].acc;
-            var cidx = (getCarryCursor() + Object.keys(preCarryStart).length) % list.length; // 1->2->3->4->1
+            var cidx = (getCarryCursor() + Object.keys(preCarryStart).length) % list.length;
             preCarryStart[ carryKey(w,d).replace(/^\d+\|/, String(blockIdx)+'|') ] = cidx;
           }
-          // accessoires
           for (var eIdx=0; eIdx<entries.length; eIdx++){
             var e = entries[eIdx];
             if (e.pattern==='Rotation' || e.pattern==='Loaded Carry') continue;
@@ -653,9 +657,9 @@ pills.push('<span class="pill">Heavy cap: '+String(heavyBiasCapFor(state.cfg.vol
       completed: {},
       completedBlocks: (state.completedBlocks|0),
       accCursor: state.accCursor || {},
-      accStart: preAccStart,            // dag-locked accessoires
-      pendingAccAdvance: {},            // pending cursor advances per dag
-      carryStart: preCarryStart         // dag-locked carry index
+      accStart: preAccStart,
+      pendingAccAdvance: {},
+      carryStart: preCarryStart
     };
     save(); renderInfo(); renderSession(); wireLiveKB(); toast('Blok aangemaakt');
   }
@@ -684,7 +688,6 @@ pills.push('<span class="pill">Heavy cap: '+String(heavyBiasCapFor(state.cfg.vol
     if(!state.plan) return;
     var w=state.cursor.w, d=state.cursor.d;
 
-    // Accessoire cursor advance
     var key = dayKey();
     var pend = (state.pendingAccAdvance && state.pendingAccAdvance[key]) || [];
     if (pend.length) {
@@ -694,10 +697,8 @@ pills.push('<span class="pill">Heavy cap: '+String(heavyBiasCapFor(state.cfg.vol
       }
       delete state.pendingAccAdvance[key];
       save();
-      // Locks van toekomstige dagen voor deze patronen wissen, zodat ze met nieuwe cursor re-locken? Niet nodig bij PRELOCK_ALL.
     }
 
-    // Carry cursor +1 als dag carry had (voor cross-block)
     try{
       var week = state.plan.weeks[w];
       var day  = week.days[d];
@@ -709,7 +710,9 @@ pills.push('<span class="pill">Heavy cap: '+String(heavyBiasCapFor(state.cfg.vol
     next();
   }
   function resetProgress(){
-    localStorage.removeItem(LS_KEY); state={};
+    localStorage.removeItem(LS_KEY);
+    localStorage.removeItem(ACC_TOTAL_KEY);
+    accTotals = {};
     document.getElementById('session').textContent='Voortgang gewist. Klik “Nieuw blok”.';
     document.getElementById('kpi').innerHTML=''; document.getElementById('orders').innerHTML=''; toast('Voortgang gereset');
   }
@@ -727,7 +730,6 @@ pills.push('<span class="pill">Heavy cap: '+String(heavyBiasCapFor(state.cfg.vol
     };
   }
 
-  // Tabs
   document.querySelectorAll('.tab-btn').forEach(function(btn){
     btn.onclick=function(){
       var t=btn.getAttribute('data-tab');
@@ -736,7 +738,6 @@ pills.push('<span class="pill">Heavy cap: '+String(heavyBiasCapFor(state.cfg.vol
     };
   });
 
-  // Live KB badge update (no rebuild needed)
   function wireLiveKB(){
     try {
       var el = document.getElementById('inpBaseKB');
@@ -757,7 +758,6 @@ pills.push('<span class="pill">Heavy cap: '+String(heavyBiasCapFor(state.cfg.vol
     } catch(e){}
   }
 
-  // UI bindings
   document.getElementById('btnNewBlock').onclick=newBlock;
   document.getElementById('btnRebuild').onclick=newBlock;
   document.getElementById('btnReset').onclick=resetProgress;
@@ -770,75 +770,6 @@ pills.push('<span class="pill">Heavy cap: '+String(heavyBiasCapFor(state.cfg.vol
     document.getElementById('selPSVol').disabled=!on;
     var adv=document.getElementById('chkPSAdvanced'); if(adv) adv.disabled=!on;
   });
-
-  function loadBarbellFields(){
-    document.getElementById('barbellPush').value = barbellMap.Push || '';
-    document.getElementById('barbellPull').value = barbellMap.Pull || '';
-    document.getElementById('barbellSquat').value = barbellMap.Squat || '';
-    document.getElementById('barbellHinge').value = barbellMap.Hinge || '';
-  }
-  document.getElementById('btnSaveBarbell').onclick=function(){
-    barbellMap.Push = sanitizeName(document.getElementById('barbellPush').value);
-    barbellMap.Pull = sanitizeName(document.getElementById('barbellPull').value);
-    barbellMap.Squat = sanitizeName(document.getElementById('barbellSquat').value);
-    barbellMap.Hinge = sanitizeName(document.getElementById('barbellHinge').value);
-    saveBarbell();
-    toast('Barbell‑lifts opgeslagen'); 
-  };
-  loadBarbellFields();
-
-  // Custom form
-  function renderCustomForm(){
-    var wrap=document.getElementById('customForm'); wrap.innerHTML='';
-    sanitizeCustom();
-    for(var pidx=0;pidx<PATTERNS.length;pidx++){
-      var pat=PATTERNS[pidx]; var conf=customMatrix[pat]; var it=conf.items;
-      var card=document.createElement('div'); card.className='card';
-      var rows=['<div class="row" style="justify-content:space-between;align-items:center"><b>'+pat+'</b></div>'];
-      for(var i=0;i<4;i++){
-        var nm=esc(it[i].name||''); var bal=!!it[i].ballistic; var uni=!!it[i].unilateral;
-        rows.push('<div class="row-inline">\
-          <div style="flex:1">\
-            <label>'+ (i===0?'1 (Main)':' '+String(i+1)) +'</label>\
-            <input type="text" data-p="'+pat+'" data-idx="'+String(i)+'" placeholder="'+(i===0?'bijv. Military Press':'... (accessoire)')+'" value="'+nm+'">\
-          </div>\
-          <label class="chk" style="margin-top:22px"><input type="checkbox" data-p="'+pat+'" data-idx="'+String(i)+'" data-bal '+(bal?'checked':'')+'> Ballistic (x2)</label>\
-          <label class="chk" style="margin-top:22px"><input type="checkbox" data-p="'+pat+'" data-idx="'+String(i)+'" data-uni '+(uni?'checked':'')+'> Unilateral (+/+) </label>\
-        </div>');
-      }
-      card.innerHTML=rows.join('');
-      wrap.appendChild(card);
-    }
-  }
-  function readCustomFromForm(){
-    var obj=loadJSON(CUSTOM_KEY,{})||{};
-    for(var pidx=0;pidx<PATTERNS.length;pidx++){var pat=PATTERNS[pidx]; obj[pat]=obj[pat]||{enabled:true,items:[{},{},{},{}]};}
-    document.querySelectorAll('input[data-idx][type="text"]').forEach(function(inp){
-      var p=inp.getAttribute('data-p'); var i=+inp.getAttribute('data-idx');
-      obj[p].items[i]=obj[p].items[i]||{};
-      obj[p].items[i].name = sanitizeName(inp.value);
-    });
-    document.querySelectorAll('input[data-bal]').forEach(function(chk){
-      var p=chk.getAttribute('data-p'); var i=+chk.getAttribute('data-idx');
-      obj[p].items[i]=obj[p].items[i]||{}; obj[p].items[i].ballistic=chk.checked;
-    });
-    document.querySelectorAll('input[data-uni]').forEach(function(chk){
-      var p=chk.getAttribute('data-p'); var i=+chk.getAttribute('data-idx');
-      obj[p].items[i]=obj[p].items[i]||{}; obj[p].items[i].unilateral=chk.checked;
-    });
-    return obj;
-  }
-
-  renderCustomForm();
-
-  document.getElementById('btnSaveCustom').onclick=function(){
-    customMatrix=readCustomFromForm(); saveJSON(CUSTOM_KEY,customMatrix);
-    document.querySelector('.tab-btn[data-tab="plan"]').click();
-    newBlock(); toast('Eigen oefeningen opgeslagen');
-  };
-  document.getElementById('btnClearCustom').onclick=function(){
-    customMatrix={}; saveJSON(CUSTOM_KEY,customMatrix); renderCustomForm(); toast('Eigen oefeningen geleegd');
-  };
 
   if(state&&state.plan){renderInfo();renderSession();}
   wireLiveKB();
