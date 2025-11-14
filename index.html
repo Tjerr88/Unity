@@ -11,6 +11,7 @@
   .app{max-width:980px;margin:0 auto;padding:16px 12px 84px}
   h1{margin:0 0 .6rem;font-size:28px}
   h2{margin:0;font-size:18px}
+  h3{margin:10px 0 6px;font-size:15px}
   .btn{background:#2b63ff;border:0;color:#fff;padding:12px 14px;border-radius:12px;cursor:pointer;font-weight:800;transition:transform .06s ease}
   .btn.ghost{background:#1a2a4a}
   .btn.inline{padding:8px 10px;border-radius:10px}
@@ -37,7 +38,7 @@
   .muted{opacity:.75;font-size:12px}
   .toast{position:fixed;right:12px;bottom:12px;background:#0f1a34;border:1px solid rgba(255,255,255,.15);padding:10px 12px;border-radius:12px;font-size:13px;display:none}
   .badge{display:inline-block;font-weight:800;font-size:12px;padding:3px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.25);margin-left:6px;background:#0f1a34}
-  .tabs{display:flex;gap:8px;margin:10px 0 6px}
+  .tabs{display:flex;gap:8px;margin:10px 0 6px;flex-wrap:wrap}
   .tab-btn{background:#0f1a34;border:1px solid rgba(255,255,255,.15);color:#e6eaf2;padding:10px 12px;border-radius:12px;font-weight:800;cursor:pointer}
   .tab-btn.active{background:#2b63ff;border-color:#2b63ff}
   .tab-pane{display:none}
@@ -51,6 +52,16 @@
   .row-inline input[type="text"]{flex:1}
   .chk{display:inline-flex;gap:6px;align-items:center;font-size:12px;opacity:.9}
   .barbell-box{padding:10px;border:1px dashed rgba(255,255,255,.25);border-radius:10px;background:#0f1a34}
+  ul{margin:6px 0 6px 18px;padding:0}
+  ul li{margin:2px 0;font-size:13px}
+
+  /* force stacked buttons */
+  .row.stack {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
 </style>
 </head>
 <body>
@@ -60,6 +71,8 @@
   <div class="tabs" role="tablist" aria-label="Navigation">
     <button class="tab-btn active" data-tab="plan" aria-selected="true">Planner</button>
     <button class="tab-btn" data-tab="custom" aria-selected="false">Custom Exercises</button>
+    <button class="tab-btn" data-tab="warmup" aria-selected="false">Warm-Up / Cooldown</button>
+    <button class="tab-btn" data-tab="zone2" aria-selected="false">Zone 2</button>
   </div>
 
   <div id="tab-plan" class="tab-pane active">
@@ -97,23 +110,23 @@
             </select>
           </div>
           <div>
-            <label>Plan Strong overlay (1 grind pattern)</label>
+            <label>Strength Focus overlay (1 grind pattern)</label>
             <select id="selPS">
               <option value="">— Off —</option>
               <option>Push</option><option>Pull</option><option>Squat</option><option>Hinge</option>
             </select>
           </div>
           <div>
-            <label>PS Volume (if PS enabled)</label>
+            <label>Strength Focus Volume (if PS enabled)</label>
             <select id="selPSVol" disabled>
               <option>180</option><option selected>240</option><option>300</option>
             </select>
           </div>
           <div>
-            <label>PS mode</label>
+            <label>Strength Focus mode</label>
             <label class="row" style="gap:10px">
               <input type="checkbox" id="chkPSAdvanced" disabled>
-              <span>Advanced: High + Super Heavy</span>
+              <span>Advanced Strength Focus</span>
             </label>
           </div>
           <div>
@@ -121,7 +134,7 @@
             <input id="inpBaseKB" type="text" placeholder="e.g. 16">
           </div>
           <div>
-            <label class="row"><input type="checkbox" id="chkBarbellMode"> Barbell‑mode (Heavy Bias = Barbell)</label>
+            <label class="row"><input type="checkbox" id="chkBarbellMode"> Barbell-mode (Heavy Bias = Barbell)</label>
           </div>
         </div>
 
@@ -132,7 +145,7 @@
             Week percentages: Deload 15% • Maintenance 22% • Development 28% • Stress 35%.<br>
             Splits per partition: 3 → [15,35,50]% • 4 → [15,22,28,35]% • 5 → [10,15,20,25,30]%.<br>
             Bias (mains only): min%=Heavy ▲, max%=Light ▼. Light-bias main: cap-boost to 10 per round (no PS).<br>
-            Barbell‑mode: replaces Heavy‑bias mains of Push/Pull/Squat/Hinge with your barbell variants.
+            Barbell-mode: replaces Heavy-bias mains of Push/Pull/Squat/Hinge with your barbell variants.
           </div>
         </div>
 
@@ -151,7 +164,7 @@
       <p class="muted">Per pattern: fill <b>1 (Main)</b> and 2–4 (accessories). Enable <b>Ballistic (x2)</b> for swings/snatches etc. and <b>Unilateral (+/+)</b> for unilateral moves (displayed as x+x). Empty = Unity defaults.</p>
       <div id="customForm" class="grid cols-2" style="margin-top:8px"></div>
       <div class="card barbell-box" style="margin-top:12px">
-        <b>Barbell‑mapping (for Heavy Bias)</b>
+        <b>Barbell-mapping (for Heavy Bias)</b>
         <div class="grid cols-4" style="margin-top:8px">
           <div><label>Push (e.g. Barbell Bench Press)</label><input type="text" id="barbellPush" placeholder="Barbell Bench Press"></div>
           <div><label>Pull (e.g. Barbell Row)</label><input type="text" id="barbellPull" placeholder="Barbell Row"></div>
@@ -161,13 +174,86 @@
         <div class="row stack" style="margin-top:8px">
           <button id="btnSaveBarbell" class="btn inline">Save Barbell lifts</button>
         </div>
-        <p class="muted" style="margin-top:6px">When <b>Barbell‑mode</b> is on and a pattern is Heavy‑biased, the main is automatically replaced by your barbell lift.</p>
+        <p class="muted" style="margin-top:6px">When <b>Barbell-mode</b> is on and a pattern is Heavy-biased, the main is automatically replaced by your barbell lift.</p>
       </div>
       <div class="row stack" style="margin-top:8px">
         <button id="btnSaveCustom" class="btn">Save</button>
         <button id="btnClearCustom" class="btn ghost">Clear</button>
         <span class="muted">After saving: the Planner is rebuilt.</span>
       </div>
+    </div>
+  </div>
+
+  <div id="tab-warmup" class="tab-pane">
+    <div class="card">
+      <h2>Warm-Up</h2>
+      <p class="muted">Optional 5–7 minute preparation before Unity.</p>
+      <h3>Sequence</h3>
+      <ul>
+        <li><b>Head nods</b> — 20 up/down, 20 side-to-side (ear to shoulder)</li>
+        <li><b>Cross crawls</b> — 20 total</li>
+      </ul>
+      <h3>Rocking</h3>
+      <ul>
+        <li>10× rocking with dorsiflexion (toes up)</li>
+        <li>10× rocking with plantarflexion (toes down)</li>
+        <li>5× rocking with one leg extended sideways</li>
+      </ul>
+      <h3>Segmental rolls</h3>
+      <ul>
+        <li>3× per arm</li>
+        <li>3× per leg</li>
+      </ul>
+      <h3>Crawling</h3>
+      <ul>
+        <li>2 minutes, easy pace, smooth breathing</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Cooldown</h2>
+      <p class="muted">Optional 2 minute reset after Unity.</p>
+      <ul>
+        <li><b>Diaphragmatic breathing</b> — 2 minutes</li>
+        <li>Inhale slowly through the nose, exhale longer than you inhale</li>
+        <li>Relaxed position (lying or seated)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="tab-zone2" class="tab-pane">
+    <div class="card">
+      <h2>Zone 2 — Readiness Gate</h2>
+      <p class="muted">Check before adding Zone 2. Strength first, Zone 2 is earned.</p>
+      <h3>Questions</h3>
+      <label class="chk"><input type="checkbox"> Slept well?</label>
+      <label class="chk"><input type="checkbox"> Low muscle soreness?</label>
+      <label class="chk"><input type="checkbox"> Good energy on waking?</label>
+      <label class="chk"><input type="checkbox"> Calm, easy breathing at rest?</label>
+      <p class="muted" style="margin-top:8px">
+        <b>3–4 YES</b> → Zone 2 allowed (30–40 min, easy pace)<br>
+        <b>0–2 YES</b> → Rest or easy walk only
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>MAF Range</h2>
+      <p class="muted">Keep Zone 2 easy and sustainable.</p>
+      <ul>
+        <li><b>Formula:</b> MAF = 180 − age</li>
+        <li><b>Target range:</b> (MAF − 10) to MAF</li>
+      </ul>
+      <p class="muted">
+        Example (age 35):<br>
+        MAF = 145 bpm → Zone 2 = <b>135–145 bpm</b>
+      </p>
+      <h3>Guidelines</h3>
+      <ul>
+        <li>Nose breathing only</li>
+        <li>Conversational pace</li>
+        <li>30–40 minutes on rest days</li>
+        <li>Finish feeling better, not tired</li>
+      </ul>
     </div>
   </div>
 </div>
@@ -427,25 +513,29 @@
       }
     }
     if(cfg.psPattern){
-      var psPat=cfg.psPattern;
-      var psBlock=+cfg.psVolume||240;
-      var fixed=['Deload','Development','Maintenance','Stress'];
-      for(var w3=0;w3<4;w3++){
-        var wt2=fixed[w3];
-        var weekVol=Math.round(psBlock*(WEEK_PCT[wt2]||0));
-        for(var dd2=0;dd2<5;dd2++){
-          weeks[w3].days[dd2].entries = weeks[w3].days[dd2].entries.filter(function(en){return en.pattern!==psPat;});
+      try{
+        var psPat=cfg.psPattern;
+        var psBlock=+cfg.psVolume||240;
+        var fixed=['Deload','Development','Maintenance','Stress'];
+        for(var w3=0;w3<4;w3++){
+          var wt2=fixed[w3];
+          var weekVol=Math.round(psBlock*(WEEK_PCT[wt2]||0));
+          for(var dd2=0;dd2<5;dd2++){
+            weeks[w3].days[dd2].entries = weeks[w3].days[dd2].entries.filter(function(en){return en.pattern!==psPat;});
+          }
+          var dayIdxs2=pickDays(3);
+          var weights=[50,35,15], labels=['L','M','H'], shOnHigh=false;
+          if(cfg.psAdvanced){weights=[30,55,15]; shOnHigh=true;}
+          var sessVols=apportion2(weekVol,weights);
+          var psMain=(matrix[psPat]&&matrix[psPat].main)?matrix[psPat].main:psPat;
+          for(var ii=0;ii<3;ii++){
+            var d2=dayIdxs2[ii];
+            weeks[w3].days[d2].ps = weeks[w3].days[d2].ps || {};
+            weeks[w3].days[d2].ps[psPat] = {weekType:wt2,reps:sessVols[ii],mainName:psMain,level:labels[ii],sh:(labels[ii]==='H'&&shOnHigh),mode:cfg.psAdvanced?'advanced':'basic'};
+          }
         }
-        var dayIdxs2=pickDays(3);
-        var weights=[50,35,15], labels=['L','M','H'], shOnHigh=false;
-        if(cfg.psAdvanced){weights=[30,55,15]; shOnHigh=true;}
-        var sessVols=apportion2(weekVol,weights);
-        var psMain=(matrix[psPat]&&matrix[psPat].main)?matrix[psPat].main:psPat;
-        for(var ii=0;ii<3;ii++){
-          var d2=dayIdxs2[ii];
-          weeks[w3].days[d2].ps = weeks[w3].days[d2].ps || {};
-          weeks[w3].days[d2].ps[psPat] = {weekType:wt2,reps:sessVols[ii],mainName:psMain,level:labels[ii],sh:(labels[ii]==='H'&&shOnHigh),mode:cfg.psAdvanced?'advanced':'basic'};
-        }
+      }catch(e){
+        if(typeof console!=='undefined' && console && console.error){ console.error(e); }
       }
     }
     return { weeks: weeks, rc: roundsCap(cfg.volume), weekOrders: weekOrders, set: 'advanced' };
@@ -517,7 +607,7 @@
     pills.push('<span class="pill">KB base: '+(state.cfg.baseKB||'-')+'</span>');
     pills.push('<span class="pill">Finished blocks: '+String(state.completedBlocks|0)+'</span>');
     pills.push('<span class="pill">KB bias: '+(state.cfg.bias==='on'?'On (▲/▼)':'Off')+'</span>');
-    if(state.cfg.psPattern){pills.push('<span class="pill">Plan Strong: '+state.cfg.psPattern+' • Vol: '+state.cfg.psVolume+' • '+(state.cfg.psAdvanced?'Advanced (H+SH)':'Basic')+'</span>');}
+    if(state.cfg.psPattern){pills.push('<span class="pill">Strength Focus: '+state.cfg.psPattern+' • Vol: '+state.cfg.psVolume+' • '+(state.cfg.psAdvanced?'Advanced (H+SH)':'Basic')+'</span>');}
     document.getElementById('kpi').innerHTML=pills.join(' ');
     var rows=[]; for(var k in state.plan.weekOrders){rows.push(k+': <b>'+state.plan.weekOrders[k].join(' → ')+'</b>');}
     document.getElementById('orders').innerHTML=rows.join('<br>');
@@ -567,8 +657,8 @@
         if(info.mode==='advanced'||info.sh){buckets=apportion2(T,[45,30,20,5]);labels=['L','M','H','SH'];}
         else {buckets=apportion2(T,[50,35,15]);labels=['L','M','H'];}
         var perRound=[], roundLabels=[];
-        for(var bi=0;bi<buckets.length;bi++){ perRound[bi]=apportion2(buckets[bi],rounds); }
-        for(var rr=0; rr<rounds; rr++){
+        for(var bi=0;bi<buckets.length;bi++){ perRound[bi] = apportion2(buckets[bi], Array(rounds).fill(1)); }
+        for(var rr=0;rr<rounds;rr++){
           var parts=[]; for(var li=0; li<labels.length; li++){ if(perRound[li][rr]>0) parts.push(labels[li]+String(perRound[li][rr])); }
           roundLabels.push(parts.length?parts.join('/'):'—');
         }
