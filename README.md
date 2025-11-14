@@ -1,474 +1,426 @@
-UNITY TRAINING SYSTEM
-Built to endure. Ready for anything.
+# UNITY TRAINING SYSTEM  
+*Built to endure. Ready for anything.*  
+**Official README — Professional Edition (Quickstart + Deep Dive)**
 
-Official README — Professional Edition (Quickstart + Deep Dive)
+---
 
-QUICKSTART GUIDE
+## QUICKSTART GUIDE  
+*(Start here — everything you need to begin Unity today)*
 
-(Start Here — Everything you need to begin Unity today)
-
-Unity is a simple, sustainable, full-body training system you can follow for years.
+Unity is a simple, sustainable, full-body training system you can follow for years.  
 Every session follows the same structure:
 
-1. Warm-Up (5–7 minutes)
-
+### 1. Warm-Up (5–7 minutes)  
 Optional, but recommended.
 
-2. Opener (1 lift)
+### 2. Opener (1 lift)  
+**Turkish Get Up (TGU)** — controlled, technical, and low-rep.
 
-Turkish Get Up (TGU) — controlled, technical, and low-rep.
+### 3. Main Circuit (8 movement patterns, 3–5 rounds)  
 
-3. Main Circuit (8 movement patterns, 3–5 rounds)
+You perform **one exercise per pattern** in random order, with controlled reps:
 
-You perform one exercise per pattern, in random order, with controlled reps.
+- Push  
+- Pull  
+- Squat  
+- Lunge  
+- Hinge  
+- Rotation  
+- Anti-Rotation  
+- Loaded Carry  
 
-Patterns include:
-Push, Pull, Squat, Lunge, Hinge, Rotation, Anti-Rotation, Loaded Carry.
-
-4. Carry Finisher (30–120 seconds)
-
+### 4. Carry Finisher (30–120 seconds)  
 A single loaded carry or crawl for time.
 
-Whole session: 30–40 minutes.
+**Total session time:** about 30–40 minutes.
 
-How often do I train?
+---
 
-5 days per week (designed for Mon–Fri, but flexible).
+### How often do I train?
 
-How long is a Unity block?
+- Unity is designed for **5 days per week** (for example: Monday–Friday).
+- You can shift days if needed, as long as you keep 5 sessions per week.
 
-4 weeks →
-20 sessions →
-Then repeat with a new block.
+---
 
-Unity auto-generates a new block every time you press New Block.
+### How long is a Unity block?
 
-Equipment needed
+- **4 weeks**  
+- **20 sessions**  
+- After finishing a block, you generate a **new block** in the app.
 
-One kettlebell (your “Goldilocks bell”)
+---
 
-Optional: one heavier and one lighter bell for variations
+### Equipment needed
 
-Optional: TRX or space for bodyweight movements
+- One kettlebell (your “Goldilocks bell”)  
+- Optional: one lighter and one heavier kettlebell  
+- Optional: space for bodyweight and crawl work  
+- Optional: running shoes for Zone 2
 
-Optional: running shoes for Zone 2
+---
 
-How hard should Unity feel?
+### How hard should Unity feel?
 
-Never maximal.
-Unity is designed to be:
+Unity should **never feel maximal**.
 
-smooth
+- You should finish sessions **tired but not destroyed**.  
+- Technique should stay crisp.  
+- You should be able to train again the next day.
 
-repeatable
+If you feel wrecked after every session, you are doing too much.
 
-sustainable
+---
 
-submaximal
+### What if I miss a day?
 
-low-stress
+- Nothing breaks. Just do **the next session**.  
+- Unity is **session-based**, not tied to specific calendar dates.
 
-injury-resistant
+---
 
-If you finish a session feeling destroyed, you went too hard.
+### What kettlebell weight should I use?
 
-What if I miss a day?
+Your **Goldilocks bell** is the kettlebell that:
 
-Just train the next session.
-Unity is not date-based. You always follow the next session.
+- is not too light  
+- is not too heavy  
+- allows clean, repeatable technique  
+- feels like you can use it for months
 
-What kettlebell weight should I use?
+Most people stay with the same bell for many weeks or even months before moving up.
 
-Your “Goldilocks bell” = the weight that feels:
+---
 
-not too light
+### Should I add cardio?
 
-not too heavy
+Yes, but only when you feel recovered.
 
-allows crisp technique
+- Unity includes an optional **Zone 2 protocol** (MAF method).
+- Use it on non-Unity days or as separate sessions when recovery feels good.
 
-feels like sustainable strength
+---
 
-Most people stick with the same bell for months, not weeks.
+### What about Strength Focus?
 
-Should I add cardio?
+- Strength Focus is an **optional overlay** that emphasizes one lift pattern per block.
+- If you are unsure, leave it **off**.  
+- Unity is fully effective without Strength Focus.
 
-Yes — if you feel recovered.
+---
 
-Unity includes an optional Zone 2 protocol (MAF method) for light, sustainable cardio.
+## DEEP DIVE — HOW UNITY WORKS
 
-Use it only on days when your recovery feels 80%+.
+### 1. Philosophy of Unity
 
-What about Strength Focus?
+Unity is built on one core principle:
 
-Optional feature that lets you emphasize one lift pattern per block.
-
-If you don’t understand it yet, leave it off.
-Unity works perfectly without it.
-
-That’s all you need to start.
-
-The rest of this document explains everything in depth.
-
----------------------------------------------
-DEEP DIVE — HOW UNITY WORKS
----------------------------------------------
-1. Philosophy of Unity
-
-Unity is built on one core idea:
-
-Train in a way you can repeat for years.
-
-Not 12-week transformations.
-Not extreme peaking.
-Not overreaching.
-Not burnout cycles.
+> Train in a way you can repeat for years.
 
 Unity is:
 
-submaximal
+- submaximal  
+- technical  
+- repeatable  
+- movement-based  
+- joint-friendly  
+- time-efficient  
 
-technical
+It is **not**:
 
-repeatable
+- a 6- or 12-week extreme plan  
+- an all-out transformation program  
+- built around maximal lifts or constant pushing to failure  
 
-movement-based
+Unity is designed so you can follow it for **5–10+ years** without burning out.
 
-joint-friendly
+---
 
-energy-efficient
+### 2. Session Structure
 
-time-efficient
+Each Unity session has three main parts (plus an optional warm-up):
 
-Unity keeps you strong, athletic, mobile, conditioned, and durable — without sacrificing recovery.
+1. Warm-Up (optional)  
+2. Opener (Turkish Get Up)  
+3. Main Circuit (8 patterns)  
+4. Carry Finisher
 
-This is why Unity can be followed for 5, 10, even 20 years.
+#### A. Warm-Up (5–7 minutes, optional)
 
-2. Session Structure (The Unity Formula)
+A simple OS-inspired sequence:
 
-Each session has three parts:
+- Head nods (20 up/down, 20 side-to-side)  
+- Cross crawls (20 total)  
+- Rocking with toes up (10 reps)  
+- Rocking with toes down (10 reps)  
+- Rocking with one leg extended sideways (5 reps per side)  
+- Segmental rolls (3 per arm, 3 per leg)  
+- Crawling (2 minutes, easy pace)
 
-A. Warm-Up (optional, 5–7 minutes)
+This prepares your body and nervous system without fatigue.
 
-A simple, OS-inspired sequence:
+#### B. Opener — Turkish Get Up
 
-Head nods (up/down & side)
+The opener is always the **Turkish Get Up**.
 
-Cross crawls
+- Low reps per side  
+- Several controlled rounds  
+- Focus on technique, not speed
 
-Rocking variations
+Benefits:
 
-Segmental rolls
+- full-body strength  
+- shoulder stability  
+- hip mobility  
+- core integration  
+- improved body awareness
 
-2 minutes crawling
+#### C. Main Circuit — 8 Movement Patterns
 
-This prepares the nervous system without fatigue.
+Unity uses one exercise per movement pattern:
 
-B. Opener — Turkish Get Up
+- **Push**  
+- **Pull**  
+- **Squat**  
+- **Lunge**  
+- **Hinge**  
+- **Rotation**  
+- **Anti-Rotation**  
+- **Loaded Carry** (as finisher)
 
-Always the same:
-1–2 reps per side, per round, for several rounds.
+Each session:
 
-Why TGU?
+- chooses exercises per pattern  
+- uses **3–5 rounds**  
+- applies **rep caps** to keep volume and intensity under control  
+- keeps everything submaximal and sustainable
 
-full-body tension
+No two sessions are exactly the same, but the **structure stays identical**.
 
-shoulder stability
+#### D. Carry Finisher (30–120 seconds)
 
-hip mobility
+At the end of the session, you perform one carry or crawl for time, such as:
 
-core integration
+- Suitcase carry  
+- Front rack carry  
+- Bottom-up carry  
+- Bear crawl  
 
-slow, technical strength
+This develops:
 
-It’s the “primer” of the session.
+- grip strength  
+- trunk stability  
+- conditioning  
+- resilience  
+- gait and loaded walking patterns
 
-C. Main Circuit — All 8 Movement Patterns
+---
 
-You perform 1 exercise per pattern:
+### 3. Block Structure (4 Weeks)
 
-Push
+Unity uses a **4-week cycle**, with different weekly emphases:
 
-Pull
+- **Week 1 — Deload (~15% of block volume)**  
+- **Week 2 — Maintenance (~22%)**  
+- **Week 3 — Development (~28%)**  
+- **Week 4 — Stress (~35%)**
 
-Squat
+You choose a **total block volume** per pattern, for example:
 
-Lunge
+- 180 reps  
+- 240 reps  
+- 300 reps (default)  
+- 400 reps  
+- 500 reps  
 
-Hinge
+Unity then distributes that volume over the 20 sessions using the week percentages above.
 
-Rotation
+Higher volume → more total work, more conditioning, more hypertrophy.  
+Lower volume → easier to recover from, ideal for busy or stressful periods.
 
-Anti-Rotation
+---
 
-Loaded Carry (separate finisher)
+### 4. Rep Caps and Rounds
 
-Each session uses:
+To keep training safe and sustainable, Unity uses:
 
-3–5 rounds
-
-Random exercise selection
-
-Controlled rep caps
-
-Submaximal intensity
-
-Every session looks different — but the structure stays identical.
-
-D. Carry Finisher (time-based)
-
-30–120 seconds of one loaded carry or crawl.
-This builds:
-
-grip strength
-
-trunk stability
-
-conditioning
-
-resilience
-
-gait patterning
-
-Unity alternates between main carries (e.g., suitcase) and accessories (rack carry, bottom-up, bear crawl).
-
-3. Block Structure (4 Weeks)
-
-Unity uses a 4-week cycle, inspired by classic strength periodization:
-
-Week 1 — Deload (15%)
-
-Week 2 — Maintenance (22%)
-
-Week 3 — Development (28%)
-
-Week 4 — Stress (35%)
-
-The percentages represent your block volume distribution.
-
-Total block volume can be:
-
-180
-
-240
-
-300 (default)
-
-400
-
-500 reps per pattern per block
-
-More volume = more work = more conditioning + hypertrophy
-Less volume = easier recovery, easier long-term adherence
-
-4. Rep Caps & Rounds
-
-Unity uses “caps” to keep sessions safe and sustainable.
+- a fixed **number of rounds** per session  
+- a **rep cap per exercise per round**
 
 Example (300-volume block):
 
-3 rounds
-
-cap = 5 reps per exercise per round
+- 3 rounds  
+- cap of 5 reps per exercise per round  
 
 This prevents:
 
-junk volume
+- ego lifting  
+- sloppy technique  
+- overaccumulation of fatigue  
+- hidden overtraining  
 
-technique breakdown
+Reps should feel strong and crisp.
 
-random overtraining
+---
 
-ego lifting
+### 5. The 8 Movement Patterns
 
-Reps stay crisp.
-Session quality stays high.
+Unity covers the full human movement spectrum:
 
-5. Movement Patterns Explained
+- **Push**  
+  - Pressing variations (floor press, military press, push press)  
+- **Pull**  
+  - Rowing and pulling (rows, cleans, high pulls, pull-ups)  
+- **Squat**  
+  - Bilateral and unilateral squats (goblet, front squat, pistols, step-ups)  
+- **Lunge**  
+  - Lunge patterns (reverse lunge, Bulgarian split squat, tactical lunge)  
+- **Hinge**  
+  - Deadlifts, swings, snatches, other hip-dominant lifts  
+- **Rotation**  
+  - Turkish Get Up, windmills, rotational patterns  
+- **Anti-Rotation**  
+  - One-arm swings, snatch, renegade rows, movements that resist rotation  
+- **Loaded Carry**  
+  - Suitcase carry, rack carries, bottom-up carries, crawl variations  
 
-Unity trains the full human movement spectrum:
+This keeps Unity balanced and complete across strength, control, and conditioning.
 
-Push
+---
 
-pressing strength (floor press, military press, push press)
+### 6. Strength Focus Overlay (Optional)
 
-Pull
+The **Strength Focus overlay** is an optional feature that emphasizes **one grind pattern** (Push, Pull, Squat, or Hinge) per block.
 
-rowing, pulling, hinging with the upper back
+What it does:
 
-Squat
+- Redistributes that pattern’s work into different “intensity zones”:  
+  - Light (L)  
+  - Medium (M)  
+  - Heavy (H)  
+  - Super Heavy (SH) — advanced only  
+- Keeps total volume controlled  
+- Adds gentle waves of intensity across the weeks
 
-bilateral and unilateral squat variations
+If you are a beginner or don’t fully understand it yet, you can leave Strength Focus **off**.  
+Unity remains fully effective without it.
 
-Lunge
+---
 
-hip stability and strength through asymmetrical stance
+### 7. Recovery and Readiness
 
-Hinge
+Unity is built around **sustainable recovery**.
 
-deadlifts, swings, explosive hip patterns
+You should generally feel:
 
-Rotation
+- refreshed after sleep  
+- not overly sore  
+- able to train again the next day  
+- mentally willing to train
 
-TGU, windmills — controlled rotational strength
+If you feel drained or your performance drops:
 
-Anti-Rotation
+- reduce reps  
+- lower kettlebell weight  
+- skip Zone 2 temporarily  
+- keep showing up, but do “easy mode” sessions
 
-snatch, one-arm swings, renegade rows — resisting rotation
+Unity is a long-term system. Short-term fatigue spikes are not the goal.
 
-Loaded Carry
+---
 
-suitcase, rack walk, bottom-up walk, bear crawl
+### 8. Zone 2 (Optional Cardio)
 
-This balanced approach makes Unity complete.
+Unity includes an optional Zone 2 (MAF-based) cardio guideline for non-strength sessions.
 
-6. Strength Focus Overlay (Optional)
+#### Readiness Check
 
-This optional feature emphasizes one grind pattern per block.
+Only add Zone 2 if most of these are true:
 
-Unity redistributes that pattern’s volume into:
+- You slept well  
+- Muscle soreness is low  
+- You feel energetic in the morning  
+- Your breathing is calm at rest  
 
-Light (L)
+If you get **3–4 YES** → Zone 2 is allowed (30–40 minutes, easy pace).  
+If **0–2 YES** → rest or easy walk only.
 
-Medium (M)
+#### MAF Formula
 
-Heavy (H)
+- **MAF = 180 − age**  
+- Zone 2 target heart rate = **MAF − 10 to MAF**
 
-Super Heavy (SH) (advanced mode only)
+Example:
 
-This creates gentle strength waves without burnout.
+- Age = 35  
+- MAF = 180 − 35 = 145  
+- Zone 2 = 135–145 bpm
 
-If you don’t understand it yet, skip it.
-Unity works perfectly without Strength Focus.
+Guidelines:
 
-7. Recovery & Readiness
+- Nose breathing only  
+- You should be able to talk in full sentences  
+- 30–40 minutes per session  
+- Finish feeling better, not worse
 
-Unity is built around sustainable recovery.
+---
 
-You should feel:
+### 9. How to Progress in Unity
 
-good
+Progress in Unity comes from:
 
-fresh
+- consistent training  
+- occasional kettlebell upgrades  
+- optional Strength Focus usage  
+- improved execution quality (better form, smoother sets)
 
-mobile
+There is **no forced progression** like “add weight every week” or “add reps every session”.
 
-not wrecked
-
-If you’re under-recovered:
-
-drop weight
-
-slow down
-
-reduce reps
-
-or skip Zone 2
-
-Unity is a long game.
-
-8. Zone 2 (Optional)
-
-Unity includes a simple aerobic protocol:
-
-Readiness Gate
-
-Ask:
-
-Slept well?
-
-Low soreness?
-
-Good energy?
-
-Calm breathing?
-
-3–4 yes → Zone 2 allowed
-0–2 yes → Rest/walk only
-
-MAF formula
-
-180 – age
-Zone 2 target = MAF – 10 → MAF
-
-Example: age 35
-145 – 10 → 145 = 135–145 bpm
-
-Train 30–40 min at:
-
-nose breathing pace
-
-easy, conversational effort
-
-no exhaustion
-
-9. How to Progress in Unity
-
-Unity has no forced progression.
 Instead:
 
-stay consistent
+- stay submaximal  
+- move with control  
+- increase bell size only when everything feels easy and technically excellent  
+- reassess your base kettlebell every 8–12 weeks
 
-increase bell weight only when technique is perfect
+Your strength, conditioning, and body composition will improve over time if you maintain consistency.
 
-never rush
+---
 
-every 8–12 weeks, evaluate your Goldilocks bell
+### 10. Frequently Asked Questions
 
-stay submaximal
+**Q: Can I do Unity long term?**  
+Yes. Unity is specifically designed to be sustainable for years.
 
-remain patient
+**Q: Is Unity good for fat loss?**  
+Yes, if you combine it with a small caloric deficit and adequate protein.
 
-your strength will grow naturally
+**Q: What if I miss a session?**  
+Just do the **next** session. Do not try to “catch up”.
 
-Unity progression = slow, steady, permanent.
+**Q: Do I need multiple kettlebells?**  
+No. One is enough to start. Extra bells give you more flexibility but are not required.
 
-10. Frequently Asked Questions
-Q: Can I do Unity forever?
+**Q: Do I need to understand all the percentages and math?**  
+No. The Unity app handles all the calculations for you.
 
-Yes — it is designed for 10+ years of sustainable training.
+---
 
-Q: Is Unity good for fat loss?
-
-Yes, if you eat slightly below maintenance.
-
-Q: What if I miss a day?
-
-Just do the next session.
-
-Q: What if I’m exhausted?
-
-Lower reps or skip Zone 2.
-Unity should feel smooth, not crushing.
-
-Q: Do I need multiple kettlebells?
-
-One is enough.
-
-Q: Do I need to understand the math?
-
-No — the app handles everything.
-
-Unity — Final Notes
+## Final Notes
 
 Unity exists to make you:
 
-stronger
+- stronger  
+- more durable  
+- leaner  
+- better conditioned  
+- more resilient in daily life  
 
-more durable
+All without burnout or extremes.
 
-leaner
+Show up.  
+Follow the structure.  
+Stay submaximal.  
+Let time do the work.
 
-more athletic
-
-more mobile
-
-better conditioned
-
-harder to break
-
-Without burnout.
-Without stress.
-Without cycles of quitting.
-
-Just consistent, repeatable training that fits your life — now and 10 years from now.
+That is Unity.
