@@ -26,7 +26,7 @@
   details[open]>summary{border-bottom:1px solid rgba(255,255,255,.08);border-bottom-left-radius:0;border-bottom-right-radius:0}
   .panel{padding:12px}
   label{font-size:12px;opacity:.88;display:block;margin:8px 0 4px}
-  select,input[type="text"]{width:100%;background:#0d1830;border:1px solid rgba(255,255,255,.18);color:#e6eaf2;padding:10px;border-radius:10px}
+  select,input[type="text"],input[type="number"]{width:100%;background:#0d1830;border:1px solid rgba(255,255,255,.18);color:#e6eaf2;padding:10px;border-radius:10px}
   .grid{display:grid;gap:10px}
   .cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
   .cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}
@@ -39,7 +39,16 @@
   .toast{position:fixed;right:12px;bottom:12px;background:#0f1a34;border:1px solid rgba(255,255,255,.15);padding:10px 12px;border-radius:12px;font-size:13px;display:none}
   .badge{display:inline-block;font-weight:800;font-size:12px;padding:3px 8px;border-radius:10px;border:1px solid rgba(255,255,255,.25);margin-left:6px;background:#0f1a34}
   .tabs{display:flex;gap:8px;margin:10px 0 6px;flex-wrap:wrap}
-  .tab-btn{background:#0f1a34;border:1px solid rgba(255,255,255,.15);color:#e6eaf2;padding:10px 12px;border-radius:12px;font-weight:800;cursor:pointer}
+  .tab-btn{
+    background:#0f1a34;
+    border:1px solid rgba(255,255,255,.15);
+    color:#e6eaf2;
+    padding:10px 12px;
+    border-radius:12px;
+    font-weight:800;
+    cursor:pointer;
+    position:relative;
+  }
   .tab-btn.active{background:#2b63ff;border-color:#2b63ff}
   .tab-pane{display:none}
   .tab-pane.active{display:block}
@@ -55,13 +64,74 @@
   ul{margin:6px 0 6px 18px;padding:0}
   ul li{margin:2px 0;font-size:13px}
 
-  /* force stacked buttons */
   .row.stack {
     display: grid !important;
     grid-template-columns: 1fr !important;
     gap: 8px !important;
   }
 
+  .nav-dot{
+    position:absolute;
+    top:4px;
+    right:6px;
+    width:8px;
+    height:8px;
+    border-radius:999px;
+    background:#f97316;
+  }
+
+  .test-block{
+    margin:10px 0;
+    padding:10px;
+    border-radius:12px;
+    border:1px solid rgba(255,255,255,.08);
+    background:#0f172a;
+  }
+  .test-block h3{margin-top:2px}
+  .test-block .row{align-items:flex-end}
+
+  .rep-counter{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:4px 8px;
+    border-radius:999px;
+    background:#0f1a34;
+  }
+  .rep-btn{
+    border:0;
+    border-radius:8px;
+    padding:2px 8px;
+    background:#111827;
+    color:#e5e7eb;
+    cursor:pointer;
+    font-weight:800;
+  }
+  .rep-value{
+    min-width:24px;
+    text-align:center;
+    font-weight:800;
+  }
+  .timer-row{
+    margin:8px 0;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .timer-controls{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    flex-wrap:wrap;
+  }
+  #test-snatch100-timer-display{
+    font-variant-numeric:tabular-nums;
+    font-weight:800;
+    padding:4px 10px;
+    border-radius:999px;
+    background:#020617;
+    border:1px solid rgba(255,255,255,.2);
+  }
 </style>
 </head>
 <body>
@@ -73,6 +143,10 @@
     <button class="tab-btn" data-tab="custom" aria-selected="false">Custom Exercises</button>
     <button class="tab-btn" data-tab="warmup" aria-selected="false">Warm-Up / Cooldown</button>
     <button class="tab-btn" data-tab="zone2" aria-selected="false">Zone 2</button>
+    <button class="tab-btn" data-tab="skill" aria-selected="false">
+      Skill Test
+      <span id="skillDot" class="nav-dot" hidden></span>
+    </button>
   </div>
 
   <div id="tab-plan" class="tab-pane active">
@@ -256,6 +330,231 @@
       </ul>
     </div>
   </div>
+
+  <div id="tab-skill" class="tab-pane">
+    <div class="card">
+      <h2>Skill Test Log</h2>
+      <p class="muted">
+        Use this page every ~8 weeks as a simple progress check. Nothing here changes your blocks — it only records your current capacity.
+      </p>
+
+      <!-- 1) One-arm swing — 10 per side -->
+      <div class="test-block" data-test="swing">
+        <h3>One-arm Swing (10 per side)</h3>
+        <div class="row">
+          <label>
+            Bell (kg)
+            <input type="number" id="test-swing-bell" min="4" max="48" step="2">
+          </label>
+          <div class="counter-group">
+            <span class="label">Left reps</span>
+            <div class="rep-counter" data-counter="test-swing-left">
+              <button type="button" class="rep-btn">−</button>
+              <span class="rep-value">0</span>
+              <button type="button" class="rep-btn">+</button>
+            </div>
+          </div>
+          <div class="counter-group">
+            <span class="label">Right reps</span>
+            <div class="rep-counter" data-counter="test-swing-right">
+              <button type="button" class="rep-btn">−</button>
+              <span class="rep-value">0</span>
+              <button type="button" class="rep-btn">+</button>
+            </div>
+          </div>
+        </div>
+        <label class="full">
+          Note
+          <input type="text" id="test-swing-notes" placeholder="e.g. 10/10 smooth, grip easy">
+        </label>
+        <button type="button" class="btn inline test-save-btn">Save test</button>
+        <p class="muted" id="test-swing-last"></p>
+      </div>
+
+      <!-- 2) Double clean — 5 total -->
+      <div class="test-block" data-test="clean">
+        <h3>Double Clean (5 total)</h3>
+        <div class="row">
+          <label>
+            Bell per hand (kg)
+            <input type="number" id="test-clean-bell" min="4" max="48" step="2">
+          </label>
+          <div class="counter-group">
+            <span class="label">Total reps</span>
+            <div class="rep-counter" data-counter="test-clean-reps">
+              <button type="button" class="rep-btn">−</button>
+              <span class="rep-value">0</span>
+              <button type="button" class="rep-btn">+</button>
+            </div>
+          </div>
+        </div>
+        <label class="full">
+          Note
+          <input type="text" id="test-clean-notes" placeholder="e.g. 5 reps, last heavy">
+        </label>
+        <button type="button" class="btn inline test-save-btn">Save test</button>
+        <p class="muted" id="test-clean-last"></p>
+      </div>
+
+      <!-- 3) Press — 5 per side -->
+      <div class="test-block" data-test="press">
+        <h3>Press (5 per side)</h3>
+        <div class="row">
+          <label>
+            Bell (kg)
+            <input type="number" id="test-press-bell" min="4" max="48" step="2">
+          </label>
+          <div class="counter-group">
+            <span class="label">Left reps</span>
+            <div class="rep-counter" data-counter="test-press-left">
+              <button type="button" class="rep-btn">−</button>
+              <span class="rep-value">0</span>
+              <button type="button" class="rep-btn">+</button>
+            </div>
+          </div>
+          <div class="counter-group">
+            <span class="label">Right reps</span>
+            <div class="rep-counter" data-counter="test-press-right">
+              <button type="button" class="rep-btn">−</button>
+              <span class="rep-value">0</span>
+              <button type="button" class="rep-btn">+</button>
+            </div>
+          </div>
+        </div>
+        <label class="full">
+          Note
+          <input type="text" id="test-press-notes" placeholder="e.g. 4+4, last rep grindy right">
+        </label>
+        <button type="button" class="btn inline test-save-btn">Save test</button>
+        <p class="muted" id="test-press-last"></p>
+      </div>
+
+      <!-- 4) Double front squat — 5 total -->
+      <div class="test-block" data-test="frontsquat">
+        <h3>Double Front Squat (5 total)</h3>
+        <div class="row">
+          <label>
+            Bell per hand (kg)
+            <input type="number" id="test-frontsquat-bell" min="4" max="48" step="2">
+          </label>
+          <div class="counter-group">
+            <span class="label">Total reps</span>
+            <div class="rep-counter" data-counter="test-frontsquat-reps">
+              <button type="button" class="rep-btn">−</button>
+              <span class="rep-value">0</span>
+              <button type="button" class="rep-btn">+</button>
+            </div>
+          </div>
+        </div>
+        <label class="full">
+          Note
+          <input type="text" id="test-frontsquat-notes" placeholder="e.g. 5 solid, core taxed">
+        </label>
+        <button type="button" class="btn inline test-save-btn">Save test</button>
+        <p class="muted" id="test-frontsquat-last"></p>
+      </div>
+
+      <!-- 5) Snatch 5 per side -->
+      <div class="test-block" data-test="snatch5">
+        <h3>Snatch (5 per side)</h3>
+        <div class="row">
+          <label>
+            Bell (kg)
+            <input type="number" id="test-snatch5-bell" min="8" max="40" step="2">
+          </label>
+          <div class="counter-group">
+            <span class="label">Left reps</span>
+            <div class="rep-counter" data-counter="test-snatch5-left">
+              <button type="button" class="rep-btn">−</button>
+              <span class="rep-value">0</span>
+              <button type="button" class="rep-btn">+</button>
+            </div>
+          </div>
+          <div class="counter-group">
+            <span class="label">Right reps</span>
+            <div class="rep-counter" data-counter="test-snatch5-right">
+              <button type="button" class="rep-btn">−</button>
+              <span class="rep-value">0</span>
+              <button type="button" class="rep-btn">+</button>
+            </div>
+          </div>
+        </div>
+        <label class="full">
+          Note
+          <input type="text" id="test-snatch5-notes" placeholder="e.g. 5/5 crisp, lockout clean">
+        </label>
+        <button type="button" class="btn inline test-save-btn">Save test</button>
+        <p class="muted" id="test-snatch5-last"></p>
+      </div>
+
+      <!-- 6) Get-up — 1 per side -->
+      <div class="test-block" data-test="getup">
+        <h3>Get-up (1 per side)</h3>
+        <div class="row">
+          <label>
+            Bell (kg)
+            <input type="number" id="test-getup-bell" min="4" max="48" step="2">
+          </label>
+          <div class="counter-group">
+            <span class="label">Left reps</span>
+            <div class="rep-counter" data-counter="test-getup-left">
+              <button type="button" class="rep-btn">−</button>
+              <span class="rep-value">0</span>
+              <button type="button" class="rep-btn">+</button>
+            </div>
+          </div>
+          <div class="counter-group">
+            <span class="label">Right reps</span>
+            <div class="rep-counter" data-counter="test-getup-right">
+              <button type="button" class="rep-btn">−</button>
+              <span class="rep-value">0</span>
+              <button type="button" class="rep-btn">+</button>
+            </div>
+          </div>
+        </div>
+        <label class="full">
+          Note
+          <input type="text" id="test-getup-notes" placeholder="e.g. 1+1 controlled, slow">
+        </label>
+        <button type="button" class="btn inline test-save-btn">Save test</button>
+        <p class="muted" id="test-getup-last"></p>
+      </div>
+
+      <!-- 7) 100 Snatch test -->
+      <div class="test-block" data-test="snatch100">
+        <h3>Snatch Test (100 reps &lt; 5:00)</h3>
+        <div class="row">
+          <label>
+            Bell (kg)
+            <input type="number" id="test-snatch100-bell" min="8" max="40" step="2">
+          </label>
+          <div class="counter-group">
+            <span class="label">Total reps</span>
+            <div class="rep-counter" data-counter="test-snatch100-reps">
+              <button type="button" class="rep-btn">−</button>
+              <span class="rep-value">0</span>
+              <button type="button" class="rep-btn">+</button>
+            </div>
+          </div>
+        </div>
+        <div class="timer-row">
+          <span class="label">Time</span>
+          <div class="timer-controls">
+            <span id="test-snatch100-timer-display">00:00</span>
+            <button type="button" class="btn inline" id="test-snatch100-timer-toggle">Start</button>
+            <button type="button" class="btn inline ghost" id="test-snatch100-timer-reset">Reset</button>
+          </div>
+          <input type="hidden" id="test-snatch100-time">
+        </div>
+        <label class="full">
+          Note
+          <input type="text" id="test-snatch100-notes" placeholder="e.g. 100 reps in 6:14, grip fade at 80">
+        </label>
+        <button type="button" class="btn inline test-save-btn">Save test</button>
+        <p class="muted" id="test-snatch100-last"></p>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div id="toast" class="toast" aria-live="polite"></div>
@@ -266,19 +565,257 @@
   var COUNTERS_KEY='unity2025_counters';
   var CUSTOM_KEY='unity2025_custom_matrix_v6';
   var BARBELL_KEY='unity2025_barbell_map_v1';
+  var BLOCKS_KEY='unity_skill_blocks_v1';
+  var LAST_TEST_BLOCK_KEY='unity_skill_lastTestBlock_v1';
+  var SKILL_TEST_KEY='unity_skillTests_v1';
   var PATTERNS=['Push','Pull','Squat','Lunge','Hinge','Rotation','Anti-Rotation','Loaded Carry'];
   var WEEK_PCT={Deload:.15,Maintenance:.22,Development:.28,Stress:.35};
   var SPLITS={3:[0.15,0.35,0.50],4:[0.15,0.22,0.28,0.35],5:[0.10,0.15,0.20,0.25,0.30]};
   var DEFAULT_BALLISTICS=new Set(['Snatch','One-arm Swing','Two-arm Swing','High Pull','Double Clean']);
 
-  // --- Carry time rule: 1 rep = 5 seconds (min 30s) --- //
   var CARRY_UNIT_SECONDS = 5;
   var CARRY_MIN_SECONDS  = 30;
   function carrySecondsFromUnits(units){
     return Math.max(CARRY_MIN_SECONDS, (units|0) * CARRY_UNIT_SECONDS);
   }
 
-  // --- Snapshots per day (block_week_day) --- //
+  function loadSkillTests(){
+    try{
+      var raw=localStorage.getItem(SKILL_TEST_KEY);
+      return raw?JSON.parse(raw):{};
+    }catch(e){
+      console.warn('Skill tests corrupted, reset.',e);
+      return {};
+    }
+  }
+  function saveSkillTests(data){
+    try{localStorage.setItem(SKILL_TEST_KEY,JSON.stringify(data));}catch(e){}
+  }
+
+  function getBlockState(){
+    var blocksCompleted = (state && typeof state.completedBlocks!=='undefined') ? (state.completedBlocks|0) : 0;
+    var last = parseInt(localStorage.getItem(LAST_TEST_BLOCK_KEY)||'0',10);
+    if(isNaN(last)) last = 0;
+    try{ localStorage.setItem(BLOCKS_KEY,String(blocksCompleted)); }catch(e){}
+    return {blocksCompleted:blocksCompleted,lastSkillTestBlock:last};
+  }
+  function setLastTestBlockToCurrent(){
+    var st=getBlockState();
+    try{ localStorage.setItem(LAST_TEST_BLOCK_KEY,String(st.blocksCompleted)); }catch(e){}
+    updateSkillDot();
+  }
+  function updateSkillDot(){
+    var dot=document.getElementById('skillDot');
+    if(!dot) return;
+    var st=getBlockState();
+    var since = st.blocksCompleted - st.lastSkillTestBlock;
+    var show = since>=2;
+    dot.hidden = !show;
+  }
+
+  function initSkillRepCounters(){
+    document.querySelectorAll('.rep-counter').forEach(function(box){
+      var valueEl = box.querySelector('.rep-value');
+      if(!valueEl) return;
+      function update(delta){
+        var cur = parseInt(valueEl.textContent||'0',10);
+        if(isNaN(cur)) cur = 0;
+        var next = cur + delta;
+        if(next<0) next = 0;
+        if(next>200) next = 200;
+        valueEl.textContent = String(next);
+      }
+      box.addEventListener('click', function(ev){
+        var btn = ev.target.closest('.rep-btn');
+        if(!btn) return;
+        if(btn.textContent.trim()==='−' || btn.textContent.trim()==='-') update(-1);
+        else update(+1);
+      });
+    });
+  }
+  function getSkillCounterValue(name){
+    var el=document.querySelector('.rep-counter[data-counter="'+name+'"] .rep-value');
+    return el? (parseInt(el.textContent||'0',10)||0) : 0;
+  }
+
+  function secondsToMMSS(total){
+    var m=Math.floor(total/60);
+    var s=total%60;
+    return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  }
+
+  var snatchTimerSeconds=0;
+  var snatchTimerInterval=null;
+  function initSnatchTimer(){
+    var display=document.getElementById('test-snatch100-timer-display');
+    var toggle=document.getElementById('test-snatch100-timer-toggle');
+    var reset=document.getElementById('test-snatch100-timer-reset');
+    var hidden=document.getElementById('test-snatch100-time');
+    if(!display||!toggle||!reset||!hidden) return;
+
+    function sync(){
+      var txt=secondsToMMSS(snatchTimerSeconds);
+      display.textContent = txt;
+      hidden.value = txt;
+    }
+
+    toggle.addEventListener('click',function(){
+      if(snatchTimerInterval){
+        clearInterval(snatchTimerInterval);
+        snatchTimerInterval=null;
+        toggle.textContent='Start';
+      }else{
+        snatchTimerInterval=setInterval(function(){
+          snatchTimerSeconds+=1;
+          sync();
+        },1000);
+        toggle.textContent='Stop';
+      }
+    });
+    reset.addEventListener('click',function(){
+      if(snatchTimerInterval){
+        clearInterval(snatchTimerInterval);
+        snatchTimerInterval=null;
+        toggle.textContent='Start';
+      }
+      snatchTimerSeconds=0;
+      sync();
+    });
+    sync();
+  }
+
+  function formatLastLine(testId,entry,prefix){
+    if(!entry) return '';
+    if(testId==='swing'){
+      return prefix+': '+entry.bell+' kg, '+entry.left+'/'+entry.right+' reps. '+(entry.notes||'');
+    }
+    if(testId==='clean'){
+      return prefix+': '+entry.bell+' kg, '+entry.reps+' reps. '+(entry.notes||'');
+    }
+    if(testId==='press'){
+      return prefix+': '+entry.bell+' kg, '+entry.left+'/'+entry.right+' reps. '+(entry.notes||'');
+    }
+    if(testId==='frontsquat'){
+      return prefix+': '+entry.bell+' kg, '+entry.reps+' reps. '+(entry.notes||'');
+    }
+    if(testId==='snatch5'){
+      return prefix+': '+entry.bell+' kg, '+entry.left+'/'+entry.right+' reps. '+(entry.notes||'');
+    }
+    if(testId==='getup'){
+      return prefix+': '+entry.bell+' kg, '+entry.left+'/'+entry.right+' reps. '+(entry.notes||'');
+    }
+    if(testId==='snatch100'){
+      return prefix+': '+entry.bell+' kg, '+entry.reps+' reps in '+entry.time+'. '+(entry.notes||'');
+    }
+    return prefix+': '+(entry.notes||'');
+  }
+
+  function readTestInputs(testId){
+    if(testId==='swing'){
+      var bell = +((document.getElementById('test-swing-bell')||{}).value||0);
+      var left = getSkillCounterValue('test-swing-left');
+      var right = getSkillCounterValue('test-swing-right');
+      var notes = (document.getElementById('test-swing-notes')||{}).value||'';
+      if(!bell || (!left && !right)){
+        alert('Fill bell and reps for One-arm Swing.');
+        return null;
+      }
+      return {type:'swing',bell:bell,left:left,right:right,notes:notes.trim()};
+    }
+    if(testId==='clean'){
+      var bellC=+((document.getElementById('test-clean-bell')||{}).value||0);
+      var repsC=getSkillCounterValue('test-clean-reps');
+      var notesC=(document.getElementById('test-clean-notes')||{}).value||'';
+      if(!bellC || !repsC){
+        alert('Fill bell and reps for Double Clean.');
+        return null;
+      }
+      return {type:'clean',bell:bellC,reps:repsC,notes:notesC.trim()};
+    }
+    if(testId==='press'){
+      var bellP=+((document.getElementById('test-press-bell')||{}).value||0);
+      var leftP=getSkillCounterValue('test-press-left');
+      var rightP=getSkillCounterValue('test-press-right');
+      var notesP=(document.getElementById('test-press-notes')||{}).value||'';
+      if(!bellP || (!leftP && !rightP)){
+        alert('Fill bell and reps for Press.');
+        return null;
+      }
+      return {type:'press',bell:bellP,left:leftP,right:rightP,notes:notesP.trim()};
+    }
+    if(testId==='frontsquat'){
+      var bellF=+((document.getElementById('test-frontsquat-bell')||{}).value||0);
+      var repsF=getSkillCounterValue('test-frontsquat-reps');
+      var notesF=(document.getElementById('test-frontsquat-notes')||{}).value||'';
+      if(!bellF || !repsF){
+        alert('Fill bell and reps for Double Front Squat.');
+        return null;
+      }
+      return {type:'frontsquat',bell:bellF,reps:repsF,notes:notesF.trim()};
+    }
+    if(testId==='snatch5'){
+      var bellS5=+((document.getElementById('test-snatch5-bell')||{}).value||0);
+      var leftS5=getSkillCounterValue('test-snatch5-left');
+      var rightS5=getSkillCounterValue('test-snatch5-right');
+      var notesS5=(document.getElementById('test-snatch5-notes')||{}).value||'';
+      if(!bellS5 || (!leftS5 && !rightS5)){
+        alert('Fill bell and reps for Snatch (5 per side).');
+        return null;
+      }
+      return {type:'snatch5',bell:bellS5,left:leftS5,right:rightS5,notes:notesS5.trim()};
+    }
+    if(testId==='getup'){
+      var bellG=+((document.getElementById('test-getup-bell')||{}).value||0);
+      var leftG=getSkillCounterValue('test-getup-left');
+      var rightG=getSkillCounterValue('test-getup-right');
+      var notesG=(document.getElementById('test-getup-notes')||{}).value||'';
+      if(!bellG || (!leftG && !rightG)){
+        alert('Fill bell and reps for Get-up.');
+        return null;
+      }
+      return {type:'getup',bell:bellG,left:leftG,right:rightG,notes:notesG.trim()};
+    }
+    if(testId==='snatch100'){
+      var bellS=+((document.getElementById('test-snatch100-bell')||{}).value||0);
+      var repsS=getSkillCounterValue('test-snatch100-reps');
+      var timeStr=(document.getElementById('test-snatch100-time')||{}).value||'';
+      var notesS=(document.getElementById('test-snatch100-notes')||{}).value||'';
+      if(!bellS || !repsS || !timeStr){
+        alert('Fill bell, reps and time for Snatch Test.');
+        return null;
+      }
+      return {type:'snatch100',bell:bellS,reps:repsS,time:timeStr.trim(),notes:notesS.trim()};
+    }
+    alert('Unknown test id: '+testId);
+    return null;
+  }
+
+  function initSkillTestLog(){
+    var data = loadSkillTests();
+    Object.keys(data).forEach(function(testId){
+      var el=document.getElementById('test-'+testId+'-last');
+      if(!el) return;
+      el.textContent = formatLastLine(testId,data[testId],'Last test');
+    });
+
+    document.querySelectorAll('.test-block[data-test]').forEach(function(block){
+      var testId=block.getAttribute('data-test');
+      var btn=block.querySelector('.test-save-btn');
+      var lastEl=document.getElementById('test-'+testId+'-last');
+      if(!btn || !lastEl) return;
+      btn.addEventListener('click',function(){
+        var entry = readTestInputs(testId);
+        if(!entry) return;
+        entry.date = new Date().toISOString();
+        var cur = loadSkillTests();
+        cur[testId] = entry;
+        saveSkillTests(cur);
+        lastEl.textContent = formatLastLine(testId,entry,'Last test');
+        setLastTestBlockToCurrent();
+      });
+    });
+  }
+
   function snapId(blockIdx, w, d){
     return String(blockIdx|0)+'_'+String(w|0)+'_'+String(d|0);
   }
@@ -347,7 +884,7 @@
   }
   function biasFromPct(weekType,pct){
     var parts=(weekType==='Deload')?3:((weekType==='Stress')?5:4);
-    var base=SPLITS[parts];
+    var base=SPLITS[parts].slice();
     var mn=Math.min.apply(null,base),mx=Math.max.apply(null,base);
     function eq(a,b){return Math.abs(a-b)<1e-9;}
     if(eq(pct,mn))return'Heavy';
@@ -546,7 +1083,6 @@
     var w=state.cursor.w, d=state.cursor.d; var week=state.plan.weeks[w]; var day=week.days[d]; var rc=state.plan.rc;
     var isBarbell = !!(state.cfg && state.cfg.barbellMode);
 
-    // ---- Read snapshot (precomputed) ----
     var openerHTML='', circuitExercises=[], carryFinisher=null;
     var snap = getSnapshotFor(w,d);
     if (snap){
@@ -622,13 +1158,11 @@
     return {w:0,d:0};
   }
 
-  // --- Precompute builder (creates opener/circuit/carry finisher & fairness) ---
   function computeSnapshotFor(w,d){
     var week = state.plan.weeks[w];
     var day  = week.days[d];
     var rc   = state.plan.rc;
 
-    // Opener (Rotation → TGU)
     var openerHTML = '';
     var rot=null;
     for(var ii=0; ii<(day.entries||[]).length; ii++){
@@ -644,7 +1178,6 @@
       rot.volume = Math.max(0,(rot.volume|0)-cost);
     }
 
-    // Circuit (carry excluded; it's a finisher)
     var baseEntries = (day.entries||[]).slice(0).filter(function(e){return e.pattern!=='Loaded Carry';});
     shuffle(baseEntries);
     var circuitExercises = [];
@@ -674,7 +1207,6 @@
       var accList=(e.pattern==='Rotation')?[]:order.slice(1);
       var remaining=e.volume;
 
-      // Main
       if(e.pattern!=='Rotation' && order.length>0){
         var nm=order[0];
         var isBarbell = !!(state.cfg && state.cfg.barbellMode);
@@ -697,7 +1229,6 @@
         }
       }
 
-      // Accessories (least-repped first)
       var assignedSomething=false;
       if(accList.length>0 && remaining>0){
         state.accTotals[e.pattern] = state.accTotals[e.pattern] || {};
@@ -710,9 +1241,9 @@
         for(var ai=0; ai<accOrder.length; ai++){
           if(remaining<=0) break;
           var nm2=accOrder[ai]; if(!nm2) continue;
-          var maxAccThis=rc.cap*rc.rounds;
-          var assignAcc=Math.min(maxAccThis, takeRoundsLE(remaining, rc.rounds));
-          var perRound2=Math.floor(assignAcc/rc.rounds);
+          var maxAccThis=state.plan.rc.cap*state.plan.rc.rounds;
+          var assignAcc=Math.min(maxAccThis, takeRoundsLE(remaining, state.plan.rc.rounds));
+          var perRound2=Math.floor(assignAcc/state.plan.rc.rounds);
           if(perRound2<=0) continue;
           var isBall2=isBallisticName(nm2), isUni2=isUnilateralName(nm2);
           var shown2=perRound2*(isBall2?2:1);
@@ -732,12 +1263,10 @@
 
     shuffle(circuitExercises);
 
-    // Carry finisher (1 exercise + time, 1 rep = 5s)
     var carryFinisher=null;
     try{
       var carryEntry=(day.entries||[]).find(function(e){return e.pattern==='Loaded Carry';});
       if(carryEntry){
-        // Use planner's carryMain flag (alternating)
         var isMainDay = !!carryEntry.carryMain;
 
         var name;
@@ -794,7 +1323,6 @@
     };
     save();
 
-    // Precompute all 20 sessions (freeze)
     (function precomputeAll(){
       var prevCur = state.cursor;
       for (var ww=0; ww<state.plan.weeks.length; ww++){
@@ -809,6 +1337,7 @@
     })();
 
     renderInfo(); renderSession(); wireLiveKB(); toast('Block created');
+    updateSkillDot();
   }
 
   function next(){
@@ -820,7 +1349,10 @@
       for(var pat in matrix){ ends[pat]=state.plan.weekOrders[pat][3]; }
       state.lastEnds=ends;
       state.completedBlocks = (state.completedBlocks|0) + 1;
-      save(); toast('Block finished'); return;
+      save();
+      updateSkillDot();
+      toast('Block finished');
+      return;
     }
     state.cursor={w:w,d:d}; save(); renderSession(); wireLiveKB();
   }
@@ -850,8 +1382,11 @@
   }
   function resetProgress(){
     localStorage.removeItem(LS_KEY); state={};
+    localStorage.removeItem(BLOCKS_KEY);
+    localStorage.removeItem(LAST_TEST_BLOCK_KEY);
     document.getElementById('session').textContent='Progress cleared. Click “New Block”.';
     document.getElementById('kpi').innerHTML=''; document.getElementById('orders').innerHTML=''; toast('Progress reset');
+    updateSkillDot();
   }
   function readCfg(){
     var psPatSel=(document.getElementById('selPS').value||''); var on=!!psPatSel;
@@ -971,8 +1506,11 @@
 
   if(state&&state.plan){renderInfo();renderSession();}
   wireLiveKB();
+  initSkillRepCounters();
+  initSkillTestLog();
+  initSnatchTimer();
+  updateSkillDot();
 })();
 </script>
 </body>
 </html>
-
