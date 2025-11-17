@@ -235,7 +235,13 @@
   <div id="tab-custom" class="tab-pane">
     <div class="card">
       <h2>Custom Exercises</h2>
-      <p class="muted">Per pattern: fill <b>1 (Main)</b> and 2–4 (accessories). Enable <b>Ballistic (x2)</b> for swings/snatches etc. and <b>Unilateral (+/+)</b> for unilateral moves (displayed as x+x). Empty = Unity defaults.</p>
+      <p class="muted">
+        This page assumes your <b>Base kettlebell</b> (in Settings) is your current Goldilocks bell.
+        As a simple rule of thumb for Unity:
+        <br>• All <b>technique tests</b> (swing, clean, press, front squat, snatch 5/side, get-up) are done with your <b>Heavy Bias</b> bell (Base&nbsp;+&nbsp;4&nbsp;kg).
+        <br>• The <b>Snatch Volume Test</b> (100 reps &lt; 5:00) is done with your <b>Light Bias</b> bell (Base&nbsp;−&nbsp;4&nbsp;kg).
+        <br>The bell fields below will auto-fill from your Base kettlebell if possible, but you can always override them.
+      </p>
       <div id="customForm" class="grid cols-2" style="margin-top:8px"></div>
       <div class="card barbell-box" style="margin-top:12px">
         <b>Barbell-mapping (for Heavy Bias)</b>
@@ -1402,11 +1408,63 @@
     };
   }
 
+
+  function applyDefaultSkillBells(){
+    try{
+      // 1) Determine Base KB from state or from the input field
+      var baseStr = (state && state.cfg && state.cfg.baseKB) || '';
+      if(!baseStr){
+        var baseInput = document.getElementById('inpBaseKB');
+        if(baseInput){ baseStr = baseInput.value || ''; }
+      }
+      var base = parseInt(baseStr,10);
+      if(!base || isNaN(base)) return;
+
+      // 2) Heavy = Base + 4, Light = Base - 4
+      var heavy = base + 4;
+      var light = base - 4;
+
+      function setIfEmpty(id, value){
+        var el = document.getElementById(id);
+        if(!el) return;
+        // Only fill if empty or 0
+        if(el.value === '' || el.value === '0'){
+          el.value = value;
+        }
+      }
+
+      // Technique tests → Heavy Bias bell
+      [
+        'test-swing-bell',
+        'test-clean-bell',
+        'test-press-bell',
+        'test-frontsquat-bell',
+        'test-snatch5-bell',
+        'test-getup-bell'
+      ].forEach(function(id){
+        setIfEmpty(id, heavy);
+      });
+
+      // Snatch volume test → Light Bias bell
+      if(light < 4){ light = base; } // safety: if Base is already very light
+      setIfEmpty('test-snatch100-bell', light);
+    }catch(e){
+      console.warn('applyDefaultSkillBells failed', e);
+    }
+  }
+
   document.querySelectorAll('.tab-btn').forEach(function(btn){
     btn.onclick=function(){
       var t=btn.getAttribute('data-tab');
-      document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.toggle('active',b===btn);});
-      document.querySelectorAll('.tab-pane').forEach(function(p){p.classList.toggle('active',p.id==='tab-'+t);});
+      document.querySelectorAll('.tab-btn').forEach(function(b){
+        b.classList.toggle('active',b===btn);
+      });
+      document.querySelectorAll('.tab-pane').forEach(function(p){
+        p.classList.toggle('active',p.id==='tab-'+t);
+      });
+      if(t === 'skill'){
+        applyDefaultSkillBells();
+      }
     };
   });
 
