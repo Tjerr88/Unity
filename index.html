@@ -1084,6 +1084,56 @@
     return { weeks: weeks, rc: roundsCap(cfg.volume), weekOrders: weekOrders, set: 'advanced' };
   }
 
+
+  function computeSessionReps(w,d){
+    if(!state.plan) return null;
+    var week = state.plan.weeks[w];
+    if(!week) return null;
+    var day = week.days[d] || {};
+    var entries = day.entries || [];
+    var rc = state.plan.rc || {};
+    var rounds = rc.rounds || 0;
+    var total = 0;
+
+    // 1) Turkish Get Up opener (Rotation pattern)
+    var rot = null;
+    for(var i=0;i<entries.length;i++){
+      if(entries[i].pattern === 'Rotation'){ rot = entries[i]; break; }
+    }
+    if(rot){
+      var sets = rounds;
+      var isLight = (state.cfg && state.cfg.bias === 'on' && (rot.bias || 'Medium') === 'Light');
+      var repsPerSet = isLight ? 4 : 2; // 2+2 vs 1+1
+      total += sets * repsPerSet;
+    }
+
+    // 2) Main patterns (zonder Rotation & Loaded Carry)
+    for(var j=0;j<entries.length;j++){
+      var e = entries[j];
+      if(e.pattern === 'Rotation' || e.pattern === 'Loaded Carry') continue;
+      total += (e.volume | 0);
+    }
+
+    // 3) Loaded Carry als "rep-equivalent"
+    for(var k=0;k<entries.length;k++){
+      var e2 = entries[k];
+      if(e2.pattern === 'Loaded Carry'){
+        total += (e2.volume | 0);
+      }
+    }
+
+    // 4) PlanStrong / PS overlay
+    if(day.ps){
+      for(var key in day.ps){
+        if(!day.ps.hasOwnProperty(key)) continue;
+        var info = day.ps[key] || {};
+        total += (info.reps | 0);
+      }
+    }
+
+    return total;
+  }
+
   function renderSession(){
     var out=$('#session'); if(!state.plan){out.textContent='No block yet. Click “New Block”.';return;}
     var w=state.cursor.w, d=state.cursor.d; var week=state.plan.weeks[w]; var day=week.days[d]; var rc=state.plan.rc;
@@ -1108,7 +1158,12 @@
     var baseKB = (state.cfg && state.cfg.baseKB) ? state.cfg.baseKB : '';
     var headerLine = 'Week '+String(w+1)+', Day '+String(d+1)+doneMark;
     var kbBadge = baseKB ? ' <span class="badge">KB ['+esc(baseKB)+']</span>' : '';
-    html.push('<div class="line"><div class="txt">'+esc(headerLine)+'</div><div>'+kbBadge+'</div></div>', '<br>');
+    html.push('<div class="line"><div class="txt">'+esc(headerLine)+'</div><div>'+kbBadge+'</div></div>');
+    var totalReps = computeSessionReps(w,d);
+    if (totalReps !== null && totalReps < 75){
+      html.push('<div class="pill">Optional Run: 20–30 min @ MAF</div>');
+    }
+    html.push('<br>');
     if(openerHTML) html.push(openerHTML,'<br><br>');
     html.push('<hr>',esc(String(rc.rounds)+' rounds of the following circuit:'),'<br>');
     if(circuitExercises.length){
