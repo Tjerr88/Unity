@@ -210,6 +210,9 @@
           <div>
             <label class="row"><input type="checkbox" id="chkBarbellMode"> Barbell-mode (Heavy Bias = Barbell)</label>
           </div>
+          <div>
+            <label class="row"><input type="checkbox" id="chkRunAuto" checked> Optional Run suggestions</label>
+          </div>
         </div>
 
         <div class="card" style="margin-top:12px">
@@ -1160,8 +1163,19 @@
     var kbBadge = baseKB ? ' <span class="badge">KB ['+esc(baseKB)+']</span>' : '';
     html.push('<div class="line"><div class="txt">'+esc(headerLine)+'</div><div>'+kbBadge+'</div></div>');
     var totalReps = computeSessionReps(w,d);
-    if (totalReps !== null && totalReps < 75){
-      html.push('<div class="pill">Optional Run: 20–30 min @ MAF</div>');
+    var runToggle = document.getElementById('chkRunAuto');
+    var allowRun = !runToggle || runToggle.checked;
+    if (allowRun && totalReps !== null && state && state.cfg && state.cfg.volume){
+      var v = +state.cfg.volume;
+      var cutoff;
+      if (v <= 180) cutoff = 45;
+      else if (v <= 240) cutoff = 60;
+      else if (v <= 300) cutoff = 75;
+      else if (v <= 400) cutoff = 100;
+      else cutoff = 125;
+      if (totalReps < cutoff){
+        html.push('<div class="pill">Optional Run: 20–30 min @ MAF</div>');
+      }
     }
     html.push('<br>');
     if(openerHTML) html.push(openerHTML,'<br><br>');
