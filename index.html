@@ -580,7 +580,7 @@
   var PATTERNS=['Push','Pull','Squat','Lunge','Hinge','Rotation','Anti-Rotation','Loaded Carry'];
   var WEEK_PCT={Deload:.15,Maintenance:.22,Development:.28,Stress:.35};
   var SPLITS={3:[0.15,0.35,0.50],4:[0.15,0.22,0.28,0.35],5:[0.10,0.15,0.20,0.25,0.30]};
-  var DEFAULT_BALLISTICS=new Set(['Snatch','One-arm Swing','Two-arm Swing','High Pull','Double Clean']);
+  var DEFAULT_BALLISTICS=new Set(['Snatch','One-arm Swing','Two-arm Swing','Double Clean','Double Push Press']);
 
   var CARRY_UNIT_SECONDS = 5;
   var CARRY_MIN_SECONDS  = 30;
@@ -845,14 +845,14 @@
   }
 
   var MATRIX_ADV={
-    'Push':{ main:'Military Press', acc:['Push Press','Half-kneeling Press','Floor Press'] },
-    'Pull':{ main:'Double Clean', acc:['Pull-up / Chin-up','Double Bent-over Row','High Pull'] },
-    'Squat':{ main:'Double Front Squat', acc:['Pistol / Box Pistol','Step-up','B-Stance Goblet Squat'] },
-    'Lunge':{ main:'Double Reverse Lunge', acc:['Tactical Lunge','Bulgarian Split Squat','Side Lunge'] },
+    'Push':{ main:'Military Press', acc:['Double Push Press','Half-Kneeling Press','Bridge Floor Press'] },
+    'Pull':{ main:'Double Clean', acc:['Pull-up / Chin-up','Wide Row','Small Row'] },
+    'Squat':{ main:'Double Front Squat', acc:['(Box) Pistol','Step-up','Goblet Squat'] },
+    'Lunge':{ main:'Double Reverse Lunge', acc:['Tactical Lunge','Bulgarian Split Squat','Clean + Reverse Lunge'] },
     'Hinge':{ main:'Two-arm Swing', acc:['Single-leg Glute Bridge','Double Deadlift','Double Snatch'] },
     'Rotation':{ main:'Turkish Get Up', acc:['Windmill','Half-kneeling Lift','Bent Press'] },
     'Anti-Rotation':{ main:'Snatch', acc:['One-arm Swing','Single-leg Deadlift','Renegade Row'] },
-    'Loaded Carry':{ main:'Suitcase Carry', acc:['Front Rack Carry','Bottom-Up Rack Carry','Bear Crawl'] }
+    'Loaded Carry':{ main:'Suitcase Carry', acc:['Front Rack Carry','Overhead Carry','Bear Crawl'] }
   };
 
   function $(s){return document.querySelector(s);}
@@ -932,7 +932,7 @@
   function inferBallistic(name){var nm=clean(name);return DEFAULT_BALLISTICS.has(nm)||/(swing|snatch|high pull|double clean)/i.test(nm)}
   function inferUnilateral(name){
     var n = clean(name).toLowerCase();
-    return /(one[-\s]?arm|single[-\s]?leg|split[-\s]?squat|pistol|step[-\s]?up|lunge|windmill|bent\s?press|half[-\s]?kneeling|kneeling|reverse\s?lunge|tactical\s?lunge|athletic\s?lunge|side\s?lunge|cossack|suitcase\s?carry|front\s?rack\s?carry|bottom[-\s]?up\s?carry|renegade\s?row|pull[-\s]?up|chin[-\s]?up|military\s?press|push\s?press|snatch)/i.test(n);
+    return /(one[-\s]?arm|single[-\s]?leg|split[-\s]?squat|pistol|step[-\s]?up|lunge|windmill|bent\s?press|half[-\s]?kneeling|kneeling|reverse\s?lunge|tactical\s?lunge|athletic\s?lunge|side\s?lunge|cossack|suitcase\s?carry|front\s?rack\s?carry|overhead\s?carry|bottom[-\s]?up\s?carry|renegade\s?row|pull[-\s]?up|chin[-\s]?up|military\s?press|push\s?press|snatch)/i.test(n);
   }
 
   function seedFromUnity(){
@@ -980,6 +980,27 @@
     }
     return out;
   }
+  function isUsingDefaultMatrix(){
+    // Returns true if the current customMatrix matches the Unity defaults (no custom overrides)
+    var seed = seedFromUnity();
+    sanitizeCustom();
+    for(var pidx=0;pidx<PATTERNS.length;pidx++){
+      var p = PATTERNS[pidx];
+      var it = (customMatrix[p] && customMatrix[p].items) || [];
+      var seedIt = seed[p].items || [];
+      for(var i=0;i<4;i++){
+        var cur = it[i] || {};
+        var base = seedIt[i] || {};
+        var nameCur = sanitizeName(cur.name||'');
+        var nameBase = sanitizeName(base.name||'');
+        if(nameCur !== nameBase) return false;
+        if(!!cur.ballistic !== !!base.ballistic) return false;
+        if(!!cur.unilateral !== !!base.unilateral) return false;
+      }
+    }
+    return true;
+  }
+
   function isBallisticName(nm){
     var name=clean(nm);
     for(var pidx=0;pidx<PATTERNS.length;pidx++){
@@ -1098,15 +1119,27 @@
     var rounds = rc.rounds || 0;
     var total = 0;
 
-    // 1) Turkish Get Up opener (Rotation pattern)
+    // 1) Rotation opener (Get-Up logic: Turkish Get Up vs Get-Up Sit-Up on Heavy bias)
     var rot = null;
-    for(var i=0;i<entries.length;i++){
+    for (var i=0;i<entries.length;i++){
       if(entries[i].pattern === 'Rotation'){ rot = entries[i]; break; }
     }
-    if(rot){
+    if(rot && isUsingDefaultMatrix()){
       var sets = rounds;
-      var isLight = (state.cfg && state.cfg.bias === 'on' && (rot.bias || 'Medium') === 'Light');
-      var repsPerSet = isLight ? 4 : 2; // 2+2 vs 1+1
+      var biasOn = !!(state.cfg && state.cfg.bias === 'on');
+      var rotBias = biasOn ? (rot.bias || 'Medium') : 'Medium';
+      var repsPerSet = 0;
+      if (biasOn && rotBias === 'Heavy'){
+        // Heavy bias = Get-Up Sit-Up, reps per side depend on block volume
+        var vol = (state.cfg && state.cfg.volume) ? +state.cfg.volume : 300;
+        var repsPerSide = 3;
+        if (vol <= 180) repsPerSide = 1;
+        else if (vol <= 240) repsPerSide = 2;
+        repsPerSet = repsPerSide * 2; // N+N per set
+      } else {
+        var isLight = (biasOn && rotBias === 'Light');
+        repsPerSet = isLight ? 4 : 2; // 2+2 vs 1+1 Turkish Get Up
+      }
       total += sets * repsPerSet;
     }
 
@@ -1243,15 +1276,35 @@
     for(var ii=0; ii<(day.entries||[]).length; ii++){
       if(day.entries[ii].pattern==='Rotation'){ rot=day.entries[ii]; break; }
     }
-    if(rot){
+    if(rot && isUsingDefaultMatrix()){
       var sets = rc.rounds;
       var cost = rc.cap * sets;
-      var isLight = (state.cfg.bias==='on' && (rot.bias||'Medium')==='Light');
-      var badge  = (state.cfg.bias==='on') ? biasBadge(rot.bias||'Medium') : '';
-      var repStr = String(sets)+' × ('+(isLight ? '2+2' : '1+1')+') Turkish Get Up'+badge;
-      openerHTML = '<div class="line"><div class="txt">'+repStr+'</div>'+mkCounterHTML('Opener — Turkish Get Up',sets)+'</div>';
+      var biasOn = (state.cfg && state.cfg.bias === 'on');
+      var rotBias = biasOn ? (rot.bias || 'Medium') : 'Medium';
+      var isHeavy = biasOn && rotBias === 'Heavy';
+      var isLight = biasOn && rotBias === 'Light';
+      var badge  = biasOn ? biasBadge(rotBias) : '';
+      var repStr;
+      var counterLabel;
+
+      if (isHeavy){
+        // Heavy bias = Get-Up Sit-Up, reps per side depend on block volume
+        var vol = (state.cfg && state.cfg.volume) ? +state.cfg.volume : 300;
+        var repsPerSide = 3;
+        if (vol <= 180) repsPerSide = 1;
+        else if (vol <= 240) repsPerSide = 2;
+        repStr = String(sets)+' × ('+String(repsPerSide)+'+'+String(repsPerSide)+') Get-Up Sit-Up'+badge;
+        counterLabel = 'Opener — Get-Up Sit-Up';
+      } else {
+        var pair = isLight ? '2+2' : '1+1';
+        repStr = String(sets)+' × ('+pair+') Turkish Get Up'+badge;
+        counterLabel = 'Opener — Turkish Get Up';
+      }
+
+      openerHTML = '<div class="line"><div class="txt">'+repStr+'</div>'+mkCounterHTML(counterLabel,sets)+'</div>';
       rot.volume = Math.max(0,(rot.volume|0)-cost);
     }
+
 
     var baseEntries = (day.entries||[]).slice(0).filter(function(e){return e.pattern!=='Loaded Carry';});
     shuffle(baseEntries);
