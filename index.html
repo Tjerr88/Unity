@@ -1001,6 +1001,14 @@
     return true;
   }
 
+  function rotationUsesTGU(){
+    // Returns true if the current Rotation main exercise is literally 'Turkish Get Up'
+    sanitizeCustom();
+    var rot = customMatrix['Rotation'] && customMatrix['Rotation'].items || [];
+    var mainName = sanitizeName((rot[0] && rot[0].name) || '');
+    return mainName === 'Turkish Get Up';
+  }
+
   function isBallisticName(nm){
     var name=clean(nm);
     for(var pidx=0;pidx<PATTERNS.length;pidx++){
@@ -1124,7 +1132,7 @@
     for (var i=0;i<entries.length;i++){
       if(entries[i].pattern === 'Rotation'){ rot = entries[i]; break; }
     }
-    if(rot && isUsingDefaultMatrix()){
+    if(rot && rotationUsesTGU()){
       var sets = rounds;
       var biasOn = !!(state.cfg && state.cfg.bias === 'on');
       var rotBias = biasOn ? (rot.bias || 'Medium') : 'Medium';
@@ -1276,7 +1284,7 @@
     for(var ii=0; ii<(day.entries||[]).length; ii++){
       if(day.entries[ii].pattern==='Rotation'){ rot=day.entries[ii]; break; }
     }
-    if(rot && isUsingDefaultMatrix()){
+    if(rot && rotationUsesTGU()){
       var sets = rc.rounds;
       var cost = rc.cap * sets;
       var biasOn = (state.cfg && state.cfg.bias === 'on');
