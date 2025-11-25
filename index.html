@@ -1339,8 +1339,15 @@
     state.accTotals = state.accTotals || {};
     for(var ei=0; ei<baseEntries.length; ei++){
       var e=baseEntries[ei];
-      var order=(e.pattern==='Rotation') ? [e.main] : [e.main].concat(e.acc||[]).filter(Boolean);
-      var accList=(e.pattern==='Rotation')?[]:order.slice(1);
+
+      // Main altijd eerst, maar bij Rotation gebruiken we de main (Get Up)
+      // alleen als opener. Alle leftover volume gaat naar de Rotation-accessoires,
+      // precies zoals bij de andere patronen.
+      var order = [e.main].concat(e.acc || []).filter(Boolean);
+      var accList = (e.pattern === 'Rotation')
+        ? (e.acc || [])      // Rotation: alleen accessoires in de circuit-logica
+        : order.slice(1);    // alle andere patronen: main + accessoires zoals altijd
+
       var remaining=e.volume;
 
       if(e.pattern!=='Rotation' && order.length>0){
