@@ -141,8 +141,6 @@
   <div class="tabs" role="tablist" aria-label="Navigation">
     <button class="tab-btn active" data-tab="plan" aria-selected="true">Planner</button>
     <button class="tab-btn" data-tab="custom" aria-selected="false">Custom Exercises</button>
-    <button class="tab-btn" data-tab="warmup" aria-selected="false">Warm-Up / Cooldown</button>
-    <button class="tab-btn" data-tab="zone2" aria-selected="false">Zone 2</button>
     <button class="tab-btn" data-tab="skill" aria-selected="false">
       Skill Test
       <span id="skillDot" class="nav-dot" hidden></span>
@@ -154,12 +152,11 @@
       <button id="btnPrevTop" class="btn ghost" aria-label="Previous session">◀ Prev</button>
       <button id="btnNextTop" class="btn" aria-label="Next session">Next ▶</button>
       <button id="btnCompleteTop" class="btn inline" title="Mark this session as completed">Complete ✔</button>
-      <button id="btnNewBlock" class="btn inline" title="New block (rebuild everything)">New Block</button>
     </div>
 
     <div class="card">
       <h2>Current Session</h2>
-      <div id="session" class="session" aria-live="polite">No block yet. Click “New Block”.</div>
+      <div id="session" class="session" aria-live="polite">No block yet. Use Settings to apply settings & create a new block.</div>
     </div>
 
     <details id="accSettings">
@@ -227,7 +224,7 @@
         </div>
 
         <div class="row stack" style="margin-top:8px">
-          <button id="btnRebuild" class="btn">Apply settings</button>
+          <button id="btnRebuild" class="btn">Apply settings &amp; create new block</button>
           <button id="btnReset" class="btn ghost">Reset progress</button>
           <button id="btnResetCounters" class="btn ghost" title="Clear set counters of this session">Reset counters</button>
         </div>
@@ -267,84 +264,15 @@
     </div>
   </div>
 
-  <div id="tab-warmup" class="tab-pane">
-    <div class="card">
-      <h2>Warm-Up</h2>
-      <p class="muted">Optional 5–7 minute preparation before Unity.</p>
-      <h3>Sequence</h3>
-      <ul>
-        <li><b>Head nods</b> — 20 up/down, 20 side-to-side (ear to shoulder)</li>
-        <li><b>Cross crawls</b> — 20 total</li>
-      </ul>
-      <h3>Rocking</h3>
-      <ul>
-        <li>10× rocking with dorsiflexion (toes up)</li>
-        <li>10× rocking with plantarflexion (toes down)</li>
-        <li>5× rocking with one leg extended sideways</li>
-      </ul>
-      <h3>Segmental rolls</h3>
-      <ul>
-        <li>3× per arm</li>
-        <li>3× per leg</li>
-      </ul>
-      <h3>Crawling</h3>
-      <ul>
-        <li>2 minutes, easy pace, smooth breathing</li>
-      </ul>
-    </div>
-
-    <div class="card">
-      <h2>Cooldown</h2>
-      <p class="muted">Optional 2 minute reset after Unity.</p>
-      <ul>
-        <li><b>Diaphragmatic breathing</b> — 2 minutes</li>
-        <li>Inhale slowly through the nose, exhale longer than you inhale</li>
-        <li>Relaxed position (lying or seated)</li>
-      </ul>
-    </div>
-  </div>
-
-  <div id="tab-zone2" class="tab-pane">
-    <div class="card">
-      <h2>Zone 2 — Readiness Gate</h2>
-      <p class="muted">Check before adding Zone 2. Strength first, Zone 2 is earned.</p>
-      <h3>Questions</h3>
-      <label class="chk"><input type="checkbox"> Slept well?</label>
-      <label class="chk"><input type="checkbox"> Low muscle soreness?</label>
-      <label class="chk"><input type="checkbox"> Good energy on waking?</label>
-      <label class="chk"><input type="checkbox"> Calm, easy breathing at rest?</label>
-      <p class="muted" style="margin-top:8px">
-        <b>3–4 YES</b> → Zone 2 allowed (30–40 min, easy pace)<br>
-        <b>0–2 YES</b> → Rest or easy walk only
-      </p>
-    </div>
-
-    <div class="card">
-      <h2>MAF Range</h2>
-      <p class="muted">Keep Zone 2 easy and sustainable.</p>
-      <ul>
-        <li><b>Formula:</b> MAF = 180 − age</li>
-        <li><b>Target range:</b> (MAF − 10) to MAF</li>
-      </ul>
-      <p class="muted">
-        Example (age 35):<br>
-        MAF = 145 bpm → Zone 2 = <b>135–145 bpm</b>
-      </p>
-      <h3>Guidelines</h3>
-      <ul>
-        <li>Nose breathing only</li>
-        <li>Conversational pace</li>
-        <li>30–40 minutes on rest days</li>
-        <li>Finish feeling better, not tired</li>
-      </ul>
-    </div>
-  </div>
-
+  
   <div id="tab-skill" class="tab-pane">
     <div class="card">
       <h2>Skill Test Log</h2>
       <p class="muted">
-        Use this page every ~8 weeks as a simple progress check. Nothing here changes your blocks — it only records your current capacity.
+        Test every 12 weeks or whenever you feel ready for a heavier bell.<br>
+        Pass the test → start the next block with that weight.<br>
+        Standard flow: <b>180 → 240 → 300 → Test → next bell.</b><br>
+        If all Heavy-bias reps were clean this block → increase volume next block.
       </p>
 
       <!-- 1) One-arm swing — 10 per side -->
@@ -932,7 +860,8 @@
   function inferBallistic(name){var nm=clean(name);return DEFAULT_BALLISTICS.has(nm)||/(swing|snatch|high pull|double clean)/i.test(nm)}
   function inferUnilateral(name){
     var n = clean(name).toLowerCase();
-    return /(one[-\s]?arm|single[-\s]?leg|split[-\s]?squat|pistol|step[-\s]?up|lunge|windmill|bent\s?press|half[-\s]?kneeling|kneeling|reverse\s?lunge|tactical\s?lunge|athletic\s?lunge|side\s?lunge|cossack|suitcase\s?carry|front\s?rack\s?carry|overhead\s?carry|bottom[-\s]?up\s?carry|renegade\s?row|pull[-\s]?up|chin[-\s]?up|military\s?press|push\s?press|snatch)/i.test(n);
+    if(/double\s+snatch/i.test(n)) return false;
+    return /(one[-\s]?arm|single[-\s]?leg|split[-\s]?squat|pistol|step[-\s]?up|lunge|windmill|bent\s?press|half[-\s]?kneeling|kneeling|reverse\s?lunge|front[-\s]?rack\s?carry|suitcase\s?carry|overhead\s?carry|farmer|bottom[-\s]?up\s?carry|renegade\s?row|pull[-\s]?up|chin[-\s]?up|military\s?press|push\s?press|snatch)/i.test(n);
   }
 
   function seedFromUnity(){
@@ -1179,7 +1108,7 @@
   }
 
   function renderSession(){
-    var out=$('#session'); if(!state.plan){out.textContent='No block yet. Click “New Block”.';return;}
+    var out=$('#session'); if(!state.plan){out.textContent='No block yet. Use Settings to apply settings & create a new block.';return;}
     var w=state.cursor.w, d=state.cursor.d; var week=state.plan.weeks[w]; var day=week.days[d]; var rc=state.plan.rc;
     var isBarbell = !!(state.cfg && state.cfg.barbellMode);
 
@@ -1218,8 +1147,14 @@
         html.push('<div class="pill">Optional Run: 20–30 min @ MAF</div>');
       }
     }
-    html.push('<br>');
-    if(openerHTML) html.push(openerHTML,'<br><br>');
+    html.push('<br><hr>');
+    html.push('<details class="acc-section"><summary>Warm-up</summary><div class="panel"><p class="muted">Optional 5–7 minute preparation before Unity.</p><h3>Sequence</h3><ul><li><b>Head nods</b> — 20 up/down, 20 side-to-side (ear to shoulder)</li><li><b>Cross crawls</b> — 20 total</li></ul><h3>Rocking</h3><ul><li>10× rocking with dorsiflexion (toes up)</li><li>10× rocking with plantarflexion (toes down)</li><li>5× rocking with one leg extended sideways</li></ul><h3>Segmental rolls</h3><ul><li>3× per arm</li><li>3× per leg</li></ul><h3>Crawling</h3><ul><li>2 minutes, easy pace, smooth breathing</li></ul></div></details>');
+    html.push('<hr>');
+    if(openerHTML){
+      html.push(openerHTML);
+    } else {
+      html.push('—');
+    }
     html.push('<hr>',esc(String(rc.rounds)+' rounds of the following circuit:'),'<br>');
     if(circuitExercises.length){
       html.push(circuitExercises.map(function(o){
@@ -1228,13 +1163,15 @@
     }else{
       html.push(esc('(No patterns in the circuit today)'));
     }
-    html.push('<br><hr><br>');
+    html.push('<hr><br>');
     if (carryFinisher){
       html.push( esc('[ '+String(carryFinisher.seconds)+'s '+carryFinisher.name+' ]') );
     } else {
       html.push( esc('[ — ]') );
     }
-    var finishedBlocks = (state.completedBlocks|0);
+    html.push('<hr>');
+    html.push('<details class="acc-section"><summary>Cooling Down</summary><div class="panel"><h3>Diaphragmatic Breathing — 2 minutes</h3><ul><li>Sit or lie comfortably.</li><li><b>Bottom hand:</b> on your lower belly.</li><li><b>Top hand:</b> on your sternum (breastbone).</li><li>Inhale slowly through the nose so that only the bottom hand moves.</li><li>The top hand should stay as still as possible.</li><li>Exhale gently through the nose or mouth while keeping the ribcage soft.</li><li>Maintain this pattern for about 2 minutes.</li></ul><h3>Trifecta Reset — 10–20 seconds each</h3><h4>L-Sit Hold (10–20 seconds)</h4><ul><li>Bent knees are fine.</li><li>Ribcage down, slight posterior pelvic tilt.</li><li>Think “light hollow”, not maximal tension.</li></ul><h4>Bridge Hold (10–20 seconds)</h4><ul><li>Lift your hips without forcing the lower back into hyperextension.</li><li>Focus on opening the front chain (hip flexors / abdomen).</li><li>Keep breathing softly.</li></ul><h4>Spinal Twist (10–20 seconds per side)</h4><ul><li>Low, gentle rotation.</li><li>Rotate only as far as you can feel the piriformis / glute / lower back engage and release.</li><li>Do not force the range.</li></ul><p class="muted">Recommended order: Diaphragmatic Breathing → L-Sit → Bridge → Twist.</p></div></details>');
+var finishedBlocks = (state.completedBlocks|0);
     html.push('<br>', '<div class="muted">Finished blocks: '+String(finishedBlocks)+'</div>');
     document.getElementById('session').innerHTML=html.join('');
 
@@ -1625,8 +1562,11 @@
     } catch(e){}
   }
 
-  document.getElementById('btnNewBlock').onclick=newBlock;
-  document.getElementById('btnRebuild').onclick=newBlock;
+    document.getElementById('btnRebuild').onclick=function(){
+    if(confirm('Are you sure you want to apply settings and create a new block? This will replace all current sessions.')){
+      newBlock();
+    }
+  };
   document.getElementById('btnReset').onclick=resetProgress;
   document.getElementById('btnNextTop').onclick=function(){next();};
   document.getElementById('btnPrevTop').onclick=function(){prev();};
