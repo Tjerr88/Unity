@@ -132,6 +132,12 @@
     background:#020617;
     border:1px solid rgba(255,255,255,.2);
   }
+
+  /* Custom sub-tabs */
+  .chip{border:1px solid rgba(255,255,255,.18); background:#0f1a34; color:#e6eaf2; padding:6px 10px; border-radius:999px; cursor:pointer; font-size:13px;}
+  .chip:hover{filter:brightness(1.05);}
+  .chip.active{background:#2b63ff; border-color:#2b63ff; color:white;}
+
 </style>
 </head>
 <body>
@@ -140,6 +146,7 @@
 
   <div class="tabs" role="tablist" aria-label="Navigation">
     <button class="tab-btn active" data-tab="plan" aria-selected="true">Planner</button>
+    <button class="tab-btn" data-tab="settings" aria-selected="false">Settings</button>
     <button class="tab-btn" data-tab="custom" aria-selected="false">Custom Exercises</button>
     <button class="tab-btn" data-tab="skill" aria-selected="false">
       Skill Test
@@ -148,6 +155,7 @@
   </div>
 
   <div id="tab-plan" class="tab-pane active">
+  <div id="unityPlannerWrap">
     <div class="row stack" style="margin:8px 0 12px">
       <button id="btnPrevTop" class="btn ghost" aria-label="Previous session">◀ Prev</button>
       <button id="btnNextTop" class="btn" aria-label="Next session">Next ▶</button>
@@ -159,21 +167,56 @@
       <div id="session" class="session" aria-live="polite">No block yet. Use Settings to apply settings & create a new block.</div>
     </div>
 
-    <details id="accSettings">
-      <summary>Settings</summary>
+    
+  </div>
+
+  <div id="bsPlannerWrap" style="display:none">
+    <div class="row stack" style="margin:8px 0 12px">
+      <button class="btn ghost" id="bs_btnPrev">◀ Prev</button>
+      <button class="btn" id="bs_btnNext">Next ▶</button>
+      <button class="btn ghost" id="bs_btnResetSession">Reset session</button>
+    </div>
+
+    <div class="card">
+      <div class="sessionHead">
+        <div>
+          <h2 id="bs_headTitle">Week 1 • Session 1</h2>
+          <div class="muted" id="bs_headSub">—</div>
+        </div>
+        <div class="meta" id="bs_kpi"></div>
+      </div>
+
+      <div id="bs_psLegend" class="legendBar"></div>
+      <div id="bs_planWrap"></div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<div id="tab-settings" class="tab-pane">
+    <div class="card">
+      <h2>Settings</h2>
       <div class="panel">
-        <div class="grid cols-2">
+<div class="grid cols-2">
           <div>
-            <label>Block volume (Unity)</label>
+            <label>Active training</label>
+            <select id="selMode">
+              <option value="LON" selected>Longevity Mode</option>
+              <option value="M3">Muscle Mode – 3</option>
+              <option value="M4">Muscle Mode – 4</option>
+              <option value="M6">Muscle Mode – 6</option>
+              <option value="S4">Strength Mode – 4</option>
+              <option value="SA">Strength Mode – Advanced</option>
+            </select>
+            <div class="muted" style="margin-top:4px">Block volume is shared across modes. Other settings are Longevity-only.</div>
+          </div>
+          <div>
+            <label>Block volume</label>
             <select id="selVol">
               <option>180</option><option>240</option><option selected>300</option><option>400</option><option>500</option>
             </select>
           </div>
-          <div>
-            <label>Seed (optional)</label>
-            <input id="inpSeed" placeholder="e.g. 12345">
-          </div>
-          <div>
+<div>
             <label>KB-bias (mains only; based on week split)</label>
             <select id="selBias">
               <option value="on" selected>On (▲/▼)</option>
@@ -229,10 +272,30 @@
           <button id="btnResetCounters" class="btn ghost" title="Clear set counters of this session">Reset counters</button>
         </div>
       </div>
-    </details>
+    </div>
   </div>
 
-  <div id="tab-custom" class="tab-pane">
+<div id="tab-custom" class="tab-pane">
+  <div class="card" style="margin-bottom:10px">
+    <div class="row" style="justify-content:space-between;align-items:center;gap:10px">
+      <b>Custom Exercises</b>
+      <div class="row" style="gap:8px;flex-wrap:wrap" id="customSubTabs" role="tablist" aria-label="Custom mode tabs">
+        <button type="button" class="chip active" data-custom="LON">Longevity</button>
+        <button type="button" class="chip" data-custom="M3">Muscle – 3</button>
+        <button type="button" class="chip" data-custom="M4">Muscle – 4</button>
+        <button type="button" class="chip" data-custom="M6">Muscle – 6</button>
+        <button type="button" class="chip" data-custom="S4">Strength – 4</button>
+        <button type="button" class="chip" data-custom="SA">Strength – Advanced</button>
+      </div>
+    </div>
+    <div class="muted" style="margin-top:6px">
+      Edit exercise presets per mode. <b>Settings → Active training</b> decides which preset is used for your training output.
+    </div>
+  </div>
+
+  <div id="customPaneLon" class="custom-mode-pane">
+    <div id="unityCustomWrap">
+
     <div class="card">
       <h2>Custom Exercises</h2>
       <p class="muted">
@@ -265,7 +328,32 @@
   </div>
 
   
-  <div id="tab-skill" class="tab-pane">
+  
+  </div>
+
+  
+  </div>
+
+  <div id="customPaneBS" class="custom-mode-pane" style="display:none">
+    <div id="bsCustomWrap">
+    <div class="card">
+      <h2>Custom Exercises</h2>
+      <div class="muted" id="bs_customHint"></div>
+    </div>
+    <div id="bs_customWrapInner"></div>
+    <div class="card">
+      <div class="row stack">
+        <button class="btn" id="bs_btnSaveCustom">Save</button>
+        <button class="btn ghost" id="bs_btnResetCustom">Reset custom exercises</button>
+      </div>
+    </div>
+  </div>
+
+  </div>
+</div>
+
+
+<div id="tab-skill" class="tab-pane">
     <div class="card">
       <h2>Skill Test Log</h2>
       <p class="muted">
@@ -1647,5 +1735,996 @@ var finishedBlocks = (state.completedBlocks|0);
   updateSkillDot();
 })();
 </script>
+<script>
+
+/* =========================
+   Unity wrapper for modes + custom subtabs
+========================= */
+(function(){
+  const KEY_MODE = "UNITY_ACTIVE_MODE_V1";
+  const KEY_CUSTOMTAB = "UNITY_CUSTOM_TAB_V1";
+
+  const selMode = document.getElementById("selMode");
+  const selVol = document.getElementById("selVol");
+
+  const unityPlan = document.getElementById("unityPlannerWrap");
+  const bsPlan = document.getElementById("bsPlannerWrap");
+
+  // Custom panes
+  const paneLon = document.getElementById("customPaneLon");
+  const paneBS  = document.getElementById("customPaneBS");
+  const bsCustomWrap = document.getElementById("bsCustomWrap");
+
+  const customButtons = Array.from(document.querySelectorAll("#customSubTabs .chip"));
+
+  function modeToTemplate(mode){
+    switch(mode){
+      case "M3": return "BTS3";
+      case "M4": return "BTS4";
+      case "M6": return "BTS6";
+      case "S4": return "PS4";
+      case "SA": return "PSA";
+      default: return null;
+    }
+  }
+
+  function applyMode(mode){
+    // Save
+    try{ localStorage.setItem(KEY_MODE, mode); }catch(_){}
+    if (selMode && selMode.value !== mode) selMode.value = mode;
+
+    const tpl = modeToTemplate(mode);
+    const vol = Number(selVol?.value || 300);
+
+    if (!tpl){
+      // Longevity
+      unityPlan.style.display = "";
+      bsPlan.style.display = "none";
+      return;
+    }
+    // Muscle/Strength
+    unityPlan.style.display = "none";
+    bsPlan.style.display = "";
+    if (window.BSApp && window.BSApp.setTemplate){
+      window.BSApp.setTemplate(tpl, vol, {renderPlanner:true, renderCustom:false});
+    }
+  }
+
+  // Custom subtabs are independent of active training
+  function applyCustomTab(tab){
+    try{ localStorage.setItem(KEY_CUSTOMTAB, tab); }catch(_){}
+    customButtons.forEach(b => b.classList.toggle("active", b.dataset.custom === tab));
+
+    const tpl = modeToTemplate(tab);
+    if (!tpl){
+      paneLon.style.display = "";
+      paneBS.style.display = "none";
+      return;
+    }
+    paneLon.style.display = "none";
+    paneBS.style.display = "";
+    if (window.BSApp && window.BSApp.renderCustomFor){
+      // make sure block volume is synced too
+      window.BSApp.setTemplate(tpl, Number(selVol?.value||300), {renderPlanner:false, renderCustom:true});
+    }
+  }
+
+  // Wire mode selector
+  if (selMode){
+    selMode.addEventListener("change", () => applyMode(selMode.value));
+  }
+  // Shared block volume impacts BS/PS too
+  if (selVol){
+    selVol.addEventListener("change", () => {
+      const currentMode = selMode?.value || "LON";
+      const tpl = modeToTemplate(currentMode);
+      if (tpl && window.BSApp && window.BSApp.setTemplate){
+        window.BSApp.setTemplate(tpl, Number(selVol.value||300), {renderPlanner:true, renderCustom:false});
+      }
+    });
+  }
+
+  // Wire custom subtabs
+  customButtons.forEach(btn => btn.addEventListener("click", () => applyCustomTab(btn.dataset.custom)));
+
+  // Load initial selections
+  let savedMode = "LON";
+  let savedCustom = "LON";
+  try{
+    savedMode = localStorage.getItem(KEY_MODE) || "LON";
+    savedCustom = localStorage.getItem(KEY_CUSTOMTAB) || "LON";
+  }catch(_){}
+  if (selMode && !["LON","M3","M4","M6","S4","SA"].includes(savedMode)) savedMode = "LON";
+  if (!["LON","M3","M4","M6","S4","SA"].includes(savedCustom)) savedCustom = "LON";
+
+  // Apply after BS app bootstraps
+  // (BS app is defined later; this still works because we call once again on window load)
+  applyMode(savedMode);
+  applyCustomTab(savedCustom);
+
+  window.addEventListener("load", () => {
+    applyMode(selMode?.value || savedMode);
+    applyCustomTab(savedCustom);
+  });
+})();
+</script>
+<script>
+/* =========================
+   Embedded BuiltStrong + PlanStrong engine (Unity-style UI)
+   IDs are prefixed with bs_ to avoid collisions.
+========================= */
+(function(){
+  const LS_KEY = "UNITY_MULTI_BSPS_V1";
+
+  // Per-mode custom exercise storage (separate from progress)
+  function CUSTOM_KEY_FOR(templateKey){ return `UNITY_MULTI_CUSTOM_${templateKey}_V1`; }
+  function loadCustomStacks(templateKey){
+    try{
+      const raw = localStorage.getItem(CUSTOM_KEY_FOR(templateKey));
+      if(raw) return JSON.parse(raw);
+    }catch(e){}
+    // defaults
+    if ((templateKey||"").startsWith("BTS")) return buildDefaultStacksBTS(templateKey);
+    return buildDefaultStacksPS();
+  }
+  function saveCustomStacks(templateKey, stacks){
+    try{ localStorage.setItem(CUSTOM_KEY_FOR(templateKey), JSON.stringify(stacks)); }catch(e){}
+  }
+
+
+  const WEEK_WAVE = [
+    { pct: 0.15, name: "Deload" },
+    { pct: 0.28, name: "Development" },
+    { pct: 0.22, name: "Maintenance" },
+    { pct: 0.35, name: "Stress" },
+  ];
+
+  const BTS_ZONES = [
+    { key:"H", name:"Heavy",  range:"4–7",   pct:0.15 },
+    { key:"M", name:"Medium", range:"8–11",  pct:0.35 },
+    { key:"L", name:"Light",  range:"12–15", pct:0.50 },
+  ];
+
+  const PS_RANGES = { L:"8–12 RM", M:"5–7 RM", H:"3–4 RM", SH:"2–3 RM" };
+
+  const PS_POS = [
+    { key:"P15", name:"Lift 1", pct:0.15 },
+    { key:"P35", name:"Lift 2", pct:0.35 },
+    { key:"P50", name:"Lift 3", pct:0.50 },
+  ];
+
+  const PS4_SPLIT = [
+    { key:"L",  pct:0.50 },
+    { key:"M",  pct:0.35 },
+    { key:"H",  pct:0.15 },
+  ];
+  const PSA_SPLIT = [
+    { key:"SH", pct:0.05 },
+    { key:"H",  pct:0.12 },
+    { key:"M",  pct:0.34 },
+    { key:"L",  pct:0.49 },
+  ];
+
+  const PS_SET_CAPS = { L: 6, M: 4, H: 3, SH: 1 };
+  const PS_MAX_LADDERS = 10;
+
+  const TEMPLATES = {
+    BTS3: {
+      type:"BTS", name:"BTS3",
+      movements:[ {id:"push",label:"Push"}, {id:"pull",label:"Pull"}, {id:"lower",label:"Lower"} ],
+      sessions:[
+        { title:"Push Day",  blocks:[ {movement:"push",zone:"H"},{movement:"push",zone:"M"},{movement:"push",zone:"L"} ] },
+        { title:"Pull Day",  blocks:[ {movement:"pull",zone:"H"},{movement:"pull",zone:"M"},{movement:"pull",zone:"L"} ] },
+        { title:"Lower Day", blocks:[ {movement:"lower",zone:"H"},{movement:"lower",zone:"M"},{movement:"lower",zone:"L"} ] },
+      ],
+    },
+    BTS4: {
+      type:"BTS", name:"BTS4",
+      movements:[ {id:"push",label:"Push"}, {id:"pull",label:"Pull"}, {id:"squat",label:"Squat"}, {id:"hinge",label:"Hinge"} ],
+      sessions:[
+        { title:"Full Body", blocks:[ {movement:"squat",zone:"H"},{movement:"push",zone:"M"},{movement:"pull",zone:"M"},{movement:"hinge",zone:"L"} ]},
+        { title:"Full Body", blocks:[ {movement:"push",zone:"H"},{movement:"pull",zone:"H"},{movement:"hinge",zone:"M"},{movement:"squat",zone:"L"} ]},
+        { title:"Full Body", blocks:[ {movement:"hinge",zone:"H"},{movement:"squat",zone:"M"},{movement:"push",zone:"L"},{movement:"pull",zone:"L"} ]},
+      ],
+    },
+    BTS6: {
+      type:"BTS", name:"BTS6",
+      movements:[
+        {id:"pushHor", label:"Push Horizontal"},
+        {id:"pullHor", label:"Pull Horizontal"},
+        {id:"pushVer", label:"Push Vertical"},
+        {id:"pullVer", label:"Pull Vertical"},
+        {id:"squat",   label:"Squat"},
+        {id:"hinge",   label:"Hinge"},
+      ],
+      sessions:[
+        { title:"Upper A", blocks:[
+          {movement:"pushHor",zone:"H"},{movement:"pullHor",zone:"H"},
+          {movement:"pushVer",zone:"M"},{movement:"pullVer",zone:"M"},
+          {movement:"pushHor",zone:"L"},{movement:"pullHor",zone:"L"},
+        ]},
+        { title:"Lower A", blocks:[ {movement:"squat",zone:"H"},{movement:"hinge",zone:"M"},{movement:"squat",zone:"L"} ]},
+        { title:"Upper B", blocks:[
+          {movement:"pushVer",zone:"H"},{movement:"pullVer",zone:"H"},
+          {movement:"pushHor",zone:"M"},{movement:"pullHor",zone:"M"},
+          {movement:"pushVer",zone:"L"},{movement:"pullVer",zone:"L"},
+        ]},
+        { title:"Lower B", blocks:[ {movement:"hinge",zone:"H"},{movement:"squat",zone:"M"},{movement:"hinge",zone:"L"} ]},
+      ],
+    },
+    PS4: {
+      type:"PS", name:"PS4",
+      lifts:[ {id:"squat",label:"Squat"},{id:"hinge",label:"Hinge"},{id:"push",label:"Push"},{id:"pull",label:"Pull"} ],
+      baseLadders:3, split:PS4_SPLIT,
+      sessions:[
+        { title:"Session 1", slots:[ {lift:"squat",pos:"P15"}, {lift:"upper",pos:"P35"}, {lift:"hinge",pos:"P50"} ]},
+        { title:"Session 2", slots:[ {lift:"upper",pos:"P15"}, {lift:"hinge",pos:"P35"}, {lift:"squat",pos:"P50"} ]},
+        { title:"Session 3", slots:[ {lift:"hinge",pos:"P15"}, {lift:"squat",pos:"P35"}, {lift:"upper",pos:"P50"} ]},
+      ],
+    },
+    PSA: {
+      type:"PS", name:"PS-A",
+      lifts:[ {id:"squat",label:"Squat"},{id:"hinge",label:"Hinge"},{id:"push",label:"Push"},{id:"pull",label:"Pull"} ],
+      baseLadders:4, split:PSA_SPLIT,
+      sessions:[
+        { title:"Session 1", slots:[ {lift:"squat",pos:"P15"}, {lift:"upper",pos:"P35"}, {lift:"hinge",pos:"P50"} ]},
+        { title:"Session 2", slots:[ {lift:"upper",pos:"P15"}, {lift:"hinge",pos:"P35"}, {lift:"squat",pos:"P50"} ]},
+        { title:"Session 3", slots:[ {lift:"hinge",pos:"P15"}, {lift:"squat",pos:"P35"}, {lift:"upper",pos:"P50"} ]},
+      ],
+    },
+  };
+
+  const $ = (s)=>document.querySelector(s);
+  const esc = (s)=>String(s??"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const mod=(n,m)=>((n%m)+m)%m;
+
+  function capC(repMax){ return Math.max(1, Math.floor(0.66 * (Number(repMax)||1))); }
+
+  function pickAB(C){
+    const candidates=[];
+    for (let a=1;a<=C-1;a++){
+      const b=C-a;
+      const delta=Math.abs(a-b)/Math.max(a,b);
+      if (delta>=0.20) candidates.push({a,b});
+    }
+    if (!candidates.length) return {a:1,b:Math.max(1,C-1)};
+    candidates.sort((x,y)=>{
+      const rx=Math.max(x.a,x.b)/Math.max(1,Math.min(x.a,x.b));
+      const ry=Math.max(y.a,y.b)/Math.max(1,Math.min(y.a,y.b));
+      if (rx!==ry) return rx-ry;
+      return y.a-x.a;
+    });
+    const best=candidates[0];
+    return {a:Math.min(best.a,best.b), b:Math.max(best.a,best.b)};
+  }
+
+  function buildBTSLadder(repMax){
+    const C=capC(repMax);
+    const ab=pickAB(C);
+    return {a:ab.a,b:ab.b,C,volume:ab.a+ab.b+C};
+  }
+
+  function planBTS(targetReps, ladder){
+    const t = Math.max(0, targetReps|0);
+    const full = ladder.volume>0 ? Math.floor(t/ladder.volume) : 0;
+    const leftover = ladder.volume>0 ? (t % ladder.volume) : t;
+    const leftoverClamped = Math.min(ladder.C, leftover);
+    return { fullLadders: full, leftoverTotal: leftoverClamped };
+  }
+
+  function splitWeekIntoSessions(weekVolume){
+    const raw = PS_POS.map(p=>weekVolume*p.pct);
+    const base = raw.map(x=>Math.floor(x));
+    let used = base.reduce((a,b)=>a+b,0);
+    let rem = weekVolume - used;
+    const fr = raw.map((x,i)=>({i, frac:x - Math.floor(x)})).sort((a,b)=>b.frac-a.frac);
+    let j=0;
+    while (rem>0){
+      base[fr[j%fr.length].i] += 1;
+      rem--;
+      j++;
+    }
+    return {P15:base[0], P35:base[1], P50:base[2]};
+  }
+
+  function splitAcrossLadders(total, ladders){
+    const base = Math.floor(total / ladders);
+    const rem = total % ladders;
+    return Array.from({length:ladders}, (_,i)=>base + (i<rem ? 1 : 0));
+  }
+  function maxIn(arr){ return arr.reduce((m,x)=>Math.max(m,x),0); }
+
+  function allocByPerc(total, split, opts={}){
+    const items = split.map(s=>({key:s.key,pct:s.pct,raw:total*s.pct,base:Math.floor(total*s.pct),frac:(total*s.pct)%1}));
+    let used = items.reduce((a,x)=>a+x.base,0);
+    let rem = total - used;
+
+    if (opts.minKey && total>0){
+      const it = items.find(x=>x.key===opts.minKey);
+      if (it && it.base===0){ it.base = 1; rem -= 1; }
+    }
+    items.sort((a,b)=>b.frac-a.frac);
+    let i=0;
+    while (rem>0 && i<10000){
+      items[i % items.length].base += 1;
+      rem -= 1;
+      i++;
+    }
+    const out={}; for (const it of items) out[it.key]=it.base;
+    return out;
+  }
+
+  function requiredLaddersForCaps(totals, baseLadders, templateKey){
+    let ladders = baseLadders;
+    while (ladders < PS_MAX_LADDERS){
+      const L = maxIn(splitAcrossLadders(totals.L||0, ladders));
+      const M = maxIn(splitAcrossLadders(totals.M||0, ladders));
+      const H = maxIn(splitAcrossLadders(totals.H||0, ladders));
+      let SHmax = 0;
+      if (templateKey==="PSA"){
+        const sh = totals.SH||0;
+        SHmax = sh>0 ? 1 : 0;
+      }
+      if (L<=PS_SET_CAPS.L && M<=PS_SET_CAPS.M && H<=PS_SET_CAPS.H && SHmax<=PS_SET_CAPS.SH) return ladders;
+      ladders++;
+    }
+    return ladders;
+  }
+
+  function planPSLift(sessionReps, templateKey){
+    const tpl = TEMPLATES[templateKey];
+    const split = tpl.split;
+    const baseLadders = tpl.baseLadders;
+
+    let totals;
+    if (templateKey==="PSA"){
+      totals = allocByPerc(sessionReps, split, {minKey:"SH"});
+      totals.SH = Math.max(0, totals.SH|0);
+    } else {
+      totals = allocByPerc(sessionReps, split, {});
+    }
+
+    let ladders = requiredLaddersForCaps(totals, baseLadders, templateKey);
+
+    const per = {};
+    if (templateKey==="PSA"){
+      const shTotal = Math.min(totals.SH||0, ladders);
+      per.SH = Array.from({length:ladders}, (_,i)=> (i<shTotal ? 1 : 0));
+      per.H = splitAcrossLadders(totals.H||0, ladders);
+      per.M = splitAcrossLadders(totals.M||0, ladders);
+      const sumHM = (totals.H||0) + (totals.M||0);
+      const Lneeded = Math.max(0, sessionReps - shTotal - sumHM);
+      per.L = splitAcrossLadders(Lneeded, ladders);
+    } else {
+      per.L = splitAcrossLadders(totals.L||0, ladders);
+      per.M = splitAcrossLadders(totals.M||0, ladders);
+      per.H = splitAcrossLadders(totals.H||0, ladders);
+    }
+
+    const lines=[], repsPerLadder=[];
+    for (let i=0;i<ladders;i++){
+      const L=per.L?.[i]??0, M=per.M?.[i]??0, H=per.H?.[i]??0, SH=per.SH?.[i]??0;
+      lines.push(templateKey==="PSA" ? `L${L} · M${M} · H${H} · SH${SH}` : `L${L} · M${M} · H${H}`);
+      repsPerLadder.push(L+M+H+SH);
+    }
+    return {ladders, lines, repsPerLadder, totals};
+  }
+
+  function buildDefaultStacksBTS(templateKey){
+    const tpl=TEMPLATES[templateKey];
+    const stacks={};
+    for (const mv of tpl.movements){
+      stacks[mv.id] = {
+        H:{exercise:"",load:"",repMax:5},
+        M:{exercise:"",load:"",repMax:10},
+        L:{exercise:"",load:"",repMax:15},
+      };
+    }
+    return stacks;
+  }
+  function buildDefaultStacksPS(){
+    return {
+      squat:{exercise:"", loadL:"", loadM:"", loadH:"", loadSH:""},
+      hinge:{exercise:"", loadL:"", loadM:"", loadH:"", loadSH:""},
+      push: {exercise:"", loadL:"", loadM:"", loadH:"", loadSH:""},
+      pull: {exercise:"", loadL:"", loadM:"", loadH:"", loadSH:""},
+    };
+  }
+
+  function defaultState(){
+    return {
+      template:"BTS6",
+      blockVolume:300,
+      sessionCursor:0,
+      btsStacks: buildDefaultStacksBTS("BTS6"),
+      btsRemaining:{},
+      btsProgress:{},
+      psStacks: loadCustomStacks("PS4"),
+      psRemaining:{},
+      psProgress:{},
+    };
+  }
+
+  function initState(st){
+    if (!st.template) st.template="BTS6";
+    if (!st.blockVolume) st.blockVolume=300;
+    if (typeof st.sessionCursor!=="number") st.sessionCursor=0;
+    if (!st.btsStacks) st.btsStacks = loadCustomStacks(st.template||"BTS6");
+    if (!st.btsRemaining) st.btsRemaining={};
+    if (!st.btsProgress) st.btsProgress={};
+    if (!st.psStacks) st.psStacks = loadCustomStacks(st.template||"PS4");
+    if (!st.psRemaining) st.psRemaining={};
+    if (!st.psProgress) st.psProgress={};
+
+    const tpl=TEMPLATES[st.template];
+    if (tpl.type==="BTS"){
+      st.btsStacks = loadCustomStacks(st.template);
+      ensureBTSRemaining(st);
+    } else {
+      ensurePSRemaining(st);
+    }
+    return st;
+  }
+
+  function loadState(){
+    try{
+      const raw=localStorage.getItem(LS_KEY);
+      if (!raw) return initState(defaultState());
+      return initState(JSON.parse(raw));
+    }catch(e){
+      console.error(e);
+      return initState(defaultState());
+    }
+  }
+  let state = loadState();
+  function saveState(){ try{localStorage.setItem(LS_KEY, JSON.stringify(state));}catch(_){ } }
+
+  function btsZoneTargets(blockVolume){
+    const out={};
+    for (const z of BTS_ZONES) out[z.key]=Math.round(Number(blockVolume)*z.pct);
+    return out;
+  }
+  function ensureBTSRemaining(st){
+    const tpl=TEMPLATES[st.template];
+    const tgt=btsZoneTargets(st.blockVolume);
+    st.btsRemaining = st.btsRemaining || {};
+    for (const mv of tpl.movements){
+      st.btsRemaining[mv.id] = st.btsRemaining[mv.id] || {};
+      for (const z of BTS_ZONES){
+        if (typeof st.btsRemaining[mv.id][z.key] !== "number") st.btsRemaining[mv.id][z.key]=tgt[z.key];
+      }
+    }
+  }
+
+  function btsProgressKey(globalWeekIndex, sessionIndex, blockIndex){
+    return `${state.template}|v${state.blockVolume}|w${globalWeekIndex}|s${sessionIndex}|b${blockIndex}`;
+  }
+  function btsEnsureEntry(globalWeekIndex, sessionIndex, blockIndex){
+    const key=btsProgressKey(globalWeekIndex, sessionIndex, blockIndex);
+    if (!state.btsProgress[key]) state.btsProgress[key]={doneLadders:0,leftoverDone:false,appliedReps:0};
+    return state.btsProgress[key];
+  }
+  function btsAppliedThisWeek(tpl, globalWeekIndex, movementId, zoneKey){
+    let total=0;
+    for (let sIdx=0; sIdx<tpl.sessions.length; sIdx++){
+      tpl.sessions[sIdx].blocks.forEach((blk, bi)=>{
+        if (blk.movement!==movementId || blk.zone!==zoneKey) return;
+        const key=btsProgressKey(globalWeekIndex, sIdx, bi);
+        const entry=state.btsProgress[key];
+        if (entry && typeof entry.appliedReps==="number") total += entry.appliedReps;
+      });
+    }
+    return total;
+  }
+  function btsCountOccurrencesPerWeek(tpl, movementId, zoneKey){
+    let n=0;
+    for (const s of tpl.sessions){
+      for (const b of s.blocks){
+        if (b.movement===movementId && b.zone===zoneKey) n++;
+      }
+    }
+    return n;
+  }
+  function btsWeekZoneTarget(blockVolume, phasePct, zonePct){
+    return Math.round(Number(blockVolume) * phasePct * zonePct);
+  }
+  function btsComputeApplied(doneLadders, ladder, leftoverTotal, leftoverDone){
+    return (doneLadders|0)*ladder.volume + (leftoverDone ? (leftoverTotal|0) : 0);
+  }
+  function btsApplyDeltaToRemaining(mvId, zKey, delta){
+    const tgt=btsZoneTargets(state.blockVolume)[zKey];
+    const cur=state.btsRemaining[mvId][zKey];
+    let next = cur - delta;
+    next = Math.max(0, Math.min(tgt, next));
+    state.btsRemaining[mvId][zKey]=next;
+  }
+  function btsUpdate(globalWeekIndex, sessionIndex, blockIndex, mvId, zKey, ladder, planFull, leftoverTotal, newDone, newLeftDone){
+    const key=btsProgressKey(globalWeekIndex, sessionIndex, blockIndex);
+    const entry=state.btsProgress[key];
+
+    newDone = Math.max(0, Math.min(planFull, newDone|0));
+    newLeftDone = !!newLeftDone;
+
+    const oldApplied = entry.appliedReps || 0;
+    const nextApplied = btsComputeApplied(newDone, ladder, leftoverTotal, newLeftDone);
+    const delta = nextApplied - oldApplied;
+
+    if (delta>0){
+      const remaining = state.btsRemaining[mvId][zKey];
+      const allowed = Math.min(delta, remaining);
+      btsApplyDeltaToRemaining(mvId, zKey, allowed);
+      entry.appliedReps = oldApplied + allowed;
+    } else if (delta<0){
+      btsApplyDeltaToRemaining(mvId, zKey, delta);
+      entry.appliedReps = nextApplied;
+    }
+
+    entry.doneLadders = newDone;
+    entry.leftoverDone = newLeftDone;
+    saveState();
+  }
+
+  function ensurePSRemaining(st){
+    st.psRemaining = st.psRemaining || {};
+    for (const lid of ["squat","hinge","push","pull"]){
+      if (typeof st.psRemaining[lid] !== "number") st.psRemaining[lid] = Number(st.blockVolume)||300;
+    }
+  }
+  function psKey(globalWeekIndex, sessionIndex, liftId){
+    return `${state.template}|v${state.blockVolume}|w${globalWeekIndex}|s${sessionIndex}|lift${liftId}`;
+  }
+  function psEnsureEntry(globalWeekIndex, sessionIndex, liftId){
+    const key=psKey(globalWeekIndex, sessionIndex, liftId);
+    if (!state.psProgress[key]) state.psProgress[key]={laddersDone:0, appliedReps:0};
+    return state.psProgress[key];
+  }
+  function psUpdate(globalWeekIndex, sessionIndex, liftId, repsPerLadder, laddersTotal, newDone){
+    newDone = Math.max(0, Math.min(laddersTotal, newDone|0));
+    const entry=psEnsureEntry(globalWeekIndex, sessionIndex, liftId);
+
+    const oldApplied = entry.appliedReps || 0;
+    const nextApplied = repsPerLadder.slice(0,newDone).reduce((a,b)=>a+b,0);
+    const delta = nextApplied - oldApplied;
+
+    if (delta>0){
+      const remaining = state.psRemaining[liftId] ?? state.blockVolume;
+      const allowed = Math.min(delta, remaining);
+      state.psRemaining[liftId] = Math.max(0, remaining - allowed);
+      entry.appliedReps = oldApplied + allowed;
+
+      if (allowed < delta){
+        let can=0, acc=0;
+        for (let i=0;i<repsPerLadder.length;i++){
+          if (acc + repsPerLadder[i] <= remaining){ acc += repsPerLadder[i]; can++; }
+          else break;
+        }
+        entry.laddersDone = can;
+        entry.appliedReps = oldApplied + acc;
+        saveState();
+        return;
+      }
+    } else if (delta<0){
+      state.psRemaining[liftId] = Math.min(state.blockVolume, (state.psRemaining[liftId]||0) + (-delta));
+      entry.appliedReps = nextApplied;
+    }
+
+    entry.laddersDone = newDone;
+    saveState();
+  }
+
+  function blockDonePct(){
+    const tpl=TEMPLATES[state.template];
+    if (tpl.type==="BTS"){
+      const targets=btsZoneTargets(state.blockVolume);
+      let total=0, rem=0;
+      for (const mv of tpl.movements){
+        for (const z of BTS_ZONES){
+          total += targets[z.key];
+          rem += state.btsRemaining[mv.id][z.key];
+        }
+      }
+      const done = total - rem;
+      return total>0 ? Math.round((done/total)*100) : 0;
+    } else {
+      const total = state.blockVolume * 4;
+      const rem = ["squat","hinge","push","pull"].reduce((a,k)=>a+(state.psRemaining[k]||0),0);
+      const done = total - rem;
+      return total>0 ? Math.round((done/total)*100) : 0;
+    }
+  }
+
+  function renderKPI(phaseName){
+    const tpl=TEMPLATES[state.template];
+    $("#bs_kpi").innerHTML = [
+      `<span class="pill">Template <b>${tpl.name}</b></span>`,
+      `<span class="pill">Block <b>${state.blockVolume}</b></span>`,
+      `<span class="pill">Week <b>${phaseName}</b></span>`,
+      `<span class="pill">Progress <b>${blockDonePct()}%</b></span>`
+    ].join("");
+  }
+
+  function movementLabel(mvId){
+    const tpl=TEMPLATES[state.template];
+    return (tpl.movements?.find(m=>m.id===mvId)?.label) || mvId;
+  }
+  function liftLabel(lid){
+    const tpl=TEMPLATES[state.template];
+    return (tpl.lifts?.find(l=>l.id===lid)?.label) || lid;
+  }
+
+  function renderPlanner(){
+    const tpl=TEMPLATES[state.template];
+    const wrap=$("#bs_planWrap");
+    wrap.innerHTML="";
+
+    const sessionsPerWeek = tpl.sessions.length;
+    const cursor = state.sessionCursor|0;
+    const globalWeekIndex = Math.floor(cursor / sessionsPerWeek);
+    const week = globalWeekIndex + 1;
+    const phase = WEEK_WAVE[mod(globalWeekIndex, WEEK_WAVE.length)];
+    const sessionIdx = mod(cursor, sessionsPerWeek);
+
+    $("#bs_headTitle").textContent = `Week ${week} • Session ${sessionIdx+1}`;
+    $("#bs_headSub").textContent = `${tpl.name} • ${tpl.sessions[sessionIdx].title} • ${phase.name}`;
+    renderKPI(phase.name);
+
+    const legend=$("#bs_psLegend");
+    if (tpl.type==="PS"){
+      legend.style.display="block";
+      legend.innerHTML = `Ladder order: <b>1️⃣ Light → 2️⃣ Medium → 3️⃣ Heavy${state.template==="PSA" ? " → 4️⃣ Super Heavy" : ""}</b>`;
+    } else {
+      legend.style.display="none";
+      legend.innerHTML="";
+    }
+
+    if (tpl.type==="BTS"){
+      ensureBTSRemaining(state);
+      const session = tpl.sessions[sessionIdx];
+      const byZone = {H:[],M:[],L:[]};
+      session.blocks.forEach((b,i)=>byZone[b.zone].push({blk:b, idx:i}));
+
+      for (const zKey of ["H","M","L"]){
+        const zMeta = BTS_ZONES.find(z=>z.key===zKey);
+        const zoneDiv=document.createElement("div");
+        zoneDiv.className="zone";
+        zoneDiv.innerHTML = `<div class="zoneTitle"><b>${zMeta.name}</b><span>${zMeta.range}</span></div>`;
+
+        for (const {blk, idx} of byZone[zKey]){
+          const mvId=blk.movement;
+          const spec = state.btsStacks[mvId][zKey];
+          const ladder = buildBTSLadder(spec.repMax);
+
+          const remainingBlock = Math.max(0, state.btsRemaining[mvId][zKey]);
+          const weekTarget = btsWeekZoneTarget(state.blockVolume, phase.pct, zMeta.pct);
+          const occ = Math.max(1, btsCountOccurrencesPerWeek(tpl, mvId, zKey));
+          const perExposure = Math.max(1, Math.ceil(weekTarget / occ));
+          const used = btsAppliedThisWeek(tpl, globalWeekIndex, mvId, zKey);
+          const weekRemaining = Math.max(0, weekTarget - used);
+
+          const targetToday = Math.min(remainingBlock, weekRemaining, perExposure);
+          const plan = planBTS(targetToday, ladder);
+
+          const entry = btsEnsureEntry(globalWeekIndex, sessionIdx, idx);
+          entry.doneLadders = Math.min(entry.doneLadders||0, plan.fullLadders);
+          if (!plan.leftoverTotal) entry.leftoverDone = false;
+
+          const title = `${movementLabel(mvId)}: ${spec.exercise || "—"}`;
+          const ladderText = `${ladder.a}-${ladder.b}-${ladder.C} × ${plan.fullLadders}`;
+          const leftoverText = plan.leftoverTotal ? ` + leftover ${plan.leftoverTotal}` : "";
+
+          const item=document.createElement("div");
+          item.className="item";
+          item.innerHTML = `
+            <div class="itemTop">
+              <div class="name">
+                ${esc(title)}
+                <span class="sub muted">${esc(spec.load || "")}</span>
+              </div>
+            </div>
+            <div class="line">
+              <div class="mono">${esc(ladderText + leftoverText)}</div>
+              <div class="ctrl">
+                <button class="cbtn" data-dec>−</button>
+                <span class="cval">${entry.doneLadders||0}/${plan.fullLadders}</span>
+                <button class="cbtn" data-inc>+</button>
+                ${plan.leftoverTotal ? `<button class="ltog ${entry.leftoverDone?'done':''}" data-ltog>+L</button>` : ``}
+              </div>
+            </div>
+          `;
+          zoneDiv.appendChild(item);
+
+          item.querySelector("[data-inc]").onclick = () => {
+            const next = Math.min(plan.fullLadders, (entry.doneLadders||0)+1);
+            btsUpdate(globalWeekIndex, sessionIdx, idx, mvId, zKey, ladder, plan.fullLadders, plan.leftoverTotal, next, entry.leftoverDone);
+            renderPlanner();
+          };
+          item.querySelector("[data-dec]").onclick = () => {
+            const next = Math.max(0, (entry.doneLadders||0)-1);
+            btsUpdate(globalWeekIndex, sessionIdx, idx, mvId, zKey, ladder, plan.fullLadders, plan.leftoverTotal, next, entry.leftoverDone);
+            renderPlanner();
+          };
+          const lt=item.querySelector("[data-ltog]");
+          if (lt){
+            lt.onclick = () => {
+              const next=!entry.leftoverDone;
+              btsUpdate(globalWeekIndex, sessionIdx, idx, mvId, zKey, ladder, plan.fullLadders, plan.leftoverTotal, entry.doneLadders||0, next);
+              renderPlanner();
+            };
+          }
+        }
+        wrap.appendChild(zoneDiv);
+      }
+      saveState();
+      return;
+    }
+
+    // PS
+    ensurePSRemaining(state);
+    const psSession = tpl.sessions[sessionIdx];
+    const weekPerLift = Math.round(state.blockVolume * phase.pct);
+    const posMap = splitWeekIntoSessions(weekPerLift);
+
+    psSession.slots.forEach(slot=>{
+      const pos = PS_POS.find(p=>p.key===slot.pos);
+      const baseReps = posMap[slot.pos];
+
+      const zoneDiv=document.createElement("div");
+      zoneDiv.className="zone";
+      zoneDiv.innerHTML = `<div class="zoneTitle"><b>${pos.name} (${Math.round(pos.pct*100)}%)</b><span>Target reps: ${baseReps}</span></div>`;
+
+      const liftsToRender = (slot.lift==="upper") ? ["push","pull"] : [slot.lift];
+
+      liftsToRender.forEach(liftId=>{
+        const stack = state.psStacks[liftId];
+        const remaining = state.psRemaining[liftId] ?? state.blockVolume;
+        const sessionReps = Math.min(baseReps, remaining);
+
+        const plan = planPSLift(sessionReps, state.template);
+        const entry = psEnsureEntry(globalWeekIndex, sessionIdx, liftId);
+        entry.laddersDone = Math.min(entry.laddersDone||0, plan.ladders);
+
+        const title = `${liftLabel(liftId)}: ${stack.exercise || "—"}`;
+        const isA = state.template==="PSA";
+        const loadLine = isA
+          ? `L(${PS_RANGES.L}): ${stack.loadL||"—"} • M(${PS_RANGES.M}): ${stack.loadM||"—"} • H(${PS_RANGES.H}): ${stack.loadH||"—"} • SH(${PS_RANGES.SH}): ${stack.loadSH||"—"}`
+          : `L(${PS_RANGES.L}): ${stack.loadL||"—"} • M(${PS_RANGES.M}): ${stack.loadM||"—"} • H(${PS_RANGES.H}): ${stack.loadH||"—"}`;
+
+        const ladderText = plan.lines.map((ln,i)=>`${i+1}) ${ln}`).join("  |  ");
+
+        const item=document.createElement("div");
+        item.className="item";
+        item.innerHTML = `
+          <div class="itemTop">
+            <div class="name">
+              ${esc(title)}
+              <span class="sub muted">${esc(loadLine)}</span>
+            </div>
+          </div>
+          <div class="line">
+            <div class="mono">${esc(ladderText)}</div>
+            <div class="ctrl">
+              <button class="cbtn" data-dec>−</button>
+              <span class="cval">${entry.laddersDone||0}/${plan.ladders}</span>
+              <button class="cbtn" data-inc>+</button>
+            </div>
+          </div>
+        `;
+        zoneDiv.appendChild(item);
+
+        item.querySelector("[data-inc]").onclick = () => {
+          const next = Math.min(plan.ladders, (entry.laddersDone||0)+1);
+          psUpdate(globalWeekIndex, sessionIdx, liftId, plan.repsPerLadder, plan.ladders, next);
+          renderPlanner();
+        };
+        item.querySelector("[data-dec]").onclick = () => {
+          const next = Math.max(0, (entry.laddersDone||0)-1);
+          psUpdate(globalWeekIndex, sessionIdx, liftId, plan.repsPerLadder, plan.ladders, next);
+          renderPlanner();
+        };
+      });
+
+      wrap.appendChild(zoneDiv);
+    });
+
+    saveState();
+  }
+
+  function renderCustom(){
+    const tpl=TEMPLATES[state.template];
+    const wrap=$("#bs_customWrapInner");
+    wrap.innerHTML="";
+    if (tpl.type==="BTS"){
+      $("#bs_customHint").textContent = `BTS template: ${tpl.movements.length} movements × 3 zones = ${tpl.movements.length*3} slots.`;
+      for (const mv of tpl.movements){
+        const card=document.createElement("div");
+        card.className="card setupCard";
+        card.innerHTML = `<h3>${esc(mv.label)}</h3>`;
+        for (const z of BTS_ZONES){
+          const spec = state.btsStacks[mv.id][z.key];
+          const ladder = buildBTSLadder(spec.repMax);
+          const row=document.createElement("div");
+          row.className="setupRow";
+          row.innerHTML = `
+            <div class="pill">${z.key} — ${z.name} (${z.range})</div>
+            <input type="text" data-k="ex" placeholder="Exercise name" value="${esc(spec.exercise||"")}">
+            <input type="text" data-k="load" placeholder="Load (e.g. 24 kg / BW)" value="${esc(spec.load||"")}">
+            <input type="number" min="1" step="1" data-k="rm" value="${Number(spec.repMax||10)}">
+            <div class="muted mono">${ladder.a}-${ladder.b}-${ladder.C}</div>
+          `;
+          const ex=row.querySelector('input[data-k="ex"]');
+          const ld=row.querySelector('input[data-k="load"]');
+          const rm=row.querySelector('input[data-k="rm"]');
+          ex.addEventListener("input",()=>{spec.exercise=ex.value; saveState(); renderPlanner();});
+          ld.addEventListener("input",()=>{spec.load=ld.value; saveState(); renderPlanner();});
+          rm.addEventListener("input",()=>{spec.repMax=Math.max(1,Number(rm.value)||1); saveState(); renderCustom();});
+          card.appendChild(row);
+        }
+        wrap.appendChild(card);
+      }
+      return;
+    }
+
+    const isA = state.template==="PSA";
+    $("#bs_customHint").innerHTML = `PlanStrong: anchors L <b>${PS_RANGES.L}</b> • M <b>${PS_RANGES.M}</b> • H <b>${PS_RANGES.H}</b>${isA?` • SH <b>${PS_RANGES.SH}</b>`:""}.`;
+    for (const lf of tpl.lifts){
+      const s = state.psStacks[lf.id];
+      const card=document.createElement("div");
+      card.className="card setupCard";
+      card.innerHTML = `<h3>${esc(lf.label)}</h3>`;
+      const row=document.createElement("div");
+      row.className="setupRowPS";
+      row.innerHTML = `
+        <div class="pill">Exercise</div>
+        <input type="text" data-k="ex" placeholder="${lf.label} exercise" value="${esc(s.exercise||"")}">
+        <input type="text" data-k="L"  placeholder="Load L (${PS_RANGES.L})" value="${esc(s.loadL||"")}">
+        <input type="text" data-k="M"  placeholder="Load M (${PS_RANGES.M})" value="${esc(s.loadM||"")}">
+        <input type="text" data-k="H"  placeholder="Load H (${PS_RANGES.H})" value="${esc(s.loadH||"")}">
+      `;
+      card.appendChild(row);
+
+      if (isA){
+        const row2=document.createElement("div");
+        row2.className="setupRowPS";
+        row2.innerHTML = `
+          <div class="pill">SH</div>
+          <div class="muted" style="padding:10px 0">Super Heavy (cap 1 rep per ladder)</div>
+          <input type="text" data-k="SH" placeholder="Load SH (${PS_RANGES.SH})" value="${esc(s.loadSH||"")}">
+          <div></div><div></div>
+        `;
+        card.appendChild(row2);
+      }
+
+      const ex=row.querySelector('input[data-k="ex"]');
+      const l=row.querySelector('input[data-k="L"]');
+      const m=row.querySelector('input[data-k="M"]');
+      const h=row.querySelector('input[data-k="H"]');
+      ex.addEventListener("input",()=>{s.exercise=ex.value; saveState(); renderPlanner();});
+      l.addEventListener("input",()=>{s.loadL=l.value; saveState(); renderPlanner();});
+      m.addEventListener("input",()=>{s.loadM=m.value; saveState(); renderPlanner();});
+      h.addEventListener("input",()=>{s.loadH=h.value; saveState(); renderPlanner();});
+      if (isA){
+        const sh=card.querySelector('input[data-k="SH"]');
+        sh.addEventListener("input",()=>{s.loadSH=sh.value; saveState(); renderPlanner();});
+      }
+      wrap.appendChild(card);
+    }
+  }
+
+  function resetThisSession(){
+    const tpl=TEMPLATES[state.template];
+    const sessionsPerWeek = tpl.sessions.length;
+    const cursor=state.sessionCursor|0;
+    const globalWeekIndex=Math.floor(cursor/sessionsPerWeek);
+    const sessionIdx=mod(cursor, sessionsPerWeek);
+
+    if (tpl.type==="BTS"){
+      const session=tpl.sessions[sessionIdx];
+      session.blocks.forEach((blk, bi)=>{
+        const key=btsProgressKey(globalWeekIndex, sessionIdx, bi);
+        const entry=state.btsProgress[key];
+        if (!entry) return;
+        btsApplyDeltaToRemaining(blk.movement, blk.zone, -(entry.appliedReps||0));
+        delete state.btsProgress[key];
+      });
+    } else {
+      const session=tpl.sessions[sessionIdx];
+      const liftIds=[];
+      session.slots.forEach(slot=>{
+        if (slot.lift==="upper") liftIds.push("push","pull");
+        else liftIds.push(slot.lift);
+      });
+      for (const liftId of liftIds){
+        const key=psKey(globalWeekIndex, sessionIdx, liftId);
+        const entry=state.psProgress[key];
+        if (!entry) continue;
+        state.psRemaining[liftId] = Math.min(state.blockVolume, (state.psRemaining[liftId]||0) + (entry.appliedReps||0));
+        delete state.psProgress[key];
+      }
+    }
+    saveState();
+  }
+
+  function clearAll(){
+    const tpl=TEMPLATES[state.template];
+    if (tpl.type==="BTS"){
+      state.btsProgress={};
+      state.btsRemaining={};
+      ensureBTSRemaining(state);
+    } else {
+      state.psProgress={};
+      state.psRemaining={};
+      ensurePSRemaining(state);
+    }
+    saveState();
+  }
+
+  function newBlock(){
+    state.sessionCursor=0;
+    clearAll();
+    renderPlanner();
+  }
+
+  function applyTemplateAndVolume(templateKey, volume){
+    state.template = templateKey;
+    state.blockVolume = Number(volume)||300;
+    state.sessionCursor=0;
+
+    const tpl=TEMPLATES[state.template];
+    if (tpl.type==="BTS"){
+      state.btsStacks = loadCustomStacks(state.template);
+      state.btsProgress = {};
+      state.btsRemaining = {};
+      ensureBTSRemaining(state);
+    } else {
+      if (!state.psStacks) state.psStacks = loadCustomStacks(state.template);
+      state.psProgress = {};
+      state.psRemaining = {};
+      ensurePSRemaining(state);
+    }
+    saveState();
+    renderCustom();
+  }
+
+  // Wire BS buttons
+  $("#bs_btnPrev").onclick = ()=>{ state.sessionCursor -= 1; saveState(); renderPlanner(); };
+  $("#bs_btnNext").onclick = ()=>{ state.sessionCursor += 1; saveState(); renderPlanner(); };
+  $("#bs_btnResetSession").onclick = ()=>{ resetThisSession(); renderPlanner(); };
+  $("#bs_btnSaveCustom").onclick = ()=>{ saveCustomStacks(state.template, (TEMPLATES[state.template].type==="BTS") ? state.btsStacks : state.psStacks); saveState(); renderPlanner(); alert("Saved."); };
+  $("#bs_btnResetCustom").onclick = ()=>{
+    if (!confirm("Reset custom exercises for this template?")) return;
+    const tpl=TEMPLATES[state.template];
+    if (tpl.type==="BTS") state.btsStacks = buildDefaultStacksBTS(state.template);
+    else state.psStacks = buildDefaultStacksPS();
+    saveCustomStacks(state.template, (tpl.type==="BTS") ? state.btsStacks : state.psStacks);
+    saveState();
+    renderCustom();
+    renderPlanner();
+  };
+
+  // Expose minimal API for switcher
+  window.BSApp = {
+    applyTemplateAndVolume,
+    newBlock,
+    clearAll: () => { clearAll(); renderPlanner(); },
+    // For Unity wrapper:
+    setTemplate: (templateKey, volume, opts={renderPlanner:true, renderCustom:true}) => {
+      applyTemplateAndVolume(templateKey, volume);
+      if (opts.renderCustom) renderCustom();
+      if (opts.renderPlanner) renderPlanner();
+    },
+    renderCustomFor: (templateKey) => {
+      // render into current bs custom area without touching planner
+      applyTemplateAndVolume(templateKey, state.blockVolume);
+      renderCustom();
+    },
+    getState: () => state,
+  };
+
+  // Initial render
+  renderCustom();
+  renderPlanner();
+})();
+</script>
+
 </body>
 </html>
