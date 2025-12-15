@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Unity 2025 — Carry Finisher (Precomputed 20 Sessions, EN)</title>
+<title>Unity Final</title>
 <style>
   :root{color-scheme:dark}
   *{box-sizing:border-box}
@@ -133,16 +133,39 @@
     border:1px solid rgba(255,255,255,.2);
   }
 
-  /* Custom sub-tabs */
-  .chip{border:1px solid rgba(255,255,255,.18); background:#0f1a34; color:#e6eaf2; padding:6px 10px; border-radius:999px; cursor:pointer; font-size:13px;}
-  .chip:hover{filter:brightness(1.05);}
-  .chip.active{background:#2b63ff; border-color:#2b63ff; color:white;}
+  /* ===== BuiltStrong / PlanStrong (embedded) ===== */
+  .sessionHead{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-end}
+  .meta{display:flex;gap:8px;flex-wrap:wrap}
+  .zone{margin-top:12px}
+  .zoneTitle{display:flex;justify-content:space-between;gap:10px;align-items:center;border-top:1px solid rgba(255,255,255,.12);padding-top:10px;margin-top:10px}
+  .zoneTitle b{font-size:14px}
+  .zoneTitle span{font-size:12px;opacity:.8}
+  .item{background:#0e182c;border:1px solid rgba(255,255,255,.10);border-radius:12px;padding:10px;margin:8px 0}
+  .itemTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+  .name{font-weight:950;min-width:0}
+  .sub{display:block;margin-top:2px;font-weight:750;opacity:.88}
+  .line{margin-top:8px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+  .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;opacity:.95}
+  .ctrl{display:inline-flex;gap:8px;align-items:center}
+  .cbtn{background:#0f1a34;border:1px solid rgba(255,255,255,.22);color:#e6eaf2;border-radius:10px;padding:6px 10px;font-weight:950;cursor:pointer}
+  .cval{min-width:90px;text-align:center;font-weight:950}
+  .ltog{background:#182446;border:1px solid rgba(255,255,255,.18);color:#e6eaf2;border-radius:10px;padding:6px 10px;font-weight:950;cursor:pointer}
+  .ltog.done{background:#2b63ff;border-color:#2b63ff}
+  .setupCard h3{margin:0 0 10px;font-size:16px}
+  .setupRow{display:grid;grid-template-columns:160px 1fr 140px 120px 160px;gap:10px;align-items:center;margin:10px 0}
+  .setupRowPS{display:grid;grid-template-columns:160px 1fr 1fr 1fr 1fr;gap:10px;align-items:center;margin:10px 0}
+  @media (max-width:760px){ .setupRow,.setupRowPS{grid-template-columns:1fr;gap:8px} }
+  .legendBar{display:none;margin:10px 0 0;background:#0f1a34;border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:10px;font-size:13px;opacity:.95}
 
+  /* Custom sub-tabs */
+  .chip{border:1px solid var(--border); background:var(--card); color:var(--text); padding:6px 10px; border-radius:999px; cursor:pointer; font-size:13px;}
+  .chip:hover{filter:brightness(1.05);}
+  .chip.active{background:var(--accent); border-color:var(--accent); color:white;}
 </style>
 </head>
 <body>
 <div class="app">
-  <h1>Unity 2025</h1>
+  <h1>Unity Final</h1>
 
   <div class="tabs" role="tablist" aria-label="Navigation">
     <button class="tab-btn active" data-tab="plan" aria-selected="true">Planner</button>
@@ -156,6 +179,7 @@
 
   <div id="tab-plan" class="tab-pane active">
   <div id="unityPlannerWrap">
+
     <div class="row stack" style="margin:8px 0 12px">
       <button id="btnPrevTop" class="btn ghost" aria-label="Previous session">◀ Prev</button>
       <button id="btnNextTop" class="btn" aria-label="Next session">Next ▶</button>
@@ -167,7 +191,6 @@
       <div id="session" class="session" aria-live="polite">No block yet. Use Settings to apply settings & create a new block.</div>
     </div>
 
-    
   </div>
 
   <div id="bsPlannerWrap" style="display:none">
@@ -190,26 +213,51 @@
       <div id="bs_planWrap"></div>
     </div>
   </div>
-  </div>
 </div>
-
-<div id="tab-settings" class="tab-pane">
+  <div id="tab-settings" class="tab-pane">
     <div class="card">
       <h2>Settings</h2>
-      <div class="panel">
-<div class="grid cols-2">
-          <div>
-            <label>Active training</label>
-            <select id="selMode">
-              <option value="LON" selected>Longevity Mode</option>
-              <option value="M3">Muscle Mode – 3</option>
-              <option value="M4">Muscle Mode – 4</option>
-              <option value="M6">Muscle Mode – 6</option>
-              <option value="S4">Strength Mode – 4</option>
-              <option value="SA">Strength Mode – Advanced</option>
-            </select>
-            <div class="muted" style="margin-top:4px">Block volume is shared across modes. Other settings are Longevity-only.</div>
+      <div class="muted" style="margin-top:-6px">Block volume is shared across modes. Other options are Unity-only.</div>
+    </div>
+
+    <div class="panel" style="margin-top:-6px">
+      <details class="acc" style="border-radius:12px; overflow:hidden; border:1px solid var(--line); background:var(--card);">
+        <summary class="row" style="cursor:pointer; padding:12px 14px; gap:10px; user-select:none;">
+          <b>Start-Up</b>
+          <span class="muted">How to use Unity (30–60 seconds)</span>
+        </summary>
+        <div style="padding:12px 14px; border-top:1px solid var(--line);">
+          <div class="muted" style="line-height:1.55">
+            <b>1. Choose a mode.</b> Longevity = default · Muscle = hypertrophy · Strength = intensity<br>
+            <b>2. Choose a block volume.</b> Recommended: <b>180 → 240 → 300</b> (you don’t need 400/500)<br>
+            <b>3. Enter correct weights and rep ranges.</b><br>
+            &nbsp;&nbsp;• <b>Muscle Mode:</b> match the intended rep ranges <b>(4–7 / 8–11 / 12–15)</b><br>
+            &nbsp;&nbsp;• <b>Strength Mode:</b> use appropriate loads for <b>Light / Medium / Heavy</b> (and Advanced: <b>Super Heavy</b>)<br>
+            <b>Unity generates structure and volume — you supply the load.</b><br>
+            <b>4. Commit to the block.</b> Avoid changing settings mid-block unless necessary<br>
+            <b>5. Train 5 days/week.</b> Missed days are fine — just continue<br>
+            <b>6. Keep it submaximal.</b> Unity is not daily max effort<br>
+            <b>7. Let the wave work.</b> Judge results after finishing the block
           </div>
+        </div>
+      </details>
+    </div>
+
+    <div class="panel">
+        <div class="grid cols-2">
+        <div>
+          <label>Active training</label>
+          <select id="selMode">
+            <option value="LON" selected>Longevity Mode</option>
+            <option value="M3">Muscle Mode – 3</option>
+            <option value="M4">Muscle Mode – 4</option>
+            <option value="M6">Muscle Mode – 6</option>
+            <option value="S4">Strength Mode – 4</option>
+            <option value="SA">Strength Mode – Advanced</option>
+          </select>
+          <div class="muted" style="margin-top:4px">Block volume is shared. Other settings are Unity-only.</div>
+        </div>
+
           <div>
             <label>Block volume</label>
             <select id="selVol">
@@ -270,9 +318,8 @@
           <button id="btnRebuild" class="btn">Apply settings &amp; create new block</button>
           <button id="btnReset" class="btn ghost">Reset progress</button>
           <button id="btnResetCounters" class="btn ghost" title="Clear set counters of this session">Reset counters</button>
-        </div>
+</div>
       </div>
-    </div>
   </div>
 
 <div id="tab-custom" class="tab-pane">
@@ -351,8 +398,6 @@
 
   </div>
 </div>
-
-
 <div id="tab-skill" class="tab-pane">
     <div class="card">
       <h2>Skill Test Log</h2>
@@ -1560,8 +1605,7 @@ var finishedBlocks = (state.completedBlocks|0);
     var psPatSel=(document.getElementById('selPS').value||''); var on=!!psPatSel;
     return {
       volume:+document.getElementById('selVol').value,
-      seed:(document.getElementById('inpSeed').value||'').trim(),
-      bias:document.getElementById('selBias').value,
+            bias:document.getElementById('selBias').value,
       psPattern: on ? psPatSel : null,
       psVolume:  on ? document.getElementById('selPSVol').value : null,
       psAdvanced:(document.getElementById('chkPSAdvanced') && !document.getElementById('chkPSAdvanced').disabled) ? document.getElementById('chkPSAdvanced').checked : false,
@@ -1621,12 +1665,37 @@ var finishedBlocks = (state.completedBlocks|0);
       document.querySelectorAll('.tab-btn').forEach(function(b){
         b.classList.toggle('active',b===btn);
       });
+      // Hard-hide all panes first (prevents any layout/position leakage)
       document.querySelectorAll('.tab-pane').forEach(function(p){
-        p.classList.toggle('active',p.id==='tab-'+t);
+        p.classList.remove('active');
+        p.style.display='none';
       });
+      var pane=document.getElementById('tab-'+t);
+      if(pane){
+        pane.classList.add('active');
+        pane.style.display='block';
+      }
+
+      // Prevent "tab leakage": hide planner wrappers when leaving Planner tab
+      if(t !== 'plan'){
+        var up=document.getElementById('unityPlannerWrap'); if(up) up.style.display='none';
+        var bp=document.getElementById('bsPlannerWrap');   if(bp) bp.style.display='none';
+        // Also hard-hide custom panes when leaving Custom tab
+        if(t !== 'custom'){
+          var cp=document.getElementById('tab-custom'); if(cp) cp.style.display='none';
+        }
+      } else {
+        // Restore correct planner (Unity vs BS/PS) based on active mode
+        if(window.UnityModeUI && window.UnityModeUI.applyMode){
+          var modeSel=document.getElementById('selMode');
+          window.UnityModeUI.applyMode(modeSel ? modeSel.value : 'LON');
+        }
+      }
+
       if(t === 'skill'){
         applyDefaultSkillBells();
       }
+      try{ if(window.UnityModeUI && window.UnityModeUI.enforceTabVisibility) window.UnityModeUI.enforceTabVisibility(); }catch(e){}
     };
   });
 
@@ -1735,6 +1804,7 @@ var finishedBlocks = (state.completedBlocks|0);
   updateSkillDot();
 })();
 </script>
+
 <script>
 
 /* =========================
@@ -1757,6 +1827,39 @@ var finishedBlocks = (state.completedBlocks|0);
 
   const customButtons = Array.from(document.querySelectorAll("#customSubTabs .chip"));
 
+  function getActiveMainTab(){
+    try{
+      const b = document.querySelector('.tab-btn.active');
+      return b ? (b.getAttribute('data-tab') || '') : '';
+    } catch(e){
+      return '';
+    }
+  }
+
+function enforceTabVisibility(){
+  const active = getActiveMainTab();
+  const tabCustom = document.getElementById('tab-custom');
+  const paneLon  = document.getElementById('customPaneLon');
+  const paneBS   = document.getElementById('customPaneBS');
+  const unityPlan = document.getElementById('unityPlannerWrap');
+  const bsPlan    = document.getElementById('bsPlannerWrap');
+
+  // If we're not on Planner, hard-hide planner wrappers (they can be toggled by mode changes)
+  if(active !== 'plan'){
+    if(unityPlan) unityPlan.style.display = 'none';
+    if(bsPlan)    bsPlan.style.display = 'none';
+  }
+
+  // If we're not on Custom, hard-hide custom panes + wrapper
+  if(active !== 'custom'){
+    if(tabCustom) tabCustom.style.display = 'none';
+    if(paneLon)   paneLon.style.display = 'none';
+    if(paneBS)    paneBS.style.display = 'none';
+  }
+}
+
+
+
   function modeToTemplate(mode){
     switch(mode){
       case "M3": return "BTS3";
@@ -1776,18 +1879,36 @@ var finishedBlocks = (state.completedBlocks|0);
     const tpl = modeToTemplate(mode);
     const vol = Number(selVol?.value || 300);
 
+    const activeTab = getActiveMainTab();
+
     if (!tpl){
       // Longevity
-      unityPlan.style.display = "";
-      bsPlan.style.display = "none";
+      if (activeTab === 'plan'){
+        unityPlan.style.display = "";
+        bsPlan.style.display = "none";
+      } else {
+        // Keep planners hidden when not on Planner tab
+        unityPlan.style.display = "none";
+        bsPlan.style.display = "none";
+      }
       return;
     }
     // Muscle/Strength
-    unityPlan.style.display = "none";
-    bsPlan.style.display = "";
-    if (window.BSApp && window.BSApp.setTemplate){
-      window.BSApp.setTemplate(tpl, vol, {renderPlanner:true, renderCustom:false});
+    if (activeTab === 'plan'){
+      unityPlan.style.display = "none";
+      bsPlan.style.display = "";
+      if (window.BSApp && window.BSApp.setTemplate){
+        window.BSApp.setTemplate(tpl, vol, {renderPlanner:true, renderCustom:false});
+      }
+    } else {
+      // Not on Planner tab: prevent any planner UI from showing
+      unityPlan.style.display = "none";
+      bsPlan.style.display = "none";
+      if (window.BSApp && window.BSApp.setTemplate){
+        window.BSApp.setTemplate(tpl, vol, {renderPlanner:false, renderCustom:false});
+      }
     }
+    enforceTabVisibility();
   }
 
   // Custom subtabs are independent of active training
@@ -1795,7 +1916,14 @@ var finishedBlocks = (state.completedBlocks|0);
     try{ localStorage.setItem(KEY_CUSTOMTAB, tab); }catch(_){}
     customButtons.forEach(b => b.classList.toggle("active", b.dataset.custom === tab));
 
+    const activeTab = getActiveMainTab();
     const tpl = modeToTemplate(tab);
+
+    // If we're not currently viewing the Custom tab, we only persist the selection.
+    if (activeTab !== 'custom'){
+      return;
+    }
+
     if (!tpl){
       paneLon.style.display = "";
       paneBS.style.display = "none";
@@ -1807,7 +1935,9 @@ var finishedBlocks = (state.completedBlocks|0);
       // make sure block volume is synced too
       window.BSApp.setTemplate(tpl, Number(selVol?.value||300), {renderPlanner:false, renderCustom:true});
     }
+    enforceTabVisibility();
   }
+
 
   // Wire mode selector
   if (selMode){
@@ -1819,7 +1949,8 @@ var finishedBlocks = (state.completedBlocks|0);
       const currentMode = selMode?.value || "LON";
       const tpl = modeToTemplate(currentMode);
       if (tpl && window.BSApp && window.BSApp.setTemplate){
-        window.BSApp.setTemplate(tpl, Number(selVol.value||300), {renderPlanner:true, renderCustom:false});
+        const activeTab = getActiveMainTab();
+        window.BSApp.setTemplate(tpl, Number(selVol.value||300), {renderPlanner: activeTab==='plan', renderCustom:false});
       }
     });
   }
@@ -1846,6 +1977,8 @@ var finishedBlocks = (state.completedBlocks|0);
     applyMode(selMode?.value || savedMode);
     applyCustomTab(savedCustom);
   });
+  // expose helpers so tab switching can hide/show correctly
+  window.UnityModeUI = { applyMode, applyCustomTab, modeToTemplate, enforceTabVisibility };
 })();
 </script>
 <script>
@@ -2007,9 +2140,28 @@ var finishedBlocks = (state.completedBlocks|0);
   function planBTS(targetReps, ladder){
     const t = Math.max(0, targetReps|0);
     const full = ladder.volume>0 ? Math.floor(t/ladder.volume) : 0;
-    const leftover = ladder.volume>0 ? (t % ladder.volume) : t;
-    const leftoverClamped = Math.min(ladder.C, leftover);
-    return { fullLadders: full, leftoverTotal: leftoverClamped };
+
+    // Build a single "partial" ladder after the full ladders.
+    // Steps can be 0 (e.g., 4-5-0) to preserve ladder structure while matching volume.
+    let rem = ladder.volume>0 ? (t % ladder.volume) : t;
+    const steps = [ladder.a, ladder.b, ladder.C];
+    const partialSteps = [];
+    let partialVolume = 0;
+
+    for (const s of steps){
+      if (rem >= s){
+        partialSteps.push(s);
+        rem -= s;
+        partialVolume += s;
+      } else {
+        partialSteps.push(0);
+      }
+    }
+
+    const extraLeftover = Math.max(0, rem|0);
+    const leftoverTotal = partialVolume + extraLeftover;
+
+    return { fullLadders: full, partialSteps, partialVolume, extraLeftover, leftoverTotal };
   }
 
   function splitWeekIntoSessions(weekVolume){
@@ -2111,13 +2263,43 @@ var finishedBlocks = (state.completedBlocks|0);
   }
 
   function buildDefaultStacksBTS(templateKey){
-    const tpl=TEMPLATES[templateKey];
-    const stacks={};
+    const tpl = TEMPLATES[templateKey];
+    const stacks = {};
+
+    // Default rep targets for Muscle ladders:
+    const REP_MAX = { H:7, M:11, L:15 };
+
+    // Unity 2025 Muscle defaults (material-light; ballistic-free)
+    const DEFAULTS = {
+      BTS3: {
+        push: { H:"Half-Kneeling Press", M:"Military Press", L:"Bridge Floor Press" },
+        pull: { H:"Chin-Up", M:"Double Bent-Over Row (Wide)", L:"Ring / Inverted Row" },
+        lower:{ H:"Double Front Squat", M:"Reverse Lunge", L:"Pistol (Box allowed)" },
+      },
+      BTS4: {
+        push: { H:"Half-Kneeling Press", M:"Military Press", L:"Bridge Floor Press" },
+        pull: { H:"Chin-Up", M:"Double Bent-Over Row (Wide)", L:"Ring / Inverted Row" },
+        squat:{ H:"Front Squat", M:"Reverse Lunge", L:"Pistol (Box)" },
+        hinge:{ H:"Sumo Deadlift", M:"B-Stance Good Morning", L:"Single-Leg Hip Thrust" },
+      },
+      BTS6: {
+        pushHor:{ H:"Floor Press", M:"Push-Up", L:"Bridge Floor Press" },
+        pullHor:{ H:"Double Bent-Over Row", M:"One-Arm Row", L:"Ring / Inverted Row" },
+        pushVer:{ H:"Half-Kneeling Press", M:"Military Press", L:"Seated Press" },
+        pullVer:{ H:"Chin-Up", M:"Assisted Chin-Up", L:"Band Pulldown" },
+        squat:  { H:"Front Squat", M:"Reverse Lunge", L:"Pistol (Box)" },
+        hinge:  { H:"Sumo Deadlift", M:"B-Stance Good Morning", L:"Single-Leg Hip Thrust" },
+      }
+    };
+
+    const tplDefaults = DEFAULTS[templateKey] || {};
+
     for (const mv of tpl.movements){
+      const d = tplDefaults[mv.id] || {};
       stacks[mv.id] = {
-        H:{exercise:"",load:"",repMax:5},
-        M:{exercise:"",load:"",repMax:10},
-        L:{exercise:"",load:"",repMax:15},
+        H:{ exercise: (d.H||""), load:"", repMax: REP_MAX.H },
+        M:{ exercise: (d.M||""), load:"", repMax: REP_MAX.M },
+        L:{ exercise: (d.L||""), load:"", repMax: REP_MAX.L },
       };
     }
     return stacks;
@@ -2410,7 +2592,9 @@ var finishedBlocks = (state.completedBlocks|0);
 
           const title = `${movementLabel(mvId)}: ${spec.exercise || "—"}`;
           const ladderText = `${ladder.a}-${ladder.b}-${ladder.C} × ${plan.fullLadders}`;
-          const leftoverText = plan.leftoverTotal ? ` + leftover ${plan.leftoverTotal}` : "";
+          const partialText = (plan.partialVolume>0) ? ` + ${plan.partialSteps.join("-")}` : "";
+          const leftoverText = plan.extraLeftover ? ` + leftover ${plan.extraLeftover}` : "";
+          const displayText = ladderText + partialText + leftoverText;
 
           const item=document.createElement("div");
           item.className="item";
@@ -2422,7 +2606,7 @@ var finishedBlocks = (state.completedBlocks|0);
               </div>
             </div>
             <div class="line">
-              <div class="mono">${esc(ladderText + leftoverText)}</div>
+              <div class="mono">${esc(displayText)}</div>
               <div class="ctrl">
                 <button class="cbtn" data-dec>−</button>
                 <span class="cval">${entry.doneLadders||0}/${plan.fullLadders}</span>
@@ -2725,6 +2909,5 @@ var finishedBlocks = (state.completedBlocks|0);
   renderPlanner();
 })();
 </script>
-
 </body>
 </html>
