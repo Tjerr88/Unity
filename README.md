@@ -13,7 +13,7 @@ long-term strength, muscle, and conditioning using minimal equipment.
   <div class="card">5 training days per week</div>
   <div class="card">4-week block structure</div>
   <div class="card">Russian Wave Loading</div>
-  <div class="card">One kettlebell required</div>
+  <div class="card">One kettlebell required, but you can use more</div>
 </div>
 
 <h2>Russian Wave Loading</h2>
